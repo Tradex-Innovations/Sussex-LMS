@@ -1,0 +1,197 @@
+import { buses, statuses } from "./data.js";
+import { icon } from "./icons.js";
+import { routeProgress } from "./map.js";
+import { badge, button, childSelect, emptyState, iconTile, pageHeading, statusBadge } from "./ui.js";
+
+export function activeFleet(state) {
+  return buses.map((bus) => bus.id === "01" ? { ...bus, status: state.trip } : bus);
+}
+
+export function nextStop(bus, progress) {
+  const stops = routeProgress(bus);
+  const nextIndex = stops.findIndex((value) => value > progress + 0.005);
+  const index = nextIndex < 0 ? bus.stops.length - 1 : nextIndex;
+  return { index, label: bus.stops[index] };
+}
+
+function filterLabel(status) {
+  return status === "all" ? "All statuses" : statuses[status].label;
+}
+
+function stat(label, value, name, tone, filter, current) {
+  return `<button type="button" class="stat-card surface ${filter === current && filter !== "all" ? "is-filtered" : ""}" data-action="filter" data-value="${filter}" data-focus="stat-${filter}" aria-pressed="${filter === current}">
+    ${iconTile(name, tone)}
+    <span class="stat-text"><span class="stat-label">${label}</span><strong>${value}</strong></span>
+  </button>`;
+}
+
+function filterSelect(current) {
+  const values = ["all", "route", "school", "delayed"];
+  return `<label class="select-wrap fleet-filter">
+    <span class="sr-only">Filter buses by status</span>
+    <select data-change="filter" data-focus="fleet-status">
+      ${values.map((status) => `<option value="${status}" ${status === current ? "selected" : ""}>${filterLabel(status)}</option>`).join("")}
+    </select>
+    ${icon("chevronDown", 15)}
+  </label>`;
+}
+
+function fleetRow(bus, selected) {
+  return `<button type="button" class="fleet-row ${selected ? "is-selected" : ""}" data-action="bus" data-value="${bus.id}" data-focus="fleet-${bus.id}" aria-pressed="${selected}">
+    <span class="fleet-bus-icon" style="--route-color:${bus.color}">${icon("bus", 20)}</span>
+    <span class="fleet-bus-label"><strong>BUS ${bus.id}</strong><small>${bus.name}</small></span>
+    ${statusBadge(bus.status)}
+  </button>`;
+}
+
+function mapSummary(bus, progress) {
+  if (!bus) return "";
+  const arrived = bus.status === "school";
+  return `<div class="map-summary">
+    <div class="map-summary-top">${iconTile("bus", statuses[bus.status].tone, "small-tile")}
+      <div><strong>BUS ${bus.id}</strong><span>${bus.name}</span></div>
+    </div>
+    <div class="map-summary-detail">${icon(arrived ? "checkCircle" : "pin", 15)}
+      <span>${arrived ? "Arrived at" : "Next stop"} <strong ${arrived ? "" : "data-next-stop"}>${arrived ? "Greenfield Academy" : nextStop(bus, progress).label}</strong></span>
+    </div>
+  </div>`;
+}
+
+function mapPanel(title, context, bus, paused) {
+  return `<section class="surface map-card">
+    <header class="panel-heading map-heading">
+      <div class="panel-title-icon">
+        ${iconTile("map", "green", "small-tile")}
+        <div><h2>${title}</h2><p>${context}</p></div>
+      </div>
+      ${badge(paused ? "Simulation paused" : "Live simulation", paused ? "neutral" : "green", true)}
+    </header>
+    <div class="map-frame">
+      <div id="map-stage" class="map-stage" tabindex="0" role="region" aria-label="${title}. Use arrow keys to pan."></div>
+    </div>
+    <div class="map-footer">
+      <span>${icon("pin", 14)} Colombo, Sri Lanka</span>
+      <span>${icon("signal", 15)} ${bus?.status === "delayed" ? "Last signal 6 min ago" : paused ? "Updates paused" : "Simulated GPS"}</span>
+    </div>
+  </section>`;
+}
+
+function adminTransport({ fleet, filter, selected, paused }) {
+  const count = (status) => fleet.filter((bus) => bus.status === status).length;
+  const visible = filter === "all" ? fleet : fleet.filter((bus) => bus.status === filter);
+  const current = fleet.find((bus) => bus.id === selected);
+  return `
+    ${pageHeading("Bus tracking", "Monitor school buses and check the status of today’s routes.",
+      `<span class="run-label">${icon("calendar", 16)} Morning run</span>${button(paused ? "Resume simulation" : "Pause simulation", "pause", { variant: "secondary", iconName: paused ? "play" : "pause", focus: "pause" })}`)}
+    <div class="stats-grid" aria-label="Fleet status">
+      ${stat("Total buses", fleet.length, "bus", "neutral", "all", filter)}
+      ${stat("On route", count("route"), "route", "green", "route", filter)}
+      ${stat("At school", count("school"), "school", "blue", "school", filter)}
+      ${stat("Signal delayed", count("delayed"), "alert", "amber", "delayed", filter)}
+    </div>
+    <div class="tracking-grid">
+      ${mapPanel("Live fleet map", "Morning school routes", current, paused)}
+      <section class="surface fleet-card">
+        <header class="panel-heading fleet-heading">
+          <div><h2>Bus fleet</h2><p>${fleet.length} buses assigned today</p></div>
+        </header>
+        ${filterSelect(filter)}
+        <div class="fleet-rows" aria-label="Buses">
+          ${visible.length ? visible.map((bus) => fleetRow(bus, bus.id === selected)).join("") : emptyState("bus", "No matching buses", "Choose another status to see more buses.")}
+        </div>
+        <div class="fleet-footer">${icon("pin", 15)} Select a bus to see its route.</div>
+      </section>
+    </div>`;
+}
+
+function routeStops(bus, progress) {
+  const arrived = bus.status === "school";
+  const next = nextStop(bus, progress).index;
+  return `<section class="surface route-stops">
+    <header class="panel-heading"><div><h2>Route stops</h2><p>${bus.name}</p></div>${iconTile("route", "green", "small-tile")}</header>
+    <ol class="stops-list ${arrived ? "all-arrived" : ""}">
+      ${bus.stops.map((name, index) => {
+        const done = arrived || index < next;
+        const upcoming = !arrived && index === next;
+        return `<li class="${done ? "passed" : upcoming ? "next" : ""}" data-stop-index="${index}">
+          <span class="stop-marker">${done ? icon("check", 13) : ""}</span><strong>${name}</strong>
+          <span class="stop-description">${arrived ? "Reached" : upcoming ? "Next stop" : done ? "Passed" : ""}</span>
+        </li>`;
+      }).join("")}
+    </ol>
+  </section>`;
+}
+
+function parentTransport({ fleet, child, progress, paused }) {
+  const bus = fleet.find((item) => item.id === child.bus);
+  const arrived = bus.status === "school";
+  return `
+    ${pageHeading("Track my bus", "Follow your child’s assigned bus during the school trip.", childSelect(child))}
+    <section class="surface trip-summary">
+      ${iconTile("bus", "green", "trip-icon")}
+      <div class="trip-heading">
+        <div><h2>BUS ${bus.id}</h2>${statusBadge(bus.status)}</div>
+        <p>${bus.name} <span>·</span> Grade ${child.grade}</p>
+      </div>
+      <dl class="trip-detail"><dt>${icon(arrived ? "checkCircle" : "pin", 16)} ${arrived ? "Arrived at" : "Next stop"}</dt><dd ${arrived ? "" : "data-next-stop"}>${arrived ? "Greenfield Academy" : nextStop(bus, progress(bus)).label}</dd></dl>
+      <dl class="trip-detail"><dt>${icon("clock", 16)} Last update</dt><dd data-last-update>${bus.status === "delayed" ? "6 min ago" : paused ? "Simulation paused" : "Just now"}</dd></dl>
+    </section>
+    <div class="tracking-grid individual-tracking">
+      ${mapPanel("Bus location", `BUS ${bus.id} · ${bus.name}`, bus, paused)}
+      ${routeStops(bus, progress(bus))}
+    </div>`;
+}
+
+function driverTransport({ fleet, progress, paused }) {
+  const bus = fleet[0];
+  const onRoute = bus.status === "route";
+  const arrived = bus.status === "school";
+  return `
+    ${pageHeading("My trip", "Check your route and manage the morning trip.")}
+    <section class="driver-trip">
+      <div class="driver-trip-text">
+        <div class="driver-trip-icon">${icon("bus", 24)}</div>
+        <div><span class="driver-trip-subtitle">BUS ${bus.id} <span>·</span> ${bus.registration}</span><h2>${bus.name}</h2><p>${onRoute ? `Next stop <strong data-next-stop>${nextStop(bus, progress(bus)).label}</strong>` : "Arrived at Greenfield Academy"}</p></div>
+      </div>
+      <div class="driver-trip-action">
+        ${badge(arrived ? "Trip complete" : statuses[bus.status].label, arrived ? "neutral" : "green", true)}
+        ${button(onRoute ? "End trip" : "Start trip", onRoute ? "end-trip" : "start-trip", { variant: "light", iconName: onRoute ? "stop" : "play", focus: "driver-trip" })}
+      </div>
+    </section>
+    <div class="tracking-grid individual-tracking">
+      ${mapPanel("My route", `BUS ${bus.id} · Morning run`, bus, paused)}
+      ${routeStops(bus, progress(bus))}
+    </div>`;
+}
+
+export function transportPage(role, options) {
+  if (role === "parent") return parentTransport(options);
+  if (role === "driver") return driverTransport(options);
+  return adminTransport(options);
+}
+
+export function mountMapSummary(stage, bus, progress) {
+  stage.insertAdjacentHTML("beforeend", mapSummary(bus, progress));
+}
+
+export function updateTripDetails(page, bus, progress) {
+  if (!bus || bus.status !== "route") return;
+  const stop = nextStop(bus, progress);
+  for (const label of page.querySelectorAll("[data-next-stop]")) {
+    if (label.textContent !== stop.label) label.textContent = stop.label;
+  }
+  for (const row of page.querySelectorAll("[data-stop-index]")) {
+    const index = Number(row.dataset.stopIndex);
+    const passed = index < stop.index;
+    const next = index === stop.index;
+    const label = passed ? "Passed" : next ? "Next stop" : "";
+    const description = row.querySelector(".stop-description");
+    if (description.textContent !== label) {
+      row.classList.toggle("passed", passed);
+      row.classList.toggle("next", next);
+      row.querySelector(".stop-marker").innerHTML = passed ? icon("check", 13) : "";
+      description.textContent = label;
+    }
+  }
+}
+
