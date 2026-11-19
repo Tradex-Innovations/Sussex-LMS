@@ -61,7 +61,7 @@ function progress(bus) {
 }
 
 function brand() {
-  return `<span class="brand-mark">${icon("brand", 25)}</span><span class="brand-name">Campusway</span>`;
+  return `<img class="brand-logo" src="./assets/sussex-college-network-logo.png" alt=""><span class="brand-name">Sussex College<span>Network</span></span>`;
 }
 
 function navigationLinks(mobile = false) {
@@ -70,15 +70,15 @@ function navigationLinks(mobile = false) {
 
 function sidebar(ctx) {
   const branch = state.branches.find((item) => item.id === ctx?.branch);
-  return `<aside class="sidebar"><a class="brand" href="#${view.role}/${roles[view.role].start}">${brand()}</a>
+  return `<aside class="sidebar"><a class="brand" aria-label="Sussex College Network home" href="#${view.role}/${roles[view.role].start}">${brand()}</a>
     <nav class="sidebar-nav" aria-label="Workspace"><p>WORKSPACE</p>${navigationLinks()}</nav>
-    <div class="sidebar-school"><span>${icon("school", 22)}</span><div><strong>Greenfield Academy</strong><small>${e(branch?.name || "All school branches")}</small></div></div>
+    <div class="sidebar-school"><span>${icon("school", 22)}</span><div><strong>Sussex College Network</strong><small>${e(branch?.name || "All school branches")}</small></div></div>
   </aside>`;
 }
 
 function topbar(ctx) {
   return `<header class="topbar">
-    <a class="brand mobile-brand" href="#${view.role}/${roles[view.role].start}">${brand()}</a>
+    <a class="brand mobile-brand" aria-label="Sussex College Network home" href="#${view.role}/${roles[view.role].start}">${brand()}</a>
     <div class="breadcrumbs">${icon("school", 17)}<span>School portal</span>${icon("chevron", 13)}<strong>${navigation[view.page].label}</strong></div>
     <div class="topbar-actions"><span class="demo-label">${icon("spark", 14)} Demo mode</span>
       <details class="role-picker"><summary class="button role-button" aria-label="Switch role">${icon(roles[view.role].icon, 17)}<span>${roles[view.role].name}</span>${icon("chevronDown", 15)}</summary>
@@ -117,7 +117,7 @@ function render(focus, { scrollTop = false } = {}) {
     const pages = { overview: overviewPage, courses: coursesPage, people: peoplePage, library: libraryPage, access: accessPage };
     body = view.page === "transport" ? transportPage(view.role, options) : pages[view.page](options);
   }
-  document.title = `${navigation[view.page].label} · ${roles[view.role].name} · Campusway`;
+  document.title = `${navigation[view.page].label} · ${roles[view.role].name} · Sussex College Network`;
   const mobileNavigation = roles[view.role].pages.length > 1;
   app.innerHTML = `<div class="app-shell role-${view.role} ${mobileNavigation ? "has-mobile-nav" : ""}">
     ${sidebar(ctx)}<div class="desktop-content">${topbar(ctx)}<main id="main" class="page page-${view.page}">${scopeBar(ctx)}${body}</main></div>
@@ -224,7 +224,7 @@ function downloadMaterial(id) {
   const material = state.materials.find((item) => item.id === id);
   const link = document.createElement("a");
   const name = material.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "class-material";
-  const href = material.file ? material.file.data : URL.createObjectURL(new Blob([`${material.title}\n${material.type} · Greenfield Academy\n\n${material.content}`], { type: "text/plain;charset=utf-8" }));
+  const href = material.file ? material.file.data : URL.createObjectURL(new Blob([`${material.title}\n${material.type} · Sussex College Network\n\n${material.content}`], { type: "text/plain;charset=utf-8" }));
   link.href = href;
   link.download = material.file?.name || name + ".txt";
   document.body.append(link);
@@ -496,7 +496,7 @@ async function submit(event) {
     const name = values.get("name").trim(), location = values.get("location").trim();
     if (!name || !location) return fail("Enter the branch name and location.");
     if (!update((next) => {
-      const school = "Greenfield " + name;
+      const school = "Sussex College " + name;
       Object.assign(next.branches.find((branch) => branch.id === id), { name, location, school });
       for (const bus of next.buses.filter((bus) => bus.branch === id)) bus.stops[bus.stops.length - 1] = school;
     })) return;

@@ -94,3 +94,17 @@ test("Legacy browser data retains materials, progress, orders, cart and trip sta
   assert.equal(state.buses[0].status, "school");
   assert.equal(state.assignments["lake-math8"].teacher, "lakshmi");
 });
+
+test("Existing branch branding updates while user data and custom stop names are retained", () => {
+  const old = freshState();
+  old.branches[0].school = "Greenfield Colombo";
+  old.buses[0].stops = ["Custom pickup", "Nawala", "Rajagiriya", "Greenfield Colombo"];
+  old.orders = [{ number: "CW-1001", parent: "parent", branch: "colombo", status: "collected", items: [] }];
+  globalThis.localStorage = { getItem: () => JSON.stringify(old) };
+  const state = loadState();
+  assert.equal(state.branches[0].school, "Sussex College Colombo");
+  assert.equal(state.buses[0].stops.at(-1), "Sussex College Colombo");
+  assert.equal(state.buses[0].stops[0], "Custom pickup");
+  assert.deepEqual(state.assignments, old.assignments);
+  assert.deepEqual(state.orders, old.orders);
+});

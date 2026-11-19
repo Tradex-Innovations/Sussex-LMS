@@ -25,8 +25,8 @@ export function sectionFor(grade) {
 }
 
 export const branches = [
-  { id: "colombo", name: "Colombo", location: "Rajagiriya", school: "Greenfield Colombo" },
-  { id: "lakeside", name: "Lakeside", location: "Battaramulla", school: "Greenfield Lakeside" },
+  { id: "colombo", name: "Colombo", location: "Rajagiriya", school: "Sussex College Colombo" },
+  { id: "lakeside", name: "Lakeside", location: "Battaramulla", school: "Sussex College Lakeside" },
 ];
 
 export const students = [
@@ -75,12 +75,12 @@ export const books = [
 ];
 
 export const buses = [
-  { id: "01", name: "Nugegoda Loop", driver: "Kasun Dias", registration: "WP NB-4521", status: "route", color: "#168467", start: 0.55, stops: ["Nugegoda Junction", "Nawala Junction", "Rajagiriya", "Greenfield Academy"], stopProgress: [0, 0.67, 0.94, 1] },
-  { id: "02", name: "Battaramulla Line", driver: "Ruwan Peries", registration: "WP NB-3692", status: "route", color: "#386bc7", start: 0.32, stops: ["Battaramulla", "Diyatha Uyana", "Rajagiriya", "Greenfield Academy"], stopProgress: [0, 0.41, 0.84, 1] },
-  { id: "03", name: "Dehiwala Express", driver: "Sanjeewa Rathnayake", registration: "WP ND-7104", status: "route", color: "#785db6", start: 0.33, stops: ["Dehiwala Junction", "Kohuwala", "Narahenpita", "Greenfield Academy"], stopProgress: [0, 0.34, 0.71, 1] },
-  { id: "04", name: "Kotte Shuttle", driver: "Indika Perera", registration: "WP NE-8406", status: "school", color: "#60796f", stops: ["Pita Kotte", "Etul Kotte", "Greenfield Academy"] },
-  { id: "05", name: "Thalawathugoda Line", driver: "Dinesh Fernando", registration: "WP NC-8259", status: "school", color: "#60796f", stops: ["Thalawathugoda", "Battaramulla", "Greenfield Academy"] },
-  { id: "06", name: "Maharagama Loop", driver: "Saman Jayasinghe", registration: "WP ND-1960", status: "delayed", color: "#b26a21", start: 0.44, stops: ["Maharagama", "Pita Kotte", "Etul Kotte", "Greenfield Academy"], stopProgress: [0, 0.64, 0.82, 1] },
+  { id: "01", name: "Nugegoda Loop", driver: "Kasun Dias", registration: "WP NB-4521", status: "route", color: "#168467", start: 0.55, stops: ["Nugegoda Junction", "Nawala Junction", "Rajagiriya", "Sussex College Network"], stopProgress: [0, 0.67, 0.94, 1] },
+  { id: "02", name: "Battaramulla Line", driver: "Ruwan Peries", registration: "WP NB-3692", status: "route", color: "#386bc7", start: 0.32, stops: ["Battaramulla", "Diyatha Uyana", "Rajagiriya", "Sussex College Network"], stopProgress: [0, 0.41, 0.84, 1] },
+  { id: "03", name: "Dehiwala Express", driver: "Sanjeewa Rathnayake", registration: "WP ND-7104", status: "route", color: "#785db6", start: 0.33, stops: ["Dehiwala Junction", "Kohuwala", "Narahenpita", "Sussex College Network"], stopProgress: [0, 0.34, 0.71, 1] },
+  { id: "04", name: "Kotte Shuttle", driver: "Indika Perera", registration: "WP NE-8406", status: "school", color: "#60796f", stops: ["Pita Kotte", "Etul Kotte", "Sussex College Network"] },
+  { id: "05", name: "Thalawathugoda Line", driver: "Dinesh Fernando", registration: "WP NC-8259", status: "school", color: "#60796f", stops: ["Thalawathugoda", "Battaramulla", "Sussex College Network"] },
+  { id: "06", name: "Maharagama Loop", driver: "Saman Jayasinghe", registration: "WP ND-1960", status: "delayed", color: "#b26a21", start: 0.44, stops: ["Maharagama", "Pita Kotte", "Etul Kotte", "Sussex College Network"], stopProgress: [0, 0.64, 0.82, 1] },
 ];
 
 export const statuses = {
@@ -155,9 +155,9 @@ export function freshState() {
     carts: {},
     orders: [],
     buses: [
-      ...buses.map((bus) => ({ ...bus, stops: [...bus.stops.slice(0, -1), "Greenfield Colombo"], branch: "colombo", driverId: "driver_" + bus.id })),
-      { id: "07", name: "Rajagiriya Link", driver: "Nalin De Silva", driverId: "driver_07", branch: "lakeside", registration: "WP NE-4528", status: "route", color: "#cb6655", start: 0.15, stops: ["Rajagiriya", "Diyatha Uyana", "Greenfield Lakeside"] },
-      { id: "08", name: "Nugegoda Link", driver: "Ashan Mendis", driverId: "driver_08", branch: "lakeside", registration: "WP NF-3172", status: "route", color: "#277c96", start: 0.42, stops: ["Nugegoda Junction", "Nawala Junction", "Rajagiriya", "Diyatha Uyana", "Greenfield Lakeside"] },
+      ...buses.map((bus) => ({ ...bus, stops: [...bus.stops.slice(0, -1), "Sussex College Colombo"], branch: "colombo", driverId: "driver_" + bus.id })),
+      { id: "07", name: "Rajagiriya Link", driver: "Nalin De Silva", driverId: "driver_07", branch: "lakeside", registration: "WP NE-4528", status: "route", color: "#cb6655", start: 0.15, stops: ["Rajagiriya", "Diyatha Uyana", "Sussex College Lakeside"] },
+      { id: "08", name: "Nugegoda Link", driver: "Ashan Mendis", driverId: "driver_08", branch: "lakeside", registration: "WP NF-3172", status: "route", color: "#277c96", start: 0.42, stops: ["Nugegoda Junction", "Nawala Junction", "Rajagiriya", "Diyatha Uyana", "Sussex College Lakeside"] },
     ],
     books: branches.flatMap((branch) => books.map((book) => ({ ...book, id: branch.id === "colombo" ? book.id : "lake-" + book.id, branch: branch.id, available: true }))),
   };
@@ -168,7 +168,14 @@ export function loadState() {
   try {
     const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
     if (!saved) return defaults;
-    if (saved.version === 2) return { ...defaults, ...saved };
+    if (saved.version === 2) {
+      return {
+        ...defaults,
+        ...saved,
+        branches: saved.branches.map((branch) => ({ ...branch, school: branch.school.replace(/^Greenfield\b/, "Sussex College") })),
+        buses: saved.buses.map((bus) => ({ ...bus, stops: bus.stops.map((stop) => stop.replace(/^Greenfield Academy$/, "Sussex College Network").replace(/^Greenfield\b/, "Sussex College")) })),
+      };
+    }
     return {
       ...defaults,
       assignments: { ...defaults.assignments, ...saved.assignments },

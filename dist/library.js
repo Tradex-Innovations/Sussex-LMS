@@ -17,7 +17,7 @@ export function cartItems(state, context) {
 
 function bookCard(book) {
   return `<article class="surface book-card">
-    <div class="cover-stage cover-${book.art}"><div class="book-cover" aria-hidden="true"><div class="cover-art"></div><span>GREENFIELD PRESS</span><strong>${e(book.title)}</strong><small>${e(book.subtitle)}</small></div></div>
+    <div class="cover-stage cover-${book.art}"><div class="book-cover" aria-hidden="true"><div class="cover-art"></div><span>SUSSEX COLLEGE</span><strong>${e(book.title)}</strong><small>${e(book.subtitle)}</small></div></div>
     <div class="book-info"><span class="book-category">Grade ${book.grade} · ${e(book.category)}</span><h2>${e(book.title)}</h2><p>${e(book.subtitle)}</p>
       <div class="book-price"><strong>${money(book.price)}</strong>${book.available ? button("Add", "add-book", { value: book.id, iconName: "plus", variant: "secondary compact", focus: `book-${book.id}`, extra: `aria-label="Add ${e(book.title)} to order"` }) : badge("Unavailable", "amber")}</div>
     </div>

@@ -1,6 +1,6 @@
-# Campusway
+# Sussex College Network
 
-A browser-only school portal prototype for a client walkthrough. Greenfield Academy, the fleet, courses, and orders are sample data. The bus positions and trip statuses are simulated. Demo changes are saved in the current browser.
+A browser-only school portal prototype for a client walkthrough. Sussex College Network, the fleet, courses, and orders are sample data. The bus positions and trip statuses are simulated. Demo changes are saved in the current browser.
 
 ## Run locally
 

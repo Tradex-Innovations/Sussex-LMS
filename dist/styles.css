@@ -944,3 +944,32 @@ dialog::backdrop { background: #142b235e; backdrop-filter: blur(2px); }
 @media (max-width: 999px) {
   body:has(.mobile-nav > :nth-child(4)) .toasts { bottom: calc(122px + env(safe-area-inset-bottom)); }
 }
+
+/* Sussex College Network identity */
+.sidebar .brand {
+  width: 100%;
+  margin-left: 0;
+  padding: 8px;
+  gap: 8px;
+  border-radius: 12px;
+  background: #fff;
+  color: #153e79;
+  letter-spacing: -.03em;
+}
+.brand-logo { display: block; height: 70px; width: auto; flex: none; object-fit: contain; }
+.sidebar .brand-name { font-size: 16px; line-height: 1.15; font-weight: 780; }
+.brand-name > span { display: block; margin-top: 4px; font-size: .82em; font-weight: 650; letter-spacing: .05em; }
+.sidebar-school strong { font-size: 12px; line-height: 1.35; }
+@media (max-width: 999px) {
+  .mobile-brand { gap: 7px; letter-spacing: -.035em; color: #153e79; flex: none; }
+  .mobile-brand .brand-logo { height: 47px; }
+  .mobile-brand .brand-name { font-size: 17px; line-height: 1.05; }
+  .mobile-brand .brand-name > span { margin-top: 3px; font-size: 12px; }
+}
+@media (max-width: 540px) {
+  .mobile-brand { gap: 6px; }
+  .mobile-brand .brand-logo { height: 43px; }
+  .mobile-brand .brand-name { font-size: 14px; }
+  .mobile-brand .brand-name > span { font-size: 11px; }
+  .topbar-actions .role-button { max-width: calc(100vw - 187px); }
+}
