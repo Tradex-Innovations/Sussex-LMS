@@ -12,6 +12,19 @@ python3 -m http.server 4183 --bind 127.0.0.1 --directory dist
 
 Open [the local demo](http://127.0.0.1:4183/). No install or build is required.
 
+## Parent demo login
+
+Open [Parent login](http://127.0.0.1:4183/#parent/login). Use a student's admission number and the temporary demo password `1234`.
+
+| Student | Admission number |
+| --- | --- |
+| Amaya Perera | SCN-1001 |
+| Kavin Perera | SCN-1002 |
+| Meera Fernando | SCN-1008 |
+| Thevin Fernando | SCN-1009 |
+
+The account cards fill in demo credentials. Sign in to open that student's bus, courses, and library portal. Log out to choose another admission number. The session survives a tab refresh. Student admission numbers appear in the staff directory and can be edited by authorized branch staff.
+
 ## Walkthrough
 
 1. Start in **Chairman → Bus tracking**. Switch between all branches, Colombo, and Lakeside. The fleet has eight simulated buses and two school destinations. Use the role menu and **Preview account** selector to compare a Principal's branch access with the Chairman's group access.
@@ -23,14 +36,14 @@ Open [the local demo](http://127.0.0.1:4183/). No install or build is required.
 7. Open **Parent → Library**, place an order, then use **Librarian → Library** to edit price or availability and mark the order collected. Each branch manages its catalogue and orders, and each parent sees their own orders.
 8. Select **Reset demo** in the role menu before a fresh walkthrough.
 
-The prototype uses browser storage and a sample account switcher. Role and scope checks run in the browser for the demonstration. A production deployment needs authenticated accounts and server-side authorization. GPS and book orders are simulated.
+The prototype uses browser storage and a sample account switcher. Role, scope, and dummy login checks run in the browser for the demonstration. A production deployment needs authenticated accounts and server-side authorization. GPS and book orders are simulated.
 
 ## Check access rules
 
 Run from this directory:
 
 ```sh
-node --test tests/access.test.mjs
+node --test tests/*.test.mjs
 ```
 
 The checks cover branch and academic scope, teacher publishing, parent and driver assignments, role delegation, order visibility, and migration of existing demo data.

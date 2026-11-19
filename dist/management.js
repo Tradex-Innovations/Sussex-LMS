@@ -1,4 +1,4 @@
-import { roles, sections } from "./data.js";
+import { nextAdmissionNumber, roles, sections } from "./data.js";
 import { assignableRoles, can, canManageGrant, visibleStudents } from "./access.js";
 import { icon } from "./icons.js";
 import { avatar, badge, button, emptyState, escapeHtml as e, iconTile, pageHeading } from "./ui.js";
@@ -35,7 +35,7 @@ export function peoplePage({ state, context }) {
         const assigned = state.courses.filter((course) => state.assignments[course.id].students.includes(student.id));
         const materials = state.materials.filter((item) => assigned.some((course) => course.id === item.course));
         const done = materials.filter((item) => state.completed[student.id]?.includes(item.id)).length;
-        return `<tr><td><div class="teacher-cell">${avatar(student, "small")}<strong>${e(student.name)}</strong></div></td><td>${e(state.branches.find((branch) => branch.id === student.branch)?.name)}<div class="secondary-text">Class ${e(student.className)}</div></td>
+        return `<tr><td><div class="teacher-cell">${avatar(student, "small")}<div><strong>${e(student.name)}</strong><div class="secondary-text">${e(student.admissionNumber)}</div></div></div></td><td>${e(state.branches.find((branch) => branch.id === student.branch)?.name)}<div class="secondary-text">Class ${e(student.className)}</div></td>
           <td>${guardians.map((person) => e(person.name)).join(", ") || "No guardian linked"}</td><td>${assigned.length} enrolled<div class="secondary-text">${done} / ${materials.length} materials done</div></td>
           <td>${can(context, "students.edit") ? button("Edit student", "edit-student", { value: student.id, variant: "secondary compact" }) : badge("View access", "neutral")}</td></tr>`;
       }).join("")}</tbody></table></div>${!students.length ? emptyState("users", "No students in this scope", "Students assigned to this section or class will appear here.") : ""}</section>`;
@@ -46,7 +46,7 @@ export function studentForm(state, context, student = {}) {
   const branch = student.branch || branches[0].id;
   const guardians = state.accounts.filter((person) => person.grants.some((grant) => grant.role === "parent" && grant.branch === branch));
   return `<form data-form="student"><input type="hidden" name="id" value="${student.id || ""}"><div class="form-body">
-    <label class="field">Full name<input name="name" value="${e(student.name || "")}" required maxlength="80"></label>
+    <label class="field">Full name<input name="name" value="${e(student.name || "")}" required maxlength="80"></label>\n    <label class="field">Admission number<input name="admissionNumber" value="${e(student.admissionNumber || nextAdmissionNumber(state.students))}" required maxlength="32" pattern="[A-Za-z0-9][A-Za-z0-9-]{2,31}" autocapitalize="characters"></label>
     <label class="field">Branch<select aria-label="Branch" name="branch" data-change="student-branch" ${student.id ? "disabled" : ""}>${branches.map((item) => `<option value="${item.id}" ${item.id === branch ? "selected" : ""}>${e(item.name)}</option>`).join("")}</select></label>
     <label class="field">Grade<select aria-label="Grade" name="grade">${Array.from({ length: 14 }, (_, grade) => `<option value="${grade}" ${grade === (student.grade ?? 8) ? "selected" : ""}>${grade === 0 ? "Preschool" : "Grade " + grade}</option>`).join("")}</select></label>
     <label class="field">Class<input name="className" value="${e(student.className || "8A")}" required maxlength="8" pattern="[0-9]{1,2}[A-Za-z]{1,2}"></label>

@@ -7,6 +7,7 @@ import { accessPage, branchForm, busForm, overviewPage, peoplePage, roleForm, sc
 import { FleetMap } from "./map.js";
 import { mountMapSummary, transportPage, updateTripDetails } from "./transport.js";
 import { avatar, button, emptyState, escapeHtml as e, iconTile } from "./ui.js";
+import { authenticateParent, demoPassword, loginPage, parentContext, readParentSession, saveParentSession } from "./parent-login.js";
 
 const app = document.querySelector("#app");
 const dialog = document.querySelector("#dialog");
@@ -20,6 +21,7 @@ const navigation = {
   access: { label: "Roles & access", icon: "badge" },
 };
 let state = loadState();
+let parentSession = readParentSession();
 let map;
 let mapViewKey;
 let dialogMode;
@@ -34,6 +36,7 @@ function getView() {
 }
 
 function context() {
+  if (view.role === "parent") return parentContext(state, parentSession);
   const [id, index] = (ui.accounts[view.role] || "").split("|");
   return contextFor(state, view.role, id, ui.branch, index);
 }
@@ -81,17 +84,21 @@ function topbar(ctx) {
     <a class="brand mobile-brand" aria-label="Sussex College Network home" href="#${view.role}/${roles[view.role].start}">${brand()}</a>
     <div class="breadcrumbs">${icon("school", 17)}<span>School portal</span>${icon("chevron", 13)}<strong>${navigation[view.page].label}</strong></div>
     <div class="topbar-actions"><span class="demo-label">${icon("spark", 14)} Demo mode</span>
-      <details class="role-picker"><summary class="button role-button" aria-label="Switch role">${icon(roles[view.role].icon, 17)}<span>${roles[view.role].name}</span>${icon("chevronDown", 15)}</summary>
+      ${view.role === "parent" ? button("Log out", "parent-logout", { variant: "secondary" }) : `<details class="role-picker"><summary class="button role-button" aria-label="Switch role">${icon(roles[view.role].icon, 17)}<span>${roles[view.role].name}</span>${icon("chevronDown", 15)}</summary>
         <div class="role-menu"><p>Preview a role</p>${Object.entries(roles).map(([id, role]) => `<a href="#${id}/${role.start}" data-role-link class="${id === view.role ? "is-current" : ""}">${icon(role.icon, 17)}<span>${role.name}</span>${id === view.role ? icon("check", 15) : ""}</a>`).join("")}
           <button type="button" data-action="reset">${icon("reset", 16)} Reset demo</button>
         </div>
-      </details>${ctx ? `<span class="account-avatar" title="${e(ctx.account.name)}">${avatar(ctx.account, "small")}</span>` : ""}
+      </details>`}${ctx ? `<span class="account-avatar" title="${e(ctx.account.name)}">${avatar(ctx.account, "small")}</span>` : ""}
     </div>
   </header>`;
 }
 
 function scopeBar(ctx) {
   if (!ctx) return "";
+  if (ctx.role === "parent") {
+    const student = childFor(ctx);
+    return `<section class="parent-student-bar" aria-label="Signed-in student">${avatar(student, "small")}<div><strong>${e(student.name)}</strong><span>${e(student.admissionNumber)} · Class ${e(student.className)}</span></div><span class="parent-branch-label">${e(state.branches.find((branch) => branch.id === student.branch)?.name)}</span></section>`;
+  }
   const entries = state.accounts.flatMap((person) => person.grants.map((grant, index) => ({ person, grant, index }))).filter(({ grant }) => grant.role === view.role);
   const selectedIndex = ctx.account.grants.indexOf(ctx.grant);
   const selected = ctx.account.id + "|" + selectedIndex;
@@ -108,6 +115,13 @@ function render(focus, { scrollTop = false } = {}) {
   map?.destroy();
   map = null;
   const ctx = context();
+  if (view.role === "parent" && !ctx) {
+    parentSession = null;
+    saveParentSession(null);
+    document.title = "Parent Login · Sussex College Network";
+    app.innerHTML = loginPage(state);
+    return;
+  }
   let body = `<section class="surface">${emptyState("users", "No account assigned", "Use a Principal or Chairman view to appoint someone to this role.")}</section>`;
   let options;
   if (ctx) {
@@ -241,6 +255,7 @@ function roleTarget(value) {
 
 function authorizedAction(name, value, ctx) {
   if (["reset", "confirm-reset", "close-dialog"].includes(name)) return true;
+  if (name === "parent-logout") return view.role === "parent";
   if (!ctx) return false;
   const options = optionsFor(ctx);
   const course = visibleCourses(state, ctx, options.child).find((item) => item.id === value);
@@ -282,9 +297,35 @@ function action(event) {
   const element = event.target.closest("[data-action]");
   if (!element) return;
   const { action: name, value, focus } = element.dataset;
+  const loginForm = app.querySelector('[data-form="parent-login"]');
+  if (loginForm && name === "fill-login" && authenticateParent(state, value, demoPassword)) {
+    loginForm.elements.admissionNumber.value = value;
+    loginForm.elements.password.value = demoPassword;
+    loginForm.querySelector(".form-error").hidden = true;
+    loginForm.querySelector('[type="submit"]').focus();
+    return;
+  }
+  if (loginForm && name === "toggle-password") {
+    const input = loginForm.elements.password;
+    const visible = input.type === "password";
+    input.type = visible ? "text" : "password";
+    element.textContent = visible ? "Hide" : "Show";
+    element.setAttribute("aria-label", visible ? "Hide password" : "Show password");
+    element.setAttribute("aria-pressed", String(visible));
+    return;
+  }
   const ctx = context();
   if (!authorizedAction(name, value, ctx)) return toast("This action is outside the current role’s assigned access.");
   switch (name) {
+    case "parent-logout":
+      parentSession = null;
+      saveParentSession(null);
+      ui.courseId = "";
+      ui.query = "";
+      closeDialog();
+      location.hash = "parent/login";
+      render();
+      break;
     case "pause":
       if (ui.paused) ui.runningSince = performance.now(); else ui.elapsed = elapsed();
       ui.paused = !ui.paused; render(focus); break;
@@ -341,6 +382,8 @@ function action(event) {
     case "confirm-reset":
       if (saveState(freshState())) {
         state = freshState(); Object.assign(ui, { accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", starts: {}, paused: false, runningSince: performance.now(), elapsed: 0 });
+        parentSession = null;
+        saveParentSession(null);
         closeDialog(); location.hash = "chairman/transport"; render(); toast("Demo reset.");
       } break;
     case "close-dialog": closeDialog(); break;
@@ -420,6 +463,23 @@ async function submit(event) {
   if (!mode) return;
   event.preventDefault();
   const values = new FormData(form);
+  if (mode === "parent-login") {
+    const session = authenticateParent(state, values.get("admissionNumber"), values.get("password"));
+    if (!session) {
+      showError(form, "Admission number or password is incorrect. Check the demo details below.");
+      return;
+    }
+    if (!saveParentSession(session)) {
+      showError(form, "The demo session could not be saved. Enable browser storage and try again.");
+      return;
+    }
+    parentSession = session;
+    ui.courseId = "";
+    closeDialog();
+    location.hash = "parent/transport";
+    render(undefined, { scrollTop: true });
+    return;
+  }
   const ctx = context();
   const id = values.get("id");
   const options = optionsFor(ctx);
@@ -459,11 +519,14 @@ async function submit(event) {
     const grade = Number(values.get("grade"));
     const className = values.get("className").trim().toUpperCase();
     const name = values.get("name").trim();
+    const admissionNumber = values.get("admissionNumber").trim().toUpperCase();
     const guardians = values.getAll("guardians");
     if (!name || !sectionFor(grade) || !new RegExp("^" + grade + "[A-Z]{1,2}$").test(className)) return fail("Enter a class matching the selected grade, such as 8A.");
+    if (!/^[A-Z0-9][A-Z0-9-]{2,31}$/.test(admissionNumber)) return fail("Use 3–32 letters, numbers, or hyphens for the admission number.");
+    if (state.students.some((student) => student.id !== id && student.admissionNumber === admissionNumber)) return fail("That admission number belongs to another student.");
     if (!guardians.every((id) => state.accounts.some((person) => person.id === id && person.grants.some((grant) => grant.role === "parent" && grant.branch === branch)))) return fail("Select guardian accounts from this branch.");
     if (!update((next) => {
-      const student = { ...existing, id: id || "student-" + crypto.randomUUID(), name, initials: name.split(" ").map((word) => word[0]).slice(0, 2).join(""), grade, className, branch, guardians, tone: existing?.tone || "green" };
+      const student = { ...existing, id: id || "student-" + crypto.randomUUID(), name, admissionNumber, initials: name.split(" ").map((word) => word[0]).slice(0, 2).join(""), grade, className, branch, guardians, tone: existing?.tone || "green" };
       if (existing) next.students[next.students.findIndex((item) => item.id === id)] = student; else next.students.push(student);
       for (const course of next.courses) if (course.branch !== branch || course.grade !== grade || course.className !== className) next.assignments[course.id].students = next.assignments[course.id].students.filter((studentId) => studentId !== student.id);
     })) return;

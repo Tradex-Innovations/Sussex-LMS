@@ -119,6 +119,21 @@ function seedAccounts() {
   ];
 }
 
+export function nextAdmissionNumber(records) {
+  const used = new Set(records.map((student) => student.admissionNumber?.trim().toUpperCase()));
+  let number = 1001;
+  while (used.has("SCN-" + number)) number += 1;
+  return "SCN-" + number;
+}
+
+function withAdmissionNumbers(records) {
+  const students = records.map((student) => ({ ...student }));
+  for (const student of students) {
+    student.admissionNumber = student.admissionNumber?.trim().toUpperCase() || nextAdmissionNumber(students);
+  }
+  return students;
+}
+
 export function freshState() {
   const scopedStudents = students.map((student) => ({
     ...student, branch: "colombo", className: student.grade + "A",
@@ -140,7 +155,7 @@ export function freshState() {
     version: 2,
     branches: structuredClone(branches),
     accounts: seedAccounts(),
-    students: scopedStudents,
+    students: withAdmissionNumbers(scopedStudents),
     courses: scopedCourses,
     assignments: scopedAssignments,
     materials: [
@@ -172,6 +187,7 @@ export function loadState() {
       return {
         ...defaults,
         ...saved,
+        students: withAdmissionNumbers(saved.students || defaults.students),
         branches: saved.branches.map((branch) => ({ ...branch, school: branch.school.replace(/^Greenfield\b/, "Sussex College") })),
         buses: saved.buses.map((bus) => ({ ...bus, stops: bus.stops.map((stop) => stop.replace(/^Greenfield Academy$/, "Sussex College Network").replace(/^Greenfield\b/, "Sussex College")) })),
       };

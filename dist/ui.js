@@ -41,6 +41,7 @@ export function button(label, action, options = {}) {
 }
 
 export function childSelect(child, profiles = childProfiles) {
+  if (profiles.length === 1) return "";
   return `<label class="profile-select">
     ${avatar(child, "small")}
     <span class="sr-only">Select student</span>

@@ -39,7 +39,7 @@ export function withinScope(context, record) {
 }
 
 export function linkedChildren(state, context) {
-  return context?.role === "parent" ? state.students.filter((student) => student.guardians.includes(context.account.id) && withinScope(context, student)) : [];
+  return context?.role === "parent" ? state.students.filter((student) => student.guardians.includes(context.account.id) && withinScope(context, student) && (!context.studentId || student.id === context.studentId)) : [];
 }
 
 export function visibleStudents(state, context) {
