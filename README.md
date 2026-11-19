@@ -27,14 +27,15 @@ The account cards fill in demo credentials. Sign in to open that student's bus, 
 
 ## Walkthrough
 
-1. Start in **Chairman → Bus tracking**. Switch between all branches, Colombo, and Lakeside. The fleet has eight simulated buses and two school destinations. Use the role menu and **Preview account** selector to compare a Principal's branch access with the Chairman's group access.
-2. Open **Roles & access** as Chairman or Principal. Appoint staff, assign sections, grades, classes or buses, and remove appointments. The Chairman appoints Principals. A Principal appoints lower roles inside their branch. Existing people can receive multiple scoped roles.
-3. Use **Section Head**, **Grade Coordinator**, **Class Teacher**, and **Subject Teacher** views to demonstrate the different academic scopes. Course assignments support teachers from the same branch and students from the matching class. Grade Coordinators can update enrollment.
-4. In an assigned Teacher view, publish or edit a handout. Open the enrolled child's course in **Parent → Courses**, download the handout, and mark it done. Teaching staff and leadership can review completion.
-5. In **School Administrator → Students & guardians**, create a student or update a record and link a guardian. Parent accounts are appointed through **Roles & access**.
-6. Open **Transport Coordinator → Bus tracking**, select a bus, and choose **Manage bus** to update its driver, stop names, and assigned students. In **Driver** view, start or end the assigned trip. The linked Parent view reflects the assignment and trip status.
-7. Open **Parent → Library**, place an order, then use **Librarian → Library** to edit price or availability and mark the order collected. Each branch manages its catalogue and orders, and each parent sees their own orders.
-8. Select **Reset demo** in the role menu before a fresh walkthrough.
+1. Start in **Chairman → Overview**. Explore the Sri Lanka map of all 20 official Sussex schools. Select a map label or ranking row to open a school's performance and activity. Use **Compare schools** and filter the sample assessment by subject, grade, and term. The network average is weighted by the assessed students.
+2. Use the **School branch** selector to open a single school's scope. A Principal's overview stays within their assigned school. The existing functional student, course, transport, and parent demo records use the Nugegoda and Malabe schools. The fleet contains eight simulated buses.
+3. Open **Roles & access** as Chairman or Principal. Appoint staff, assign sections, grades, classes or buses, and remove appointments. The Chairman appoints Principals. A Principal appoints lower roles inside their branch. Existing people can receive multiple scoped roles.
+4. Use **Section Head**, **Grade Coordinator**, **Class Teacher**, and **Subject Teacher** views to demonstrate the different academic scopes. Course assignments support teachers from the same branch and students from the matching class. Grade Coordinators can update enrollment.
+5. In an assigned Teacher view, publish or edit a handout. Open the enrolled child's course in **Parent → Courses**, download the handout, and mark it done. Teaching staff and leadership can review completion.
+6. In **School Administrator → Students & guardians**, create a student or update a record and link a guardian. Parent accounts are appointed through **Roles & access**.
+7. Open **Transport Coordinator → Bus tracking**, select a bus, and choose **Manage bus** to update its driver, stop names, and assigned students. In **Driver** view, start or end the assigned trip. The linked Parent view reflects the assignment and trip status.
+8. Open **Parent → Library**, place an order, then use **Librarian → Library** to edit price or availability and mark the order collected. Each branch manages its catalogue and orders, and each parent sees their own orders.
+9. Select **Reset demo** in the role menu before a fresh walkthrough.
 
 The prototype uses browser storage and a sample account switcher. Role, scope, and dummy login checks run in the browser for the demonstration. A production deployment needs authenticated accounts and server-side authorization. GPS and book orders are simulated.
 
@@ -48,7 +49,17 @@ node --test tests/*.test.mjs
 
 The checks cover branch and academic scope, teacher publishing, parent and driver assignments, role delegation, order visibility, and migration of existing demo data.
 
+## Branch locations and performance data
+
+School names, addresses, and approximate branch positions were verified against [Sussex College Network's official directory](https://www.sussexcollege.lk/branches/) on 19 November 2026. The Matara pin uses destination coordinates in the official school's Google Maps link. The public directory lists 20 school branches.
+
+Assessment marks, term comparisons, and seeded activity entries are illustrative data. They demonstrate comparison of the same subject, grade, and term. Actions inside the prototype also appear in the relevant school's activity feed. Branch workspace totals come from the records in the browser.
+
+Earlier sample branch IDs are retained internally so existing admission logins, course assignments, orders, and trip state continue to resolve to their associated records. Their display names now identify Nugegoda and Malabe.
+
 ## Assets
+
+- The national map uses the [Natural Earth public-domain coastline](https://www.naturalearthdata.com/about/terms-of-use/).
 
 - The local map image and sample route paths use [© OpenStreetMap contributors](https://www.openstreetmap.org/copyright) data under the Open Database License, via [Geofabrik's Sri Lanka extract](https://download.geofabrik.de/asia/sri-lanka.html).
 - DM Sans is bundled with its [Open Font License](dist/assets/DM-Sans-OFL.txt).

@@ -1,0 +1,113 @@
+import { rankedResults, networkSummary, performanceTone, assessmentResult, branchActivity, subjects } from "./network-analytics.js";
+import { icon } from "./icons.js";
+import { badge, button, emptyState, escapeHtml as e, iconTile, pageHeading } from "./ui.js";
+
+export function networkBranches(state, context, network) {
+  const scoped = state.branches.filter((branch) => context.branch === "all" || branch.id === context.branch);
+  return context.branch !== "all" || network.compare === null ? scoped : scoped.filter((branch) => network.compare.includes(branch.id));
+}
+
+function selectFilter(label, key, values, selected) {
+  return `<label class="network-filter"><span>${label}</span><span class="select-wrap"><select data-change="${key}" aria-label="${label}">${values.map(([value, name]) => `<option value="${value}" ${String(value) === String(selected) ? "selected" : ""}>${name}</option>`).join("")}</select>${icon("chevronDown", 15)}</span></label>`;
+}
+
+function picker(state, context, network) {
+  if (context.role !== "chairman" || context.branch !== "all") return "";
+  const count = network.compare === null ? state.branches.length : network.compare.length;
+  return `<details class="network-branch-picker">
+    <summary class="button secondary">${icon("school", 17)} Compare schools <span class="selection-count">${count}</span>${icon("chevronDown", 15)}</summary>
+    <div class="network-picker-panel">
+      <div class="network-picker-tools">${button("Select all", "network-all", { variant: "secondary compact" })}${button("Clear", "network-none", { variant: "secondary compact" })}</div>
+      <div class="network-picker-list">${state.branches.map((branch) => `<label><input type="checkbox" data-change="network-branch-check" value="${branch.id}" ${network.compare === null || network.compare.includes(branch.id) ? "checked" : ""}><span>${e(branch.name)}</span></label>`).join("")}</div>
+    </div>
+  </details>`;
+}
+
+function metric(label, value, description, name, tone = "green") {
+  return `<article class="surface network-metric">${iconTile(name, tone)}<div><span>${label}</span><strong>${value}</strong><small>${description}</small></div></article>`;
+}
+
+function activityFeed(state, branch, network) {
+  const entries = branchActivity(state, branch.id, network.category);
+  const date = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Colombo" });
+  const categories = [["all", "All activity"], ["academic", "Learning"], ["transport", "Transport"], ["library", "Library"], ["people", "People"]];
+  const icons = { academic: "book", transport: "bus", library: "library", people: "users" };
+  return `<section class="surface network-activity">
+    <header class="panel-heading"><div><h2>School activity</h2><p>Updates for ${e(branch.name)}</p></div></header>
+    <div class="activity-filters">${categories.map(([id, label]) => `<button type="button" data-action="network-activity" data-value="${id}" aria-pressed="${network.category === id}" class="${network.category === id ? "is-active" : ""}">${label}</button>`).join("")}</div>
+    <div class="activity-feed">${entries.map((entry) => `<article class="activity-entry">${iconTile(icons[entry.category] || "school", "green", "small-tile")}<div><strong>${e(entry.message)}</strong><span>${e(entry.actor)} · ${date.format(new Date(entry.at))}${entry.sample ? " · Sample" : ""}</span></div></article>`).join("") || emptyState("clock", "No activity in this category", "Choose another category to see this school’s updates.")}</div>
+  </section>`;
+}
+
+function branchDetail(state, context, result, network) {
+  const branch = result.branch;
+  const metrics = [
+    ["Students in demo", state.students.filter((student) => student.branch === branch.id).length],
+    ["Assigned teachers", state.accounts.filter((person) => person.grants.some((grant) => ["teacher", "class_teacher"].includes(grant.role) && grant.branch === branch.id)).length],
+    ["Course classes", state.courses.filter((course) => course.branch === branch.id).length],
+    ["Assigned buses", state.buses.filter((bus) => bus.branch === branch.id).length],
+    ["Library orders", state.orders.filter((order) => order.branch === branch.id).length],
+    ["Lessons completed", state.students.filter((student) => student.branch === branch.id).reduce((sum, student) => sum + (state.completed[student.id]?.length || 0), 0)],
+  ];
+  return `<section class="selected-school-heading">
+    <div>${badge("Selected school", "green")}<h2>${e(branch.school)}</h2><p>${e(branch.address)}</p></div>
+    <a class="button secondary" href="${e(branch.source)}" target="_blank" rel="noopener noreferrer">Official school page</a>
+  </section>
+  <div class="selected-school-grid">
+    <section class="surface subject-breakdown"><header class="panel-heading"><div><h2>Learning performance</h2><p>Grade ${network.grade} · Term ${network.term} · Sample marks</p></div></header>
+      <div class="subject-bars">${subjects.map((subject) => {
+        const assessment = assessmentResult(branch, { ...network, subject: subject.id });
+        return `<div><span>${subject.name}</span><strong>${assessment.mean.toFixed(1)}%</strong><progress value="${assessment.mean}" max="100" aria-label="${subject.name} sample average"></progress></div>`;
+      }).join("")}</div>
+      <div class="assessment-facts"><span>Pass mark <strong>50%</strong></span><span>High-score threshold <strong>75%</strong></span><span>Students assessed <strong>${result.count}</strong></span></div>
+    </section>
+    ${activityFeed(state, branch, network)}
+  </div>
+  <section class="surface branch-workspace">
+    <header class="panel-heading"><div><h2>Branch workspace</h2><p>Records and actions available in this prototype</p></div>${button("Open this branch", "network-open", { value: branch.id, variant: "secondary" })}</header>
+    <dl class="workspace-counts">${metrics.map(([label, count]) => `<div><dt>${label}</dt><dd>${count}</dd></div>`).join("")}</dl>
+  </section>`;
+}
+
+export function networkOverviewPage(options) {
+  const { state, context, network } = options;
+  const branches = networkBranches(state, context, network);
+  const results = rankedResults(branches, network);
+  const summary = networkSummary(results);
+  const subject = subjects.find((subject) => subject.id === network.subject);
+  const selected = results.find((result) => result.branch.id === network.selected) || results[0];
+  return `${pageHeading(context.role === "chairman" ? "School network overview" : "School overview", "Compare learning outcomes and follow activity across your school network.", badge("Sample results", "amber"))}
+    <div class="network-toolbar">
+      ${selectFilter("Subject", "network-subject", subjects.map((subject) => [subject.id, subject.name]), network.subject)}
+      ${selectFilter("Grade", "network-grade", [6, 8, 10, 11].map((grade) => [grade, "Grade " + grade]), network.grade)}
+      ${selectFilter("Assessment", "network-term", [1, 2, 3].map((term) => [term, "Term " + term]), network.term)}
+      ${picker(state, context, network)}
+    </div>
+    <p class="network-data-note">School locations are from the official Sussex directory. Marks and activity examples are sample data for this demonstration.</p>
+    <div class="network-metrics">
+      ${metric("Schools in view", results.length, "20 schools in the network", "school", "neutral")}
+      ${metric("Average mark", summary.mean.toFixed(1) + "%", subject.name + " · Weighted by students", "book")}
+      ${metric("Pass rate", summary.passRate.toFixed(1) + "%", summary.count + " sample students assessed", "checkCircle", "blue")}
+      ${metric("Highest average", results[0] ? e(results[0].branch.name) : "—", results[0] ? results[0].mean.toFixed(1) + "% · Sample results" : "Select schools to compare", "spark", "amber")}
+    </div>
+    <div class="network-comparison-grid">
+      <section class="surface network-map-card">
+        <header class="panel-heading"><div><h2>Our schools across Sri Lanka</h2><p>Select a school on the map or ranking</p></div>${badge(results.length + " schools", "neutral")}</header>
+        <div id="school-network-map" class="school-network-map" role="region" aria-label="Sri Lanka school branch map"></div>
+        <div class="network-map-legend"><span><i class="legend-green"></i>85% and above</span><span><i class="legend-blue"></i>75–84.9%</span><span><i class="legend-amber"></i>Below 75%</span></div>
+        <footer class="network-map-source"><span>Approximate branch positions</span><a href="https://www.naturalearthdata.com/about/terms-of-use/" target="_blank" rel="noopener noreferrer">Natural Earth</a></footer>
+      </section>
+      <section class="surface network-ranking">
+        <header class="panel-heading"><div><h2>${subject.name} comparison</h2><p>Grade ${network.grade} · Term ${network.term} · Common sample assessment</p></div></header>
+        <div class="ranking-head"><span>School</span><span>Average</span><span>Change</span></div>
+        <div class="ranking-rows">${results.map((result) => `<button type="button" class="ranking-row ${selected?.branch.id === result.branch.id ? "is-selected" : ""}" data-action="network-select" data-value="${result.branch.id}" data-focus="ranking-${result.branch.id}" aria-pressed="${selected?.branch.id === result.branch.id}">
+          <span class="ranking-number">${result.rank}</span><span class="ranking-school"><strong>${e(result.branch.name)}</strong><span>${result.count} assessed · ${e(result.branch.province)}</span><span class="ranking-bar"><i class="tone-${performanceTone(result.mean)}" style="width:${result.mean}%"></i></span></span>
+          <strong class="ranking-value">${result.mean.toFixed(1)}%</strong><span class="ranking-change">${result.change === null ? "—" : (result.change > 0 ? "+" : "") + result.change.toFixed(1) + " pp"}</span>
+        </button>`).join("") || emptyState("school", "Choose schools to compare", "Use Compare schools to select branches.", button("Select all schools", "network-all", { variant: "secondary" }))}</div>
+        <footer class="ranking-footer">Ranked within selected schools by average mark. Change is against the previous term.</footer>
+      </section>
+    </div>
+    ${selected ? branchDetail(state, context, selected, network) : ""}
+    <p class="network-directory-source">Branch directory verified on 19 November 2026. <a href="https://www.sussexcollege.lk/branches/" target="_blank" rel="noopener noreferrer">View the official 20-school directory</a></p>`;
+}
+

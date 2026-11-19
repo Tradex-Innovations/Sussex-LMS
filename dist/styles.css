@@ -1047,3 +1047,130 @@ dialog::backdrop { background: #142b235e; backdrop-filter: blur(2px); }
   .login-demo-students button { padding: 8px; }
   .login-demo-students span { font-size: 12px; }
 }
+
+/* School network performance and activity */
+.network-toolbar { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 13px; margin-bottom: 13px; }
+.network-filter { display: grid; gap: 6px; min-width: 135px; }
+.network-filter > span:first-child { font-size: 13px; color: var(--muted); font-weight: 700; }
+.network-filter select { font-size: 14px; min-height: 41px; }
+.network-branch-picker { position: relative; margin-left: auto; }
+.network-branch-picker summary { list-style: none; user-select: none; min-height: 42px; }
+.network-branch-picker summary::-webkit-details-marker { display: none; }
+.selection-count { display: grid; place-items: center; min-width: 23px; height: 22px; background: #edf4eb; color: #315c42; border-radius: 6px; padding: 0 4px; font-size: 12px; }
+.network-picker-panel { position: absolute; z-index: 12; right: 0; top: calc(100% + 8px); width: 275px; border: 1px solid var(--line); border-radius: 12px; background: #fff; box-shadow: 0 12px 32px #14392224; padding: 10px; }
+.network-picker-tools { display: flex; gap: 7px; padding-bottom: 9px; border-bottom: 1px solid var(--line); }
+.network-picker-list { max-height: 320px; overflow-y: auto; margin-top: 5px; }
+.network-picker-list label { display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 6px; font-size: 14px; color: #294a38; cursor: pointer; border-radius: 7px; }
+.network-picker-list label:hover { background: #edf5e9; }
+.network-picker-list input { width: 17px; height: 17px; accent-color: var(--accent); }
+.network-data-note { font-size: 13px; line-height: 1.5; color: #685a34; margin-bottom: 17px; }
+.network-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
+.network-metric { display: flex; align-items: flex-start; gap: 11px; padding: 16px; min-height: 122px; }
+.network-metric .icon-tile { width: 38px; height: 38px; border-radius: 10px; }
+.network-metric > div { min-width: 0; }
+.network-metric > div > span { font-size: 13px; color: var(--muted); font-weight: 650; }
+.network-metric strong { display: block; margin-top: 6px; font-size: 29px; line-height: 1.1; letter-spacing: -.04em; font-weight: 760; }
+.network-metric small { display: block; margin-top: 6px; color: var(--muted); line-height: 1.4; font-size: 12px; }
+.network-metric:last-child strong { font-size: 24px; overflow-wrap: anywhere; }
+.network-comparison-grid { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); gap: 18px; align-items: stretch; }
+.network-map-card { overflow: hidden; }
+.network-map-card .panel-heading, .network-ranking .panel-heading { min-height: 75px; }
+.school-network-map { position: relative; height: 550px; overflow: hidden; isolation: isolate; border-block: 1px solid #e5ece4; background: #e9f0ef; }
+.school-network-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.school-location-label { position: absolute; display: flex; align-items: center; justify-content: center; min-height: 26px; border: 1px solid #cad8cd; background: #ffffffec; color: #315340; border-radius: 6px; padding: 4px; font-size: 13px; font-weight: 680; line-height: 1.1; white-space: nowrap; box-shadow: 0 1px 3px #42604e11; }
+.school-location-label::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--school-color); margin-right: 4px; flex: none; }
+.school-location-label:hover { border-color: #87aa90; background: #f8fff5; z-index: 2; }
+.school-location-label.is-selected { border-color: #1f5942; background: #1f5942; color: #fff; box-shadow: 0 0 0 2px #e3c56a; z-index: 3; }
+.school-location-label.is-selected::before { background: #f1da8f; }
+.network-map-legend { display: flex; flex-wrap: wrap; gap: 13px; padding: 12px 14px 5px; color: #536c5e; font-size: 12px; }
+.network-map-legend > span { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+.network-map-legend i { width: 7px; height: 7px; border-radius: 50%; }
+.legend-green { background: #287052; }
+.legend-blue { background: #537c9d; }
+.legend-amber { background: #b57a34; }
+.network-map-source { display: flex; justify-content: space-between; gap: 8px; padding: 7px 14px 11px; font-size: 11px; color: #6b8274; }
+.network-map-source a:hover { text-decoration: underline; }
+.network-ranking { display: flex; flex-direction: column; overflow: hidden; }
+.ranking-head { display: grid; grid-template-columns: minmax(0, 1fr) 77px 62px; gap: 10px; padding: 12px 17px 12px 47px; background: #f6f9f3; border-block: 1px solid #e6eee3; color: #536d5c; font-size: 12px; font-weight: 750; }
+.ranking-head > span:not(:first-child) { text-align: right; }
+.ranking-rows { max-height: 538px; overflow-y: auto; }
+.ranking-row { display: grid; grid-template-columns: 22px minmax(0, 1fr) 77px 62px; align-items: center; gap: 10px; width: 100%; min-height: 69px; padding: 11px 17px; text-align: left; border: 0; border-bottom: 1px solid #eaf0e7; background: transparent; }
+.ranking-row:hover { background: #f3f8ee; }
+.ranking-row.is-selected { background: #edf5e8; box-shadow: inset 3px 0 #397250; }
+.ranking-number { color: #698171; font-size: 12px; font-weight: 750; font-variant-numeric: tabular-nums; }
+.ranking-row:first-child .ranking-number { color: #7c6228; background: #f0e6bf; width: 23px; height: 23px; display: grid; place-items: center; border-radius: 7px; }
+.ranking-school { min-width: 0; }
+.ranking-school > strong { display: block; font-size: 14px; font-weight: 740; }
+.ranking-school > span:not(.ranking-bar) { display: block; color: var(--muted); font-size: 12px; margin-top: 4px; }
+.ranking-bar { display: block; height: 4px; margin-top: 7px; border-radius: 8px; background: #e7eee3; overflow: hidden; }
+.ranking-bar > i { display: block; height: 100%; background: var(--tone-ink); opacity: .8; border-radius: inherit; }
+.ranking-value { font-size: 17px; font-weight: 750; color: #224b37; text-align: right; }
+.ranking-change { font-size: 12px; font-weight: 650; color: #497859; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ranking-footer { margin-top: auto; padding: 12px 16px; font-size: 12px; color: var(--muted); line-height: 1.4; border-top: 1px solid var(--line); }
+.selected-school-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 13px; margin: 29px 0 17px; }
+.selected-school-heading h2 { margin-top: 9px; font-size: 29px; font-weight: 760; letter-spacing: -.045em; }
+.selected-school-heading p { margin-top: 5px; font-size: 14px; color: var(--muted); line-height: 1.5; max-width: 60ch; }
+.selected-school-grid { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 18px; }
+.subject-bars { display: grid; gap: 20px; padding: 5px 18px 19px; }
+.subject-bars > div { display: grid; grid-template-columns: 1fr auto; gap: 8px; font-size: 14px; color: #3c5c47; }
+.subject-bars strong { color: #1f4832; }
+.subject-bars progress { grid-column: 1 / -1; height: 7px; }
+.assessment-facts { display: grid; gap: 7px; padding: 14px 18px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+.assessment-facts span { display: flex; justify-content: space-between; gap: 10px; }
+.assessment-facts strong { color: #3a6145; }
+.activity-filters { display: flex; align-items: center; gap: 5px; padding: 0 14px 12px; overflow-x: auto; }
+.activity-filters button { border: 1px solid #dfe7da; background: #fff; color: #58705e; font-size: 12px; font-weight: 680; padding: 7px 9px; border-radius: 8px; white-space: nowrap; }
+.activity-filters .is-active { background: #e8f2e3; border-color: #bfd3b8; color: #2c5438; }
+.activity-feed { padding: 0 16px 7px; max-height: 357px; overflow-y: auto; }
+.activity-entry { display: flex; gap: 10px; align-items: flex-start; padding: 13px 0; border-top: 1px solid #e7eee2; }
+.activity-entry strong { display: block; font-size: 14px; line-height: 1.4; font-weight: 650; }
+.activity-entry > div > span { display: block; margin-top: 6px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+.branch-workspace { margin-top: 18px; }
+.workspace-counts { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); padding: 5px 18px 20px; gap: 12px; }
+.workspace-counts > div { border-right: 1px solid var(--line); padding-right: 8px; }
+.workspace-counts > div:last-child { border-right: 0; }
+.workspace-counts dt { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.workspace-counts dd { font-size: 24px; font-weight: 750; margin-top: 6px; color: #31593b; }
+.network-directory-source { margin-top: 16px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.network-directory-source a { color: #3b6748; text-decoration: underline; text-underline-offset: 3px; }
+
+@media (max-width: 1190px) {
+  .network-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .network-comparison-grid { grid-template-columns: minmax(0, 1fr); }
+  .school-network-map { height: 570px; }
+  .ranking-rows { max-height: 440px; }
+}
+@media (max-width: 750px) {
+  .selected-school-grid { grid-template-columns: minmax(0, 1fr); }
+  .workspace-counts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 17px 10px; }
+  .workspace-counts > div:nth-child(3) { border-right: 0; }
+}
+@media (max-width: 540px) {
+  .network-toolbar { gap: 10px; }
+  .network-filter { flex: 1 1 125px; min-width: 0; }
+  .network-branch-picker { margin-left: 0; flex: 1 1 125px; }
+  .network-branch-picker > summary { min-height: 41px; width: 100%; padding-inline: 8px; font-size: 12px; }
+  .network-picker-panel { width: min(275px, calc(100vw - 30px)); }
+  .network-data-note { font-size: 12px; margin-bottom: 13px; }
+  .network-metrics { gap: 8px; margin-bottom: 14px; }
+  .network-metric { padding: 11px; gap: 7px; min-height: 117px; }
+  .network-metric .icon-tile { display: none; }
+  .network-metric > div > span { font-size: 12px; }
+  .network-metric strong { font-size: 28px; }
+  .network-metric:last-child strong { font-size: 23px; }
+  .network-metric small { font-size: 12px; }
+  .school-network-map { height: 590px; }
+  .school-location-label { font-size: 11px; min-height: 26px; }
+  .school-location-label::before { width: 4px; height: 4px; margin-right: 3px; }
+  .network-map-card .panel-heading { flex-wrap: wrap; }
+  .network-map-card .panel-heading h2 { font-size: 16px; }
+  .network-map-legend { gap: 9px; font-size: 11px; padding-inline: 10px; }
+  .ranking-head { grid-template-columns: minmax(0, 1fr) 63px 51px; gap: 7px; padding-left: 38px; padding-right: 11px; }
+  .ranking-row { grid-template-columns: 19px minmax(0, 1fr) 63px 51px; gap: 7px; padding-inline: 11px; }
+  .ranking-school > strong { font-size: 14px; }
+  .ranking-school > span:not(.ranking-bar) { font-size: 11px; }
+  .ranking-value { font-size: 16px; }
+  .ranking-change { font-size: 11px; }
+  .selected-school-heading h2 { font-size: 25px; }
+  .network-directory-source { font-size: 12px; }
+}

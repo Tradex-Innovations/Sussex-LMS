@@ -1,7 +1,8 @@
 import { icon } from "./icons.js";
 import { geometry } from "./routes.js";
+import { branchDirectory } from "./network-data.js";
 
-const { width: mapWidth, height: mapHeight, school, routes } = geometry;
+const { width: mapWidth, height: mapHeight, routes } = geometry;
 
 function demoRoute(coordinates, stopCoordinates) {
   let distance = 0;
@@ -38,7 +39,10 @@ const nawala = routes["01"].points.find((point) => point[2] / routes["01"].lengt
 routes["07"] = demoRoute(toLakeside, [toLakeside[0], diyatha, toLakeside.at(-1)]);
 routes["08"] = demoRoute([...routes["01"].points, ...reverseLake.slice(1)], [routes["01"].points[0], nawala, toLakeside[0], diyatha, toLakeside.at(-1)]);
 
-export const campusPoints = { colombo: school, lakeside: routes["02"].points[0] };
+export const campusPoints = Object.fromEntries(branchDirectory.map((branch) => [
+  branch.id,
+  [(branch.lon - 79.835) * mapWidth / (79.993 - 79.835), (6.933 - branch.lat) * mapHeight / (6.933 - 6.832)],
+]));
 
 export function routeProgress(bus) {
   return routes[bus.id]?.stops ?? bus.stopProgress ?? bus.stops.map((_, index) => index / (bus.stops.length - 1));

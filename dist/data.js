@@ -1,5 +1,7 @@
+import { branchDirectory } from "./network-data.js";
+
 export const roles = {
-  chairman: { name: "Chairman", icon: "school", start: "transport", pages: ["overview", "transport", "courses", "people", "library", "access"] },
+  chairman: { name: "Chairman", icon: "school", start: "overview", pages: ["overview", "transport", "courses", "people", "library", "access"] },
   principal: { name: "Principal", icon: "badge", start: "transport", pages: ["overview", "transport", "courses", "people", "library", "access"] },
   vice_principal: { name: "Vice Principal", icon: "badge", start: "overview", pages: ["overview", "transport", "courses", "people", "library"] },
   section_head: { name: "Section Head", icon: "users", start: "courses", pages: ["courses", "people"] },
@@ -24,10 +26,7 @@ export function sectionFor(grade) {
   return sections.find((section) => section.grades.includes(Number(grade)))?.id;
 }
 
-export const branches = [
-  { id: "colombo", name: "Colombo", location: "Rajagiriya", school: "Sussex College Colombo" },
-  { id: "lakeside", name: "Lakeside", location: "Battaramulla", school: "Sussex College Lakeside" },
-];
+export const branches = branchDirectory;
 
 export const students = [
   { id: "amaya", name: "Amaya Perera", grade: 8, initials: "AP", tone: "violet", bus: "01" },
@@ -153,6 +152,8 @@ export function freshState() {
   for (const course of courses) scopedAssignments["lake-" + course.id] = { teacher: "lakshmi", students: [course.grade === 8 ? "meera" : "thevin"] };
   return {
     version: 2,
+    networkVersion: 1,
+    activity: [],
     branches: structuredClone(branches),
     accounts: seedAccounts(),
     students: withAdmissionNumbers(scopedStudents),
@@ -170,12 +171,19 @@ export function freshState() {
     carts: {},
     orders: [],
     buses: [
-      ...buses.map((bus) => ({ ...bus, stops: [...bus.stops.slice(0, -1), "Sussex College Colombo"], branch: "colombo", driverId: "driver_" + bus.id })),
-      { id: "07", name: "Rajagiriya Link", driver: "Nalin De Silva", driverId: "driver_07", branch: "lakeside", registration: "WP NE-4528", status: "route", color: "#cb6655", start: 0.15, stops: ["Rajagiriya", "Diyatha Uyana", "Sussex College Lakeside"] },
-      { id: "08", name: "Nugegoda Link", driver: "Ashan Mendis", driverId: "driver_08", branch: "lakeside", registration: "WP NF-3172", status: "route", color: "#277c96", start: 0.42, stops: ["Nugegoda Junction", "Nawala Junction", "Rajagiriya", "Diyatha Uyana", "Sussex College Lakeside"] },
+      ...buses.map((bus) => ({ ...bus, stops: [...bus.stops.slice(0, -1), "Sussex College Nugegoda"], branch: "colombo", driverId: "driver_" + bus.id })),
+      { id: "07", name: "Rajagiriya Link", driver: "Nalin De Silva", driverId: "driver_07", branch: "lakeside", registration: "WP NE-4528", status: "route", color: "#cb6655", start: 0.15, stops: ["Rajagiriya", "Diyatha Uyana", "Sussex College Malabe"] },
+      { id: "08", name: "Nugegoda Link", driver: "Ashan Mendis", driverId: "driver_08", branch: "lakeside", registration: "WP NF-3172", status: "route", color: "#277c96", start: 0.42, stops: ["Nugegoda Junction", "Nawala Junction", "Rajagiriya", "Diyatha Uyana", "Sussex College Malabe"] },
     ],
     books: branches.flatMap((branch) => books.map((book) => ({ ...book, id: branch.id === "colombo" ? book.id : "lake-" + book.id, branch: branch.id, available: true }))),
   };
+}
+
+function migrateSchoolLabel(label) {
+  return label.replace(/^Greenfield Academy$/, "Sussex College Network")
+    .replace(/^Greenfield\b/, "Sussex College")
+    .replace(/^Sussex College Colombo$/, "Sussex College Nugegoda")
+    .replace(/^Sussex College Lakeside$/, "Sussex College Malabe");
 }
 
 export function loadState() {
@@ -187,9 +195,13 @@ export function loadState() {
       return {
         ...defaults,
         ...saved,
+        networkVersion: 1,
         students: withAdmissionNumbers(saved.students || defaults.students),
-        branches: saved.branches.map((branch) => ({ ...branch, school: branch.school.replace(/^Greenfield\b/, "Sussex College") })),
-        buses: saved.buses.map((bus) => ({ ...bus, stops: bus.stops.map((stop) => stop.replace(/^Greenfield Academy$/, "Sussex College Network").replace(/^Greenfield\b/, "Sussex College")) })),
+        branches: defaults.branches.map((branch) => {
+          const existing = saved.branches.find((item) => item.id === branch.id);
+          return saved.networkVersion && existing ? { ...branch, ...existing, school: migrateSchoolLabel(existing.school) } : { ...existing, ...branch };
+        }),
+        buses: saved.buses.map((bus) => ({ ...bus, stops: bus.stops.map(migrateSchoolLabel) })),
       };
     }
     return {

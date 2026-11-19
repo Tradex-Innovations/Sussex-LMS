@@ -3,7 +3,10 @@ import { assignableRoles, branchTeachers, can, canManageGrant, contextFor, linke
 import { icon } from "./icons.js";
 import { assignmentForm, coursesPage, materialForm } from "./learning.js";
 import { branchBooks, bookForm, cartForm, cartFor, cartItems, catalogResults, libraryPage, orderHistory } from "./library.js";
-import { accessPage, branchForm, busForm, overviewPage, peoplePage, roleForm, scopeLabel, studentForm } from "./management.js";
+import { accessPage, branchForm, busForm, peoplePage, roleForm, scopeLabel, studentForm } from "./management.js";
+import { networkBranches, networkOverviewPage } from "./network.js";
+import { rankedResults, subjects } from "./network-analytics.js";
+import { SchoolNetworkMap } from "./network-map.js";
 import { FleetMap } from "./map.js";
 import { mountMapSummary, transportPage, updateTripDetails } from "./transport.js";
 import { avatar, button, emptyState, escapeHtml as e, iconTile } from "./ui.js";
@@ -23,10 +26,12 @@ const navigation = {
 let state = loadState();
 let parentSession = readParentSession();
 let map;
+let schoolMap;
 let mapViewKey;
 let dialogMode;
 let view = getView();
-const ui = { accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", grade: "all", query: "", paused: false, runningSince: performance.now(), elapsed: 0, starts: {} };
+const ui = { accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", grade: "all", query: "", paused: false, runningSince: performance.now(), elapsed: 0, starts: {},
+  network: { subject: "mathematics", grade: 8, term: 3, selected: "", compare: null, category: "all" } };
 
 function getView() {
   const [requestedRole, requestedPage] = location.hash.slice(1).split("/");
@@ -49,7 +54,7 @@ function childFor(ctx) {
 function optionsFor(ctx = context()) {
   const children = linkedChildren(state, ctx);
   const child = childFor(ctx);
-  return { state, context: ctx, children, child, fleet: visibleBuses(state, ctx, child), filter: ui.filter, selected: ui.bus, paused: ui.paused, progress, courseId: ui.courseId, grade: ui.grade, query: ui.query };
+  return { state, context: ctx, children, child, fleet: visibleBuses(state, ctx, child), filter: ui.filter, selected: ui.bus, paused: ui.paused, progress, courseId: ui.courseId, grade: ui.grade, query: ui.query, network: ui.network };
 }
 
 function elapsed() {
@@ -111,8 +116,11 @@ function scopeBar(ctx) {
 }
 
 function render(focus, { scrollTop = false } = {}) {
+  const pickerOpen = app.querySelector(".network-branch-picker")?.open;
   const previousViewport = map?.viewport;
   map?.destroy();
+  schoolMap?.destroy();
+  schoolMap = null;
   map = null;
   const ctx = context();
   if (view.role === "parent" && !ctx) {
@@ -128,7 +136,7 @@ function render(focus, { scrollTop = false } = {}) {
     options = optionsFor(ctx);
     if (!options.fleet.some((bus) => bus.id === ui.bus)) ui.bus = options.fleet[0]?.id;
     options.selected = ui.bus;
-    const pages = { overview: overviewPage, courses: coursesPage, people: peoplePage, library: libraryPage, access: accessPage };
+    const pages = { overview: networkOverviewPage, courses: coursesPage, people: peoplePage, library: libraryPage, access: accessPage };
     body = view.page === "transport" ? transportPage(view.role, options) : pages[view.page](options);
   }
   document.title = `${navigation[view.page].label} · ${roles[view.role].name} · Sussex College Network`;
@@ -137,6 +145,18 @@ function render(focus, { scrollTop = false } = {}) {
     ${sidebar(ctx)}<div class="desktop-content">${topbar(ctx)}<main id="main" class="page page-${view.page}">${scopeBar(ctx)}${body}</main></div>
     ${mobileNavigation ? `<nav class="mobile-nav" aria-label="Workspace">${navigationLinks(true)}</nav>` : ""}
   </div>`;
+  const networkStage = app.querySelector("#school-network-map");
+  if (networkStage) {
+    const branches = networkBranches(state, ctx, ui.network);
+    const results = rankedResults(branches, ui.network);
+    if (!results.some((result) => result.branch.id === ui.network.selected)) ui.network.selected = results[0]?.branch.id || "";
+    schoolMap = new SchoolNetworkMap(networkStage, results, ui.network.selected, selectNetworkBranch);
+    const rows = app.querySelector(".ranking-rows");
+    const activeRow = rows?.querySelector('[aria-pressed="true"]');
+    if (activeRow) rows.scrollTop = Math.max(0, activeRow.offsetTop - rows.offsetTop - rows.clientHeight / 2 + activeRow.clientHeight / 2);
+    const picker = app.querySelector(".network-branch-picker");
+    if (picker && pickerOpen) picker.open = true;
+  }
   const stage = app.querySelector("#map-stage");
   if (stage && options.fleet.length) {
     const fleet = options.fleet;
@@ -162,9 +182,12 @@ function toast(message) {
   setTimeout(() => notice.remove(), 3800);
 }
 
-function update(mutator) {
+function update(mutator, activity) {
   const next = structuredClone(state);
   mutator(next);
+  if (activity) {
+    next.activity = [{ ...activity, id: crypto.randomUUID(), actor: context()?.account.name || "Demo user", at: new Date().toISOString() }, ...(next.activity || [])].slice(0, 300);
+  }
   if (!saveState(next)) { toast("The change could not be saved in this browser."); return false; }
   state = next;
   return true;
@@ -191,6 +214,14 @@ function selectBus(id, focus) {
   if (!bus) return;
   ui.bus = id;
   if (ui.filter !== "all" && ui.filter !== bus.status) ui.filter = "all";
+  render(focus);
+}
+
+function selectNetworkBranch(id, focus) {
+  const ctx = context();
+  if (!["chairman", "principal", "vice_principal"].includes(ctx?.role)) return;
+  if (!networkBranches(state, ctx, ui.network).some((branch) => branch.id === id)) return;
+  ui.network.selected = id;
   render(focus);
 }
 
@@ -229,7 +260,7 @@ function placeOrder() {
   const order = { number, parent: ctx.account.id, branch: ctx.branch, status: "pending", items,
     total: items.reduce((sum, item) => sum + item.price * item.quantity, 0),
     date: new Intl.DateTimeFormat("en-LK", { day: "numeric", month: "short", timeZone: "Asia/Colombo" }).format(new Date()) };
-  if (!update((next) => { next.orders.push(order); next.carts[ctx.account.id][ctx.branch] = {}; })) return;
+  if (!update((next) => { next.orders.push(order); next.carts[ctx.account.id][ctx.branch] = {}; }, { branch: ctx.branch, category: "library", message: "New library order placed." })) return;
   render();
   showDialog("receipt", "Order placed", number, `<div class="form-body order-confirmation">${iconTile("checkCircle", "green")}<p>Collect your books and pay at your school library.</p></div><footer class="dialog-actions">${button("View my orders", "orders", { iconName: "package" })}</footer>`);
 }
@@ -262,6 +293,11 @@ function authorizedAction(name, value, ctx) {
   const material = state.materials.find((item) => item.id === value);
   const materialCourse = visibleCourses(state, ctx, options.child).find((item) => item.id === material?.course);
   const guards = {
+    "network-select": ["chairman", "principal", "vice_principal"].includes(ctx.role) && networkBranches(state, ctx, ui.network).some((branch) => branch.id === value),
+    "network-open": ["chairman", "principal", "vice_principal"].includes(ctx.role) && networkBranches(state, ctx, ui.network).some((branch) => branch.id === value),
+    "network-all": ctx.role === "chairman" && ctx.branch === "all",
+    "network-none": ctx.role === "chairman" && ctx.branch === "all",
+    "network-activity": ["chairman", "principal", "vice_principal"].includes(ctx.role) && ["all", "academic", "transport", "library", "people"].includes(value),
     "pause": roles[ctx.role].pages.includes("transport"), "bus": options.fleet.some((bus) => bus.id === value),
     "filter": roles[ctx.role].pages.includes("transport"),
     "assign": can(ctx, "courses.assign") && (!value || Boolean(course)),
@@ -286,7 +322,7 @@ function authorizedAction(name, value, ctx) {
 
 function updateTrip(status) {
   const bus = optionsFor().fleet[0];
-  if (!update((next) => { next.buses.find((item) => item.id === bus.id).status = status; })) return;
+  if (!update((next) => { next.buses.find((item) => item.id === bus.id).status = status; }, { branch: bus.branch, category: "transport", message: `BUS ${bus.id} ${status === "route" ? "started a trip." : "completed its trip."}` })) return;
   if (status === "route") ui.starts[bus.id] = elapsed();
   closeDialog();
   render();
@@ -317,6 +353,14 @@ function action(event) {
   const ctx = context();
   if (!authorizedAction(name, value, ctx)) return toast("This action is outside the current role’s assigned access.");
   switch (name) {
+    case "network-select": selectNetworkBranch(value, focus); break;
+    case "network-all": ui.network.compare = null; render(); break;
+    case "network-none": ui.network.compare = []; render(); break;
+    case "network-activity": ui.network.category = value; render(); break;
+    case "network-open":
+      if (ctx.role === "chairman") ui.branch = value;
+      location.hash = `${view.role}/courses`;
+      break;
     case "parent-logout":
       parentSession = null;
       saveParentSession(null);
@@ -344,7 +388,7 @@ function action(event) {
     case "complete": {
       const child = childFor(ctx);
       const done = state.completed[child.id]?.includes(value);
-      if (update((next) => { const list = next.completed[child.id] || []; next.completed[child.id] = done ? list.filter((id) => id !== value) : [...list, value]; })) { render(focus); toast(done ? "Marked as incomplete." : "Marked as done."); }
+      if (update((next) => { const list = next.completed[child.id] || []; next.completed[child.id] = done ? list.filter((id) => id !== value) : [...list, value]; }, { branch: child.branch, category: "academic", message: done ? "A lesson was marked incomplete." : "A lesson was marked complete." })) { render(focus); toast(done ? "Marked as incomplete." : "Marked as done."); }
       break;
     }
     case "add-book":
@@ -355,7 +399,7 @@ function action(event) {
     case "orders": showDialog("orders", "My orders", "Your family’s library orders.", orderHistory(state, ctx)); break;
     case "edit-book": showDialog("book", "Edit book", "Manage the catalogue for this branch.", bookForm(state.books.find((book) => book.id === value))); break;
     case "collect-order":
-      if (update((next) => { next.orders.find((order) => order.number === value).status = "collected"; })) { render(); toast("Order marked as collected."); } break;
+      if (update((next) => { next.orders.find((order) => order.number === value).status = "collected"; }, { branch: state.orders.find((order) => order.number === value).branch, category: "library", message: "A library order was collected." })) { render(); toast("Order marked as collected."); } break;
     case "end-trip": confirmDialog("trip", "End this trip?", "The bus will appear as At school for the branch and assigned parents.", "End trip", "confirm-end-trip"); break;
     case "confirm-end-trip": updateTrip("school"); break;
     case "start-trip": updateTrip("route"); break;
@@ -374,7 +418,7 @@ function action(event) {
           const bus = next.buses.find((bus) => bus.id === grant.bus);
           if (bus?.driverId === account.id) { bus.driverId = ""; bus.driver = "Unassigned"; }
         }
-      })) { closeDialog(); render(); toast("Role removed."); } break;
+      }, { branch: grant.branch, category: "people", message: "A staff role appointment was removed." })) { closeDialog(); render(); toast("Role removed."); } break;
     }
     case "branch-map": if (ctx.role === "chairman") ui.branch = value; location.hash = `${view.role}/transport`; break;
     case "edit-branch": showDialog("branch", "Edit school branch", "School branch details.", branchForm(state.branches.find((branch) => branch.id === value))); break;
@@ -382,6 +426,7 @@ function action(event) {
     case "confirm-reset":
       if (saveState(freshState())) {
         state = freshState(); Object.assign(ui, { accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", starts: {}, paused: false, runningSince: performance.now(), elapsed: 0 });
+        ui.network = { subject: "mathematics", grade: 8, term: 3, selected: "", compare: null, category: "all" };
         parentSession = null;
         saveParentSession(null);
         closeDialog(); location.hash = "chairman/transport"; render(); toast("Demo reset.");
@@ -396,11 +441,31 @@ function change(event) {
   const ctx = context();
   if (!ctx) return;
   switch (name) {
+    case "network-subject":
+    case "network-grade":
+    case "network-term":
+      if (!["chairman", "principal", "vice_principal"].includes(ctx.role)) return;
+      if (name === "network-subject" && subjects.some((subject) => subject.id === element.value)) ui.network.subject = element.value;
+      if (name === "network-grade" && [6, 8, 10, 11].includes(Number(element.value))) ui.network.grade = Number(element.value);
+      if (name === "network-term" && [1, 2, 3].includes(Number(element.value))) ui.network.term = Number(element.value);
+      render();
+      break;
+    case "network-branch-check": {
+      if (ctx.role !== "chairman" || ctx.branch !== "all" || !state.branches.some((branch) => branch.id === element.value)) return;
+      const selected = new Set(ui.network.compare || state.branches.map((branch) => branch.id));
+      if (element.checked) selected.add(element.value); else selected.delete(element.value);
+      ui.network.compare = [...selected];
+      render();
+      app.querySelector(`[data-change="network-branch-check"][value="${CSS.escape(element.value)}"]`)?.focus({ preventScroll: true });
+      break;
+    }
     case "account":
       ui.accounts[view.role] = element.value; ui.courseId = ""; ui.filter = "all"; closeDialog(); render(); break;
     case "branch":
       if (ctx.role !== "chairman") return;
-      ui.branch = element.value; ui.courseId = ""; ui.filter = "all"; closeDialog(); render(); break;
+      ui.branch = element.value; ui.courseId = ""; ui.filter = "all";
+      if (element.value !== "all") ui.network.selected = element.value;
+      closeDialog(); render(); break;
     case "child":
       if (!linkedChildren(state, ctx).some((child) => child.id === element.value)) return;
       update((next) => { next.child = element.value; }); ui.courseId = ""; render("child-select"); break;
@@ -486,6 +551,18 @@ async function submit(event) {
   const allowedBranch = (branch) => state.branches.some((item) => item.id === branch) && (ctx.branch === "all" || ctx.branch === branch);
   const fail = (message = "This change is outside your assigned scope.") => showError(form, message);
 
+  const formActivity = {
+    assignment: ["academic", "Course assignments updated.", state.courses.find((course) => course.id === values.get("course"))?.branch],
+    material: ["academic", id ? "Course material updated." : "New course material published.", state.courses.find((course) => course.id === values.get("course"))?.branch],
+    student: ["people", id ? "Student record updated." : "New student added.", state.students.find((student) => student.id === id)?.branch || values.get("branch")],
+    bus: ["transport", "Bus route and student assignments updated.", state.buses.find((bus) => bus.id === id)?.branch],
+    book: ["library", "Book catalogue updated.", state.books.find((book) => book.id === id)?.branch],
+    branch: ["people", "School branch details updated.", id],
+    role: ["people", "Staff role assignment updated.", values.get("branch")],
+  }[mode];
+  const save = (mutator) => update(mutator, formActivity ? { category: formActivity[0], message: formActivity[1], branch: formActivity[2] } : undefined);
+
+
   if (mode === "assignment") {
     const course = visibleCourses(state, ctx).find((item) => item.id === values.get("course"));
     if (!can(ctx, "courses.assign") || !course) return fail();
@@ -493,7 +570,7 @@ async function submit(event) {
     const students = values.getAll("students");
     if (!branchTeachers(state, course.branch).some((person) => person.id === teacher)) return fail("Select a teacher assigned to this branch.");
     if (!students.every((id) => state.students.some((student) => student.id === id && student.branch === course.branch && student.className === course.className && student.grade === course.grade))) return fail();
-    if (!update((next) => { next.assignments[course.id] = { teacher, students }; })) return;
+    if (!save((next) => { next.assignments[course.id] = { teacher, students }; })) return;
   } else if (mode === "material") {
     const course = state.courses.find((course) => course.id === values.get("course"));
     const existing = state.materials.find((item) => item.id === id);
@@ -509,7 +586,7 @@ async function submit(event) {
       const attachment = file.size ? await fileData(file) : existing?.file || null;
       if (!dialog.open || !form.isConnected) return;
       const item = { ...existing, id: id || "m-" + crypto.randomUUID(), course: course.id, title, description, type: values.get("type"), date: "Today", file: attachment, content: description + "\n\nReview the topic and note one question to discuss in class." };
-      if (!update((next) => { if (existing) next.materials[next.materials.findIndex((material) => material.id === id)] = item; else next.materials.push(item); })) return;
+      if (!save((next) => { if (existing) next.materials[next.materials.findIndex((material) => material.id === id)] = item; else next.materials.push(item); })) return;
     } catch { return fail("The file could not be read."); }
     finally { submitButton.disabled = false; }
   } else if (mode === "student") {
@@ -525,7 +602,7 @@ async function submit(event) {
     if (!/^[A-Z0-9][A-Z0-9-]{2,31}$/.test(admissionNumber)) return fail("Use 3–32 letters, numbers, or hyphens for the admission number.");
     if (state.students.some((student) => student.id !== id && student.admissionNumber === admissionNumber)) return fail("That admission number belongs to another student.");
     if (!guardians.every((id) => state.accounts.some((person) => person.id === id && person.grants.some((grant) => grant.role === "parent" && grant.branch === branch)))) return fail("Select guardian accounts from this branch.");
-    if (!update((next) => {
+    if (!save((next) => {
       const student = { ...existing, id: id || "student-" + crypto.randomUUID(), name, admissionNumber, initials: name.split(" ").map((word) => word[0]).slice(0, 2).join(""), grade, className, branch, guardians, tone: existing?.tone || "green" };
       if (existing) next.students[next.students.findIndex((item) => item.id === id)] = student; else next.students.push(student);
       for (const course of next.courses) if (course.branch !== branch || course.grade !== grade || course.className !== className) next.assignments[course.id].students = next.assignments[course.id].students.filter((studentId) => studentId !== student.id);
@@ -538,7 +615,7 @@ async function submit(event) {
     const stops = values.getAll("stops").map((stop) => stop.trim());
     if (!driver || !values.get("name").trim() || stops.length !== bus.stops.length || stops.some((stop) => !stop)) return fail("Complete the route name, driver, and stop names.");
     if (!students.every((id) => state.students.some((student) => student.id === id && student.branch === bus.branch))) return fail();
-    if (!update((next) => {
+    if (!save((next) => {
       const target = next.buses.find((item) => item.id === id);
       target.name = values.get("name").trim(); target.stops = stops;
       assignDriver(next, id, driver.id);
@@ -553,12 +630,12 @@ async function submit(event) {
     const price = Number(values.get("price"));
     const title = values.get("title").trim();
     if (!title || !Number.isInteger(price) || price < 1 || price > 100000) return fail("Enter a title and a price from LKR 1 to 100,000.");
-    if (!update((next) => Object.assign(next.books.find((item) => item.id === id), { title, price, available: values.has("available") }))) return;
+    if (!save((next) => Object.assign(next.books.find((item) => item.id === id), { title, price, available: values.has("available") }))) return;
   } else if (mode === "branch") {
     if (!can(ctx, "branch.edit") || !state.branches.some((branch) => branch.id === id)) return fail();
     const name = values.get("name").trim(), location = values.get("location").trim();
     if (!name || !location) return fail("Enter the branch name and location.");
-    if (!update((next) => {
+    if (!save((next) => {
       const school = "Sussex College " + name;
       Object.assign(next.branches.find((branch) => branch.id === id), { name, location, school });
       for (const bus of next.buses.filter((bus) => bus.branch === id)) bus.stops[bus.stops.length - 1] = school;
@@ -588,7 +665,7 @@ async function submit(event) {
       grant.bus = values.get("bus");
     }
     if (person?.grants.some((item) => Object.entries(grant).every(([key, value]) => item[key] === value))) return fail("This person already has that role and scope.");
-    if (!update((next) => {
+    if (!save((next) => {
       const personId = newPerson ? "person-" + crypto.randomUUID() : person.id;
       if (newPerson) next.accounts.push({ id: personId, name, initials: name.split(" ").map((word) => word[0]).slice(0, 2).join(""), grants: [], tone: "green" });
       const account = next.accounts.find((item) => item.id === personId);
@@ -603,6 +680,8 @@ async function submit(event) {
 }
 
 document.addEventListener("click", (event) => {
+  const picker = app.querySelector(".network-branch-picker");
+  if (picker?.open && !picker.contains(event.target)) picker.open = false;
   const menu = app.querySelector(".role-picker");
   if (menu?.open && (!menu.contains(event.target) || event.target.closest("[data-role-link], [data-action='reset']"))) menu.open = false;
   action(event);

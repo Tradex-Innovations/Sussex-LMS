@@ -9,22 +9,6 @@ export function scopeLabel(grant, state) {
   return [branch, section, grant.className ? "Class " + grant.className : grant.grade !== undefined ? "Grade " + grant.grade : "", grant.bus ? "BUS " + grant.bus : ""].filter(Boolean).join(" · ");
 }
 
-export function overviewPage({ state, context }) {
-  const branches = state.branches.filter((branch) => context.branch === "all" || branch.id === context.branch);
-  return `${pageHeading(context.role === "chairman" ? "School group overview" : "Branch overview", "A view of transport, learning, and people across your assigned schools.")}
-    <div class="branch-grid">${branches.map((branch) => {
-      const fleet = state.buses.filter((bus) => bus.branch === branch.id);
-      const principal = state.accounts.find((person) => person.grants.some((grant) => grant.role === "principal" && grant.branch === branch.id));
-      const students = state.students.filter((student) => student.branch === branch.id);
-      return `<article class="surface branch-card">
-        <div class="branch-card-heading">${iconTile("school", "green")}<div><h2>${e(branch.name)}</h2><p>${e(branch.location)}</p></div></div>
-        <dl class="branch-metrics"><div><dt>Students</dt><dd>${students.length}</dd></div><div><dt>Buses</dt><dd>${fleet.length}</dd></div><div><dt>On route</dt><dd>${fleet.filter((bus) => bus.status === "route").length}</dd></div></dl>
-        <p class="secondary-text">Principal · ${e(principal?.name || "Appointment pending")}</p>
-        <div class="branch-actions">${button("View bus map", "branch-map", { value: branch.id, variant: "secondary" })}${can(context, "branch.edit") ? button("Edit branch", "edit-branch", { value: branch.id, variant: "secondary" }) : ""}</div>
-      </article>`;
-    }).join("")}</div>`;
-}
-
 export function peoplePage({ state, context }) {
   const students = visibleStudents(state, context);
   return `${pageHeading("Students & guardians", "Student records and linked parent accounts within your assigned scope.", can(context, "students.edit") ? button("Add student", "edit-student", { iconName: "plus" }) : "")}
