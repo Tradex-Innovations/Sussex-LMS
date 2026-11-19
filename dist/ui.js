@@ -40,12 +40,12 @@ export function button(label, action, options = {}) {
   </button>`;
 }
 
-export function childSelect(child) {
+export function childSelect(child, profiles = childProfiles) {
   return `<label class="profile-select">
     ${avatar(child, "small")}
     <span class="sr-only">Select student</span>
     <select data-change="child" data-focus="child-select">
-      ${childProfiles.map((student) => `<option value="${student.id}" ${student.id === child.id ? "selected" : ""}>${student.name}</option>`).join("")}
+      ${profiles.map((student) => `<option value="${student.id}" ${student.id === child.id ? "selected" : ""}>${student.name}</option>`).join("")}
     </select>
     ${icon("chevronDown", 15)}
   </label>`;

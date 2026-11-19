@@ -1,11 +1,8 @@
-import { buses, statuses } from "./data.js";
+import { statuses } from "./data.js";
 import { icon } from "./icons.js";
+import { can } from "./access.js";
 import { routeProgress } from "./map.js";
-import { badge, button, childSelect, emptyState, iconTile, pageHeading, statusBadge } from "./ui.js";
-
-export function activeFleet(state) {
-  return buses.map((bus) => bus.id === "01" ? { ...bus, status: state.trip } : bus);
-}
+import { badge, button, childSelect, emptyState, escapeHtml as e, iconTile, pageHeading, statusBadge } from "./ui.js";
 
 export function nextStop(bus, progress) {
   const stops = routeProgress(bus);
@@ -39,7 +36,7 @@ function filterSelect(current) {
 function fleetRow(bus, selected) {
   return `<button type="button" class="fleet-row ${selected ? "is-selected" : ""}" data-action="bus" data-value="${bus.id}" data-focus="fleet-${bus.id}" aria-pressed="${selected}">
     <span class="fleet-bus-icon" style="--route-color:${bus.color}">${icon("bus", 20)}</span>
-    <span class="fleet-bus-label"><strong>BUS ${bus.id}</strong><small>${bus.name}</small></span>
+    <span class="fleet-bus-label"><strong>BUS ${bus.id}</strong><small>${e(bus.name)}</small></span>
     ${statusBadge(bus.status)}
   </button>`;
 }
@@ -49,10 +46,10 @@ function mapSummary(bus, progress) {
   const arrived = bus.status === "school";
   return `<div class="map-summary">
     <div class="map-summary-top">${iconTile("bus", statuses[bus.status].tone, "small-tile")}
-      <div><strong>BUS ${bus.id}</strong><span>${bus.name}</span></div>
+      <div><strong>BUS ${bus.id}</strong><span>${e(bus.name)}</span></div>
     </div>
     <div class="map-summary-detail">${icon(arrived ? "checkCircle" : "pin", 15)}
-      <span>${arrived ? "Arrived at" : "Next stop"} <strong ${arrived ? "" : "data-next-stop"}>${arrived ? "Greenfield Academy" : nextStop(bus, progress).label}</strong></span>
+      <span>${arrived ? "Arrived at" : "Next stop"} <strong ${arrived ? "" : "data-next-stop"}>${e(arrived ? bus.stops.at(-1) : nextStop(bus, progress).label)}</strong></span>
     </div>
   </div>`;
 }
@@ -76,13 +73,13 @@ function mapPanel(title, context, bus, paused) {
   </section>`;
 }
 
-function adminTransport({ fleet, filter, selected, paused }) {
+function adminTransport({ fleet, filter, selected, paused, context }) {
   const count = (status) => fleet.filter((bus) => bus.status === status).length;
   const visible = filter === "all" ? fleet : fleet.filter((bus) => bus.status === filter);
   const current = fleet.find((bus) => bus.id === selected);
   return `
     ${pageHeading("Bus tracking", "Monitor school buses and check the status of today’s routes.",
-      `<span class="run-label">${icon("calendar", 16)} Morning run</span>${button(paused ? "Resume simulation" : "Pause simulation", "pause", { variant: "secondary", iconName: paused ? "play" : "pause", focus: "pause" })}`)}
+      `<span class="run-label">${icon("calendar", 16)} Morning run</span>${current && can(context, "transport.manage") ? button("Manage bus", "edit-bus", { value: current.id, variant: "secondary", iconName: "edit" }) : ""}${button(paused ? "Resume simulation" : "Pause simulation", "pause", { variant: "secondary", iconName: paused ? "play" : "pause", focus: "pause" })}`)}
     <div class="stats-grid" aria-label="Fleet status">
       ${stat("Total buses", fleet.length, "bus", "neutral", "all", filter)}
       ${stat("On route", count("route"), "route", "green", "route", filter)}
@@ -108,13 +105,13 @@ function routeStops(bus, progress) {
   const arrived = bus.status === "school";
   const next = nextStop(bus, progress).index;
   return `<section class="surface route-stops">
-    <header class="panel-heading"><div><h2>Route stops</h2><p>${bus.name}</p></div>${iconTile("route", "green", "small-tile")}</header>
+    <header class="panel-heading"><div><h2>Route stops</h2><p>${e(bus.name)}</p></div>${iconTile("route", "green", "small-tile")}</header>
     <ol class="stops-list ${arrived ? "all-arrived" : ""}">
       ${bus.stops.map((name, index) => {
         const done = arrived || index < next;
         const upcoming = !arrived && index === next;
         return `<li class="${done ? "passed" : upcoming ? "next" : ""}" data-stop-index="${index}">
-          <span class="stop-marker">${done ? icon("check", 13) : ""}</span><strong>${name}</strong>
+          <span class="stop-marker">${done ? icon("check", 13) : ""}</span><strong>${e(name)}</strong>
           <span class="stop-description">${arrived ? "Reached" : upcoming ? "Next stop" : done ? "Passed" : ""}</span>
         </li>`;
       }).join("")}
@@ -122,22 +119,22 @@ function routeStops(bus, progress) {
   </section>`;
 }
 
-function parentTransport({ fleet, child, progress, paused }) {
+function parentTransport({ fleet, child, children, progress, paused }) {
   const bus = fleet.find((item) => item.id === child.bus);
   const arrived = bus.status === "school";
   return `
-    ${pageHeading("Track my bus", "Follow your child’s assigned bus during the school trip.", childSelect(child))}
+    ${pageHeading("Track my bus", "Follow your child’s assigned bus during the school trip.", childSelect(child, children))}
     <section class="surface trip-summary">
       ${iconTile("bus", "green", "trip-icon")}
       <div class="trip-heading">
         <div><h2>BUS ${bus.id}</h2>${statusBadge(bus.status)}</div>
-        <p>${bus.name} <span>·</span> Grade ${child.grade}</p>
+        <p>${e(bus.name)} <span>·</span> Grade ${child.grade}</p>
       </div>
-      <dl class="trip-detail"><dt>${icon(arrived ? "checkCircle" : "pin", 16)} ${arrived ? "Arrived at" : "Next stop"}</dt><dd ${arrived ? "" : "data-next-stop"}>${arrived ? "Greenfield Academy" : nextStop(bus, progress(bus)).label}</dd></dl>
+      <dl class="trip-detail"><dt>${icon(arrived ? "checkCircle" : "pin", 16)} ${arrived ? "Arrived at" : "Next stop"}</dt><dd ${arrived ? "" : "data-next-stop"}>${e(arrived ? bus.stops.at(-1) : nextStop(bus, progress(bus)).label)}</dd></dl>
       <dl class="trip-detail"><dt>${icon("clock", 16)} Last update</dt><dd data-last-update>${bus.status === "delayed" ? "6 min ago" : paused ? "Simulation paused" : "Just now"}</dd></dl>
     </section>
     <div class="tracking-grid individual-tracking">
-      ${mapPanel("Bus location", `BUS ${bus.id} · ${bus.name}`, bus, paused)}
+      ${mapPanel("Bus location", `BUS ${bus.id} · ${e(bus.name)}`, bus, paused)}
       ${routeStops(bus, progress(bus))}
     </div>`;
 }
@@ -151,7 +148,7 @@ function driverTransport({ fleet, progress, paused }) {
     <section class="driver-trip">
       <div class="driver-trip-text">
         <div class="driver-trip-icon">${icon("bus", 24)}</div>
-        <div><span class="driver-trip-subtitle">BUS ${bus.id} <span>·</span> ${bus.registration}</span><h2>${bus.name}</h2><p>${onRoute ? `Next stop <strong data-next-stop>${nextStop(bus, progress(bus)).label}</strong>` : "Arrived at Greenfield Academy"}</p></div>
+        <div><span class="driver-trip-subtitle">BUS ${bus.id} <span>·</span> ${bus.registration}</span><h2>${e(bus.name)}</h2><p>${onRoute ? `Next stop <strong data-next-stop>${e(nextStop(bus, progress(bus)).label)}</strong>` : `Arrived at ${e(bus.stops.at(-1))}`}</p></div>
       </div>
       <div class="driver-trip-action">
         ${badge(arrived ? "Trip complete" : statuses[bus.status].label, arrived ? "neutral" : "green", true)}
@@ -165,6 +162,7 @@ function driverTransport({ fleet, progress, paused }) {
 }
 
 export function transportPage(role, options) {
+  if (!options.fleet.length) return pageHeading(role === "parent" ? "Track my bus" : "Bus tracking", "School transport", role === "parent" && options.child ? childSelect(options.child, options.children) : "") + `<section class="surface">${emptyState("bus", "No bus assigned", role === "parent" ? "Your child’s bus assignment will appear here." : "No buses are available in your assigned scope.")}</section>`;
   if (role === "parent") return parentTransport(options);
   if (role === "driver") return driverTransport(options);
   return adminTransport(options);

@@ -14,11 +14,26 @@ Open [the local demo](http://127.0.0.1:4183/). No install or build is required.
 
 ## Walkthrough
 
-1. Start in **Admin view → Bus tracking**. Select a bus or map pin, filter the fleet by status, and pause or resume the simulation. Select BUS 06 to see a delayed signal.
-2. Switch to **Parent view** and choose a student to see their assigned bus and route stops. Switch to **Driver view**, end BUS 01's trip, and return to the parent view with Amaya selected to see the updated status. Start a new trip from the driver view.
-3. Open **Admin view → Course management** and assign a teacher and students. In **Teacher view**, open the assigned course and publish a handout. In **Parent view → Courses**, open the course for the enrolled child, download the handout, and mark it done.
-4. Open **Parent view → Library**, add a book to the bag, and place a demo order for school collection. Review the receipt in **My orders** or **Admin view → Library orders**.
-5. Select **Reset demo** in the role menu before a fresh walkthrough.
+1. Start in **Chairman → Bus tracking**. Switch between all branches, Colombo, and Lakeside. The fleet has eight simulated buses and two school destinations. Use the role menu and **Preview account** selector to compare a Principal's branch access with the Chairman's group access.
+2. Open **Roles & access** as Chairman or Principal. Appoint staff, assign sections, grades, classes or buses, and remove appointments. The Chairman appoints Principals. A Principal appoints lower roles inside their branch. Existing people can receive multiple scoped roles.
+3. Use **Section Head**, **Grade Coordinator**, **Class Teacher**, and **Subject Teacher** views to demonstrate the different academic scopes. Course assignments support teachers from the same branch and students from the matching class. Grade Coordinators can update enrollment.
+4. In an assigned Teacher view, publish or edit a handout. Open the enrolled child's course in **Parent → Courses**, download the handout, and mark it done. Teaching staff and leadership can review completion.
+5. In **School Administrator → Students & guardians**, create a student or update a record and link a guardian. Parent accounts are appointed through **Roles & access**.
+6. Open **Transport Coordinator → Bus tracking**, select a bus, and choose **Manage bus** to update its driver, stop names, and assigned students. In **Driver** view, start or end the assigned trip. The linked Parent view reflects the assignment and trip status.
+7. Open **Parent → Library**, place an order, then use **Librarian → Library** to edit price or availability and mark the order collected. Each branch manages its catalogue and orders, and each parent sees their own orders.
+8. Select **Reset demo** in the role menu before a fresh walkthrough.
+
+The prototype uses browser storage and a sample account switcher. Role and scope checks run in the browser for the demonstration. A production deployment needs authenticated accounts and server-side authorization. GPS and book orders are simulated.
+
+## Check access rules
+
+Run from this directory:
+
+```sh
+node --test tests/access.test.mjs
+```
+
+The checks cover branch and academic scope, teacher publishing, parent and driver assignments, role delegation, order visibility, and migration of existing demo data.
 
 ## Assets
 

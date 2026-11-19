@@ -1,9 +1,33 @@
 export const roles = {
-  admin: { name: "Admin", person: "Anjali Fernando", initials: "AF", icon: "badge", start: "transport", pages: ["transport", "courses", "library"] },
-  teacher: { name: "Teacher", person: "Dilini Silva", initials: "DS", icon: "book", start: "courses", pages: ["courses"] },
-  parent: { name: "Parent", person: "Nadeesha Perera", initials: "NP", icon: "users", start: "transport", pages: ["transport", "courses", "library"] },
-  driver: { name: "Driver", person: "Kasun Dias", initials: "KD", icon: "bus", start: "transport", pages: ["transport"] },
+  chairman: { name: "Chairman", icon: "school", start: "transport", pages: ["overview", "transport", "courses", "people", "library", "access"] },
+  principal: { name: "Principal", icon: "badge", start: "transport", pages: ["overview", "transport", "courses", "people", "library", "access"] },
+  vice_principal: { name: "Vice Principal", icon: "badge", start: "overview", pages: ["overview", "transport", "courses", "people", "library"] },
+  section_head: { name: "Section Head", icon: "users", start: "courses", pages: ["courses", "people"] },
+  coordinator: { name: "Grade Coordinator", icon: "users", start: "courses", pages: ["courses", "people"] },
+  class_teacher: { name: "Class Teacher", icon: "book", start: "courses", pages: ["courses", "people"] },
+  teacher: { name: "Subject Teacher", icon: "book", start: "courses", pages: ["courses"] },
+  admin: { name: "School Administrator", icon: "settings", start: "people", pages: ["people", "courses"] },
+  transport: { name: "Transport Coordinator", icon: "route", start: "transport", pages: ["transport"] },
+  driver: { name: "Driver", icon: "bus", start: "transport", pages: ["transport"] },
+  librarian: { name: "Librarian", icon: "library", start: "library", pages: ["library"] },
+  parent: { name: "Parent", icon: "user", start: "transport", pages: ["transport", "courses", "library"] },
 };
+
+export const sections = [
+  { id: "preschool", name: "Preschool", grades: [0] },
+  { id: "primary", name: "Primary", grades: [1, 2, 3, 4, 5] },
+  { id: "middle", name: "Middle School", grades: [6, 7, 8, 9] },
+  { id: "senior", name: "Senior School", grades: [10, 11, 12, 13] },
+];
+
+export function sectionFor(grade) {
+  return sections.find((section) => section.grades.includes(Number(grade)))?.id;
+}
+
+export const branches = [
+  { id: "colombo", name: "Colombo", location: "Rajagiriya", school: "Greenfield Colombo" },
+  { id: "lakeside", name: "Lakeside", location: "Battaramulla", school: "Greenfield Lakeside" },
+];
 
 export const students = [
   { id: "amaya", name: "Amaya Perera", grade: 8, initials: "AP", tone: "violet", bus: "01" },
@@ -67,25 +91,96 @@ export const statuses = {
 
 const storageKey = "campusway-demo-v1";
 
+function seedAccounts() {
+  const account = (id, name, grants) => ({ id, name, initials: name.split(" ").map((word) => word[0]).slice(0, 2).join(""), tone: "green", grants });
+  const grant = (role, branch = "colombo", extra = {}) => ({ role, branch, ...extra });
+  return [
+    account("chairman", "Duminda Wijesinghe", [grant("chairman", "all")]),
+    account("principal_c", "Malini Senanayake", [grant("principal")]),
+    account("principal_l", "Suresh Jayawardena", [grant("principal", "lakeside")]),
+    account("vice_c", "Roshani Fernando", [grant("vice_principal")]),
+    account("vice_l", "Dilan Mendis", [grant("vice_principal", "lakeside")]),
+    account("dilini", "Dilini Silva", [grant("section_head", "colombo", { section: "middle" }), grant("teacher"), grant("class_teacher", "colombo", { grade: 8, className: "8A" })]),
+    account("nuwan", "Nuwan Gamage", [grant("coordinator", "colombo", { grade: 8 }), grant("teacher")]),
+    account("rihana", "Rihana Farook", [grant("teacher")]),
+    account("asha", "Asha Wickramasinghe", [grant("section_head", "colombo", { section: "primary" }), grant("teacher")]),
+    account("lakshmi", "Lakshmi Fernando", [grant("section_head", "lakeside", { section: "middle" }), grant("teacher", "lakeside")]),
+    account("admin_c", "Anjali Fernando", [grant("admin")]),
+    account("admin_l", "Shanika Dias", [grant("admin", "lakeside")]),
+    account("transport_c", "Nimal Rathnayake", [grant("transport")]),
+    account("transport_l", "Chamara Silva", [grant("transport", "lakeside")]),
+    ...buses.map((bus) => account("driver_" + bus.id, bus.driver, [grant("driver", "colombo", { bus: bus.id })])),
+    account("driver_07", "Nalin De Silva", [grant("driver", "lakeside", { bus: "07" })]),
+    account("driver_08", "Ashan Mendis", [grant("driver", "lakeside", { bus: "08" })]),
+    account("librarian_c", "Hasini Perera", [grant("librarian")]),
+    account("librarian_l", "Kumari Rodrigo", [grant("librarian", "lakeside")]),
+    account("parent", "Nadeesha Perera", [grant("parent")]),
+    account("parent_l", "Tharushi Fernando", [grant("parent", "lakeside")]),
+  ];
+}
+
 export function freshState() {
+  const scopedStudents = students.map((student) => ({
+    ...student, branch: "colombo", className: student.grade + "A",
+    guardians: ["amaya", "kavin"].includes(student.id) ? ["parent"] : [],
+  }));
+  scopedStudents.push(
+    { id: "anuki", name: "Anuki Ramanayake", initials: "AR", grade: 4, className: "4A", branch: "colombo", tone: "rose", guardians: [] },
+    { id: "meera", name: "Meera Fernando", initials: "MF", grade: 8, className: "8A", branch: "lakeside", tone: "amber", guardians: ["parent_l"], bus: "07" },
+    { id: "thevin", name: "Thevin Fernando", initials: "TF", grade: 6, className: "6A", branch: "lakeside", tone: "blue", guardians: ["parent_l"], bus: "08" },
+  );
+  const scopedCourses = courses.map((course) => ({ ...course, branch: "colombo", className: course.grade + "A" }));
+  scopedCourses.push(
+    { id: "math4", code: "MAT 04", title: "Mathematics", grade: 4, className: "4A", branch: "colombo", tone: "blue", icon: "math", summary: "Number patterns, fractions, and shapes." },
+    ...courses.map((course) => ({ ...course, id: "lake-" + course.id, branch: "lakeside", className: course.grade + "A" })),
+  );
+  const scopedAssignments = { ...structuredClone(assignments), math4: { teacher: "asha", students: ["anuki"] } };
+  for (const course of courses) scopedAssignments["lake-" + course.id] = { teacher: "lakshmi", students: [course.grade === 8 ? "meera" : "thevin"] };
   return {
-    assignments: structuredClone(assignments),
-    materials: structuredClone(materials),
-    completed: { amaya: ["m1"], kavin: [] },
+    version: 2,
+    branches: structuredClone(branches),
+    accounts: seedAccounts(),
+    students: scopedStudents,
+    courses: scopedCourses,
+    assignments: scopedAssignments,
+    materials: [
+      ...structuredClone(materials),
+      { id: "p1", course: "math4", title: "Fractions in everyday life", type: "Lecture notes", date: "18 Nov", description: "Understand halves, quarters, and equal parts.", content: "Draw a circle and divide it into four equal parts. Shade one quarter, then one half." },
+      ...materials.map((material) => ({ ...material, id: "lake-" + material.id, course: "lake-" + material.course })),
+    ],
+    completed: { amaya: ["m1"], kavin: [], meera: ["lake-m1"] },
     child: "amaya",
     teacher: "dilini",
     cart: {},
+    carts: {},
     orders: [],
-    trip: "route",
+    buses: [
+      ...buses.map((bus) => ({ ...bus, stops: [...bus.stops.slice(0, -1), "Greenfield Colombo"], branch: "colombo", driverId: "driver_" + bus.id })),
+      { id: "07", name: "Rajagiriya Link", driver: "Nalin De Silva", driverId: "driver_07", branch: "lakeside", registration: "WP NE-4528", status: "route", color: "#cb6655", start: 0.15, stops: ["Rajagiriya", "Diyatha Uyana", "Greenfield Lakeside"] },
+      { id: "08", name: "Nugegoda Link", driver: "Ashan Mendis", driverId: "driver_08", branch: "lakeside", registration: "WP NF-3172", status: "route", color: "#277c96", start: 0.42, stops: ["Nugegoda Junction", "Nawala Junction", "Rajagiriya", "Diyatha Uyana", "Greenfield Lakeside"] },
+    ],
+    books: branches.flatMap((branch) => books.map((book) => ({ ...book, id: branch.id === "colombo" ? book.id : "lake-" + book.id, branch: branch.id, available: true }))),
   };
 }
 
 export function loadState() {
+  const defaults = freshState();
   try {
-    const saved = localStorage.getItem(storageKey);
-    return saved ? { ...freshState(), ...JSON.parse(saved) } : freshState();
+    const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
+    if (!saved) return defaults;
+    if (saved.version === 2) return { ...defaults, ...saved };
+    return {
+      ...defaults,
+      assignments: { ...defaults.assignments, ...saved.assignments },
+      materials: [...defaults.materials.filter((item) => item.course === "math4" || item.course.startsWith("lake-")), ...(saved.materials || materials)],
+      completed: { ...defaults.completed, ...saved.completed },
+      child: saved.child || defaults.child,
+      carts: { parent: { colombo: saved.cart || {} } },
+      orders: (saved.orders || []).map((order) => ({ ...order, branch: "colombo", parent: "parent", status: "pending" })),
+      buses: defaults.buses.map((bus) => bus.id === "01" ? { ...bus, status: saved.trip || bus.status } : bus),
+    };
   } catch {
-    return freshState();
+    return defaults;
   }
 }
 
@@ -97,4 +192,3 @@ export function saveState(state) {
     return false;
   }
 }
-

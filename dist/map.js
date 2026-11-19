@@ -3,6 +3,43 @@ import { geometry } from "./routes.js";
 
 const { width: mapWidth, height: mapHeight, school, routes } = geometry;
 
+function demoRoute(coordinates, stopCoordinates) {
+  let distance = 0;
+  const points = coordinates.map((point, index) => {
+    if (index) distance += Math.hypot(point[0] - coordinates[index - 1][0], point[1] - coordinates[index - 1][1]);
+    return [point[0], point[1], distance];
+  });
+  return {
+    points, length: distance,
+    stops: stopCoordinates.map((stop) => {
+      let nearest = points[0];
+      let nearestDistance = Infinity;
+      for (const point of points) {
+        const difference = Math.hypot(point[0] - stop[0], point[1] - stop[1]);
+        if (difference < nearestDistance) {
+          nearest = point;
+          nearestDistance = difference;
+        }
+      }
+      return nearest[2] / distance;
+    }),
+    focus: [
+      (Math.min(...points.map((point) => point[0])) + Math.max(...points.map((point) => point[0]))) / 2,
+      (Math.min(...points.map((point) => point[1])) + Math.max(...points.map((point) => point[1]))) / 2,
+    ],
+  };
+}
+
+const reverseLake = [...routes["02"].points].reverse();
+const rajagiriyaIndex = routes["02"].points.findIndex((point) => point[2] / routes["02"].length >= routes["02"].stops[2]);
+const toLakeside = routes["02"].points.slice(0, rajagiriyaIndex + 1).reverse();
+const diyatha = routes["02"].points.find((point) => point[2] / routes["02"].length >= routes["02"].stops[1]);
+const nawala = routes["01"].points.find((point) => point[2] / routes["01"].length >= routes["01"].stops[1]);
+routes["07"] = demoRoute(toLakeside, [toLakeside[0], diyatha, toLakeside.at(-1)]);
+routes["08"] = demoRoute([...routes["01"].points, ...reverseLake.slice(1)], [routes["01"].points[0], nawala, toLakeside[0], diyatha, toLakeside.at(-1)]);
+
+export const campusPoints = { colombo: school, lakeside: routes["02"].points[0] };
+
 export function routeProgress(bus) {
   return routes[bus.id]?.stops ?? bus.stopProgress ?? bus.stops.map((_, index) => index / (bus.stops.length - 1));
 }
@@ -44,10 +81,20 @@ export class FleetMap {
     this.image = stage.querySelector(".basemap");
     this.canvas = stage.querySelector("canvas");
     const pins = stage.querySelector(".map-pins");
-    this.schoolPin = document.createElement("div");
-    this.schoolPin.className = "school-map-pin";
-    this.schoolPin.innerHTML = `<span>${icon("school", 17)}</span><strong>Greenfield Academy</strong>`;
-    pins.append(this.schoolPin);
+    this.schoolPins = (options.schools || []).map((branch) => {
+      const pin = document.createElement("div");
+      pin.className = "school-map-pin";
+      pin.innerHTML = `<span>${icon("school", 17)}</span><strong></strong>`;
+      pin.querySelector("strong").textContent = branch.school;
+      const parked = options.buses.filter((bus) => bus.branch === branch.id && bus.status === "school").length;
+      if (parked) {
+        const badge = document.createElement("small");
+        badge.textContent = parked;
+        pin.append(badge);
+      }
+      pins.append(pin);
+      return { pin, point: campusPoints[branch.id] };
+    });
 
     this.markers = new Map();
     const busMarkers = options.buses.filter((bus) => routes[bus.id] && bus.status !== "school");
@@ -66,14 +113,6 @@ export class FleetMap {
       }
       this.markers.set(bus, marker);
       pins.append(marker);
-    }
-
-    const parked = options.buses.filter((bus) => bus.status === "school").length;
-    if (parked > 1) {
-      const badge = document.createElement("small");
-      badge.textContent = parked;
-      badge.title = `${parked} buses at school`;
-      this.schoolPin.append(badge);
     }
 
     this.bindControls();
@@ -189,7 +228,7 @@ export class FleetMap {
       if (current) this.drawRoute(ctx, current);
     }
 
-    this.place(this.schoolPin, school);
+    for (const { pin, point } of this.schoolPins) this.place(pin, point);
     this.stage.classList.add("is-positioning");
     this.updateMarkers();
     this.stage.getBoundingClientRect();
