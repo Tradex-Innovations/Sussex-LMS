@@ -27,11 +27,12 @@ let state = loadState();
 let parentSession = readParentSession();
 let map;
 let schoolMap;
+let schoolMapKey;
 let mapViewKey;
 let dialogMode;
 let view = getView();
 const ui = { accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", grade: "all", query: "", paused: false, runningSince: performance.now(), elapsed: 0, starts: {},
-  network: { subject: "mathematics", grade: 8, term: 3, selected: "", compare: null, category: "all" } };
+  network: { subject: "mathematics", grade: 8, term: 3, selected: "", mode: "", compare: null, category: "all" } };
 
 function getView() {
   const [requestedRole, requestedPage] = location.hash.slice(1).split("/");
@@ -118,6 +119,7 @@ function scopeBar(ctx) {
 function render(focus, { scrollTop = false } = {}) {
   const pickerOpen = app.querySelector(".network-branch-picker")?.open;
   const previousViewport = map?.viewport;
+  const previousSchoolViewport = schoolMap?.viewport;
   map?.destroy();
   schoolMap?.destroy();
   schoolMap = null;
@@ -134,6 +136,11 @@ function render(focus, { scrollTop = false } = {}) {
   let options;
   if (ctx) {
     options = optionsFor(ctx);
+    options.scopeControls = scopeBar(ctx);
+    if (ui.network.selected && !networkBranches(state, ctx, ui.network).some((branch) => branch.id === ui.network.selected)) {
+      ui.network.selected = "";
+      if (ui.network.mode === "branch") ui.network.mode = "";
+    }
     if (!options.fleet.some((bus) => bus.id === ui.bus)) ui.bus = options.fleet[0]?.id;
     options.selected = ui.bus;
     const pages = { overview: networkOverviewPage, courses: coursesPage, people: peoplePage, library: libraryPage, access: accessPage };
@@ -142,15 +149,16 @@ function render(focus, { scrollTop = false } = {}) {
   document.title = `${navigation[view.page].label} · ${roles[view.role].name} · Sussex College Network`;
   const mobileNavigation = roles[view.role].pages.length > 1;
   app.innerHTML = `<div class="app-shell role-${view.role} ${mobileNavigation ? "has-mobile-nav" : ""}">
-    ${sidebar(ctx)}<div class="desktop-content">${topbar(ctx)}<main id="main" class="page page-${view.page}">${scopeBar(ctx)}${body}</main></div>
+    ${sidebar(ctx)}<div class="desktop-content">${topbar(ctx)}<main id="main" class="page page-${view.page}">${view.page === "overview" ? "" : scopeBar(ctx)}${body}</main></div>
     ${mobileNavigation ? `<nav class="mobile-nav" aria-label="Workspace">${navigationLinks(true)}</nav>` : ""}
   </div>`;
   const networkStage = app.querySelector("#school-network-map");
   if (networkStage) {
     const branches = networkBranches(state, ctx, ui.network);
     const results = rankedResults(branches, ui.network);
-    if (!results.some((result) => result.branch.id === ui.network.selected)) ui.network.selected = results[0]?.branch.id || "";
-    schoolMap = new SchoolNetworkMap(networkStage, results, ui.network.selected, selectNetworkBranch);
+    const key = `${ctx.account.id}-${ctx.branch}-${branches.map((branch) => branch.id).join(",")}`;
+    schoolMap = new SchoolNetworkMap(networkStage, results, ui.network.selected, selectNetworkBranch, schoolMapKey === key ? previousSchoolViewport : null);
+    schoolMapKey = key;
     const rows = app.querySelector(".ranking-rows");
     const activeRow = rows?.querySelector('[aria-pressed="true"]');
     if (activeRow) rows.scrollTop = Math.max(0, activeRow.offsetTop - rows.offsetTop - rows.clientHeight / 2 + activeRow.clientHeight / 2);
@@ -222,7 +230,9 @@ function selectNetworkBranch(id, focus) {
   if (!["chairman", "principal", "vice_principal"].includes(ctx?.role)) return;
   if (!networkBranches(state, ctx, ui.network).some((branch) => branch.id === id)) return;
   ui.network.selected = id;
-  render(focus);
+  ui.network.mode = "branch";
+  render();
+  app.querySelector("#network-inspector-title")?.focus({ preventScroll: true });
 }
 
 function filterBuses(status, focus) {
@@ -298,6 +308,8 @@ function authorizedAction(name, value, ctx) {
     "network-all": ctx.role === "chairman" && ctx.branch === "all",
     "network-none": ctx.role === "chairman" && ctx.branch === "all",
     "network-activity": ["chairman", "principal", "vice_principal"].includes(ctx.role) && ["all", "academic", "transport", "library", "people"].includes(value),
+    "network-performance": ["chairman", "principal", "vice_principal"].includes(ctx.role),
+    "network-close": ["chairman", "principal", "vice_principal"].includes(ctx.role),
     "pause": roles[ctx.role].pages.includes("transport"), "bus": options.fleet.some((bus) => bus.id === value),
     "filter": roles[ctx.role].pages.includes("transport"),
     "assign": can(ctx, "courses.assign") && (!value || Boolean(course)),
@@ -354,6 +366,14 @@ function action(event) {
   if (!authorizedAction(name, value, ctx)) return toast("This action is outside the current role’s assigned access.");
   switch (name) {
     case "network-select": selectNetworkBranch(value, focus); break;
+    case "network-performance":
+      ui.network.mode = "comparison"; render();
+      app.querySelector("#network-inspector-title")?.focus({ preventScroll: true });
+      break;
+    case "network-close": {
+      const branch = ui.network.selected;
+      ui.network.mode = ""; ui.network.selected = ""; ui.network.compare = null; render("network-pin-" + branch); break;
+    }
     case "network-all": ui.network.compare = null; render(); break;
     case "network-none": ui.network.compare = []; render(); break;
     case "network-activity": ui.network.category = value; render(); break;
@@ -426,7 +446,7 @@ function action(event) {
     case "confirm-reset":
       if (saveState(freshState())) {
         state = freshState(); Object.assign(ui, { accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", starts: {}, paused: false, runningSince: performance.now(), elapsed: 0 });
-        ui.network = { subject: "mathematics", grade: 8, term: 3, selected: "", compare: null, category: "all" };
+        ui.network = { subject: "mathematics", grade: 8, term: 3, selected: "", mode: "", compare: null, category: "all" };
         parentSession = null;
         saveParentSession(null);
         closeDialog(); location.hash = "chairman/transport"; render(); toast("Demo reset.");
@@ -695,6 +715,10 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !dialog.open) {
     const menu = app.querySelector(".role-picker[open]");
     if (menu) { menu.open = false; menu.querySelector("summary").focus(); }
+    else if (view.page === "overview" && ui.network.mode) {
+      const branch = ui.network.selected;
+      ui.network.mode = ""; ui.network.selected = ""; ui.network.compare = null; render("network-pin-" + branch);
+    }
   }
 });
 dialog.addEventListener("click", (event) => { if (event.target === dialog) closeDialog(); });
@@ -702,6 +726,9 @@ window.addEventListener("hashchange", () => {
   const previous = view;
   view = getView();
   if (previous.role !== view.role || previous.page !== view.page) { ui.courseId = ""; ui.filter = "all"; }
+  if (view.page === "overview" && (previous.role !== view.role || previous.page !== view.page)) {
+    ui.network.selected = ""; ui.network.mode = ""; ui.network.compare = null; schoolMapKey = null;
+  }
   closeDialog();
   render(undefined, { scrollTop: true });
 });

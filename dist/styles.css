@@ -1174,3 +1174,74 @@ dialog::backdrop { background: #142b235e; backdrop-filter: blur(2px); }
   .selected-school-heading h2 { font-size: 25px; }
   .network-directory-source { font-size: 12px; }
 }
+
+/* The school overview opens as a map; performance appears after a branch selection. */
+.page.page-overview { max-width: none; padding: 0 !important; margin: 0; }
+.network-experience { display: flex; position: relative; height: calc(100dvh - var(--topbar-height) - var(--map-nav-height, 0px)); overflow: hidden; }
+.network-map-viewport { flex: 1; min-width: 0; height: 100%; position: relative; }
+.network-experience .school-network-map { width: 100%; height: 100%; border: 0; touch-action: none; cursor: grab; }
+.network-experience .school-network-map.is-dragging { cursor: grabbing; }
+.school-branch-bubble { position: absolute; left: 0; top: 0; z-index: 1; min-height: 34px; border: 1px solid #cad9ce; border-radius: 999px; padding: 7px 14px; background: #fffffff5; color: #254d3c; font-size: 14px; font-weight: 720; line-height: 1.2; white-space: nowrap; box-shadow: 0 3px 10px #3154431a; }
+.school-branch-bubble:hover { background: #f6fff1; border-color: #6e967d; z-index: 3; }
+.school-branch-bubble:focus-visible { z-index: 4; }
+.school-branch-bubble.is-selected { background: var(--forest); color: #fff; border-color: var(--forest); box-shadow: 0 0 0 3px #e6d291, 0 4px 12px #143c3333; z-index: 3; }
+.school-map-controls { position: absolute; right: 16px; bottom: 58px; z-index: 4; display: grid; border: 1px solid #c9d9d5; border-radius: 12px; background: #fff; box-shadow: 0 3px 12px #365b4d17; overflow: hidden; }
+.school-map-controls button { display: grid; place-items: center; width: 42px; height: 42px; border: 0; background: #fff; color: #315c4a; }
+.school-map-controls button + button { border-top: 1px solid #e6ece8; }
+.school-map-controls button:hover:not(:disabled) { background: #edf5ea; }
+.map-explorer-attribution { position: absolute; z-index: 4; bottom: 0; left: 0; right: 0; padding: 9px 15px; background: #eaf2f1dc; color: #4d6870; font-size: 11px; line-height: 1.5; }
+.map-explorer-attribution a { text-decoration: underline; text-underline-offset: 2px; }
+.network-inspector { flex: 0 0 min(470px, 43%); min-width: 350px; height: 100%; background: #fff; border-left: 1px solid #d5e2d9; z-index: 6; display: flex; flex-direction: column; box-shadow: -6px 0 24px #254d3610; }
+.network-inspector-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex: none; padding: 19px 20px 17px; border-bottom: 1px solid var(--line); }
+.network-inspector-header > div > span { font-size: 12px; font-weight: 650; color: var(--muted); }
+.network-inspector-header h2 { font-size: 23px; margin-top: 4px; letter-spacing: -.04em; }
+.network-inspector-header h2:focus { outline: none; }
+.network-inspector-content { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 20px; overscroll-behavior: contain; scrollbar-gutter: stable; }
+.network-inspector .selected-school-heading { display: block; margin: 12px 0 18px; }
+.network-inspector .selected-school-heading .badge { display: none; }
+.network-inspector .selected-school-heading h2 { font-size: 27px; margin-top: 0; }
+.network-inspector .selected-school-heading .button { margin-top: 12px; min-height: 36px; font-size: 12px; }
+.branch-report-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.network-inspector .network-toolbar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.network-inspector .network-filter { min-width: 0; }
+.network-inspector .network-filter:has([data-change="network-subject"]) { grid-column: 1 / -1; }
+.network-inspector .selected-school-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+.network-inspector .panel-heading { padding: 16px; flex-wrap: wrap; gap: 12px; }
+.network-inspector .panel-heading h2 { font-size: 17px; }
+.network-inspector .panel-heading p { font-size: 12px; line-height: 1.5; }
+.network-inspector .workspace-counts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 17px 10px; padding: 0 16px 18px; }
+.network-inspector .workspace-counts > div:nth-child(3) { border: 0; }
+.network-inspector .branch-workspace { margin-bottom: 18px; }
+.network-inspector .network-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.network-inspector .network-metric { padding: 12px; min-height: 120px; }
+.network-inspector .network-metric .icon-tile { display: none; }
+.network-inspector .network-metric strong { font-size: 28px; }
+.network-inspector .network-metric:last-child strong { font-size: 23px; }
+.network-inspector .network-branch-picker { margin: 0 0 13px; }
+.network-inspector .network-branch-picker > summary { width: 100%; }
+.network-inspector .network-picker-panel { width: 100%; }
+.network-inspector .scope-bar { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.network-inspector .scope-account, .network-inspector .scope-branch { width: 100%; max-width: none; }
+.network-inspector .scope-note { display: none; }
+.network-inspector .ranking-head { grid-template-columns: minmax(0, 1fr) 65px 51px; gap: 7px; padding-left: 38px; padding-right: 11px; }
+.network-inspector .ranking-row { grid-template-columns: 19px minmax(0, 1fr) 65px 51px; gap: 7px; padding-inline: 11px; }
+.network-inspector .ranking-value { font-size: 16px; }
+.network-inspector .ranking-rows { max-height: none; overflow-y: visible; }
+@media (max-width: 999px) {
+  .has-mobile-nav { --map-nav-height: calc(62px + env(safe-area-inset-bottom)); }
+  .has-mobile-nav:has(.mobile-nav > :nth-child(4)) { --map-nav-height: calc(103px + env(safe-area-inset-bottom)); }
+  .has-mobile-nav .page.page-overview { padding-bottom: 0; }
+}
+@media (max-width: 750px) {
+  .network-inspector { position: absolute; bottom: 0; left: 0; right: 0; width: 100%; min-width: 0; height: 78%; border: 1px solid #cbdccf; border-bottom: 0; border-radius: 20px 20px 0 0; box-shadow: 0 -8px 32px #254d3624; }
+  .network-inspector-header { padding: 14px 17px; }
+  .network-inspector-header h2 { font-size: 21px; }
+  .network-inspector-content { padding: 17px; }
+  .network-inspector .selected-school-heading h2 { font-size: 25px; }
+}
+@media (max-width: 540px) {
+  .school-branch-bubble { min-height: 31px; font-size: 12px; padding: 6px 10px; }
+  .school-map-controls { right: 11px; bottom: 65px; }
+  .school-map-controls button { width: 40px; height: 40px; }
+  .map-explorer-attribution { padding: 7px 11px; font-size: 10px; }
+}

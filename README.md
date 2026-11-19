@@ -27,8 +27,8 @@ The account cards fill in demo credentials. Sign in to open that student's bus, 
 
 ## Walkthrough
 
-1. Start in **Chairman → Overview**. Explore the Sri Lanka map of all 20 official Sussex schools. Select a map label or ranking row to open a school's performance and activity. Use **Compare schools** and filter the sample assessment by subject, grade, and term. The network average is weighted by the assessed students.
-2. Use the **School branch** selector to open a single school's scope. A Principal's overview stays within their assigned school. The existing functional student, course, transport, and parent demo records use the Nugegoda and Malabe schools. The fleet contains eight simulated buses.
+1. Start in **Chairman → Overview**. The Sri Lanka map fills the workspace with 20 branch-name bubbles. Click a bubble to open that school's performance and activity in a side panel (a bottom sheet on mobile). Close the panel or press Escape to return to the full map. Drag to pan, use the zoom controls, or choose **View whole island** to reset.
+2. Inside a school's panel, use **Compare schools** to compare sample results by subject, grade, and term. Choose schools to filter the comparison and map; closing the panel restores all branches in your scope. The network average is weighted by assessed students. The **School branch** selector is available in the comparison panel and other workspaces. A Principal's overview stays within their assigned school. Functional student, course, transport, and parent demo records use Nugegoda and Malabe. The fleet contains eight simulated buses.
 3. Open **Roles & access** as Chairman or Principal. Appoint staff, assign sections, grades, classes or buses, and remove appointments. The Chairman appoints Principals. A Principal appoints lower roles inside their branch. Existing people can receive multiple scoped roles.
 4. Use **Section Head**, **Grade Coordinator**, **Class Teacher**, and **Subject Teacher** views to demonstrate the different academic scopes. Course assignments support teachers from the same branch and students from the matching class. Grade Coordinators can update enrollment.
 5. In an assigned Teacher view, publish or edit a handout. Open the enrolled child's course in **Parent → Courses**, download the handout, and mark it done. Teaching staff and leadership can review completion.
@@ -59,7 +59,7 @@ Earlier sample branch IDs are retained internally so existing admission logins, 
 
 ## Assets
 
-- The national map uses the [Natural Earth public-domain coastline](https://www.naturalearthdata.com/about/terms-of-use/).
+- The national map uses the [Natural Earth public-domain coastline](https://www.naturalearthdata.com/about/terms-of-use/) and main roads from OpenStreetMap.
 
 - The local map image and sample route paths use [© OpenStreetMap contributors](https://www.openstreetmap.org/copyright) data under the Open Database License, via [Geofabrik's Sri Lanka extract](https://download.geofabrik.de/asia/sri-lanka.html).
 - DM Sans is bundled with its [Open Font License](dist/assets/DM-Sans-OFL.txt).
