@@ -53,7 +53,7 @@ function branchDetail(state, context, result, network) {
   ];
   return `<section class="selected-school-heading">
     <div><h2>${e(branch.school)}</h2><p>${e(branch.address)}</p></div>
-    <div class="branch-report-actions"><a class="button secondary" href="${e(branch.source)}" target="_blank" rel="noopener noreferrer">Official school page</a>${button("Compare schools", "network-performance", { variant: "secondary", iconName: "school" })}</div>
+    <div class="branch-report-actions"><a class="button secondary" href="${e(branch.source)}" target="_blank" rel="noopener noreferrer">Official school page</a>${button(context.role === "principal" ? "Open academics" : "Compare schools", "network-performance", { variant: "secondary", iconName: "school" })}</div>
   </section>
   ${assessmentFilters(network)}
   <div class="selected-school-grid">
@@ -119,7 +119,7 @@ export function networkOverviewPage(options) {
     <div class="network-map-viewport">
       <h1 class="sr-only">Sri Lanka school transport map</h1>
       <div id="school-network-map" class="school-network-map" tabindex="0" role="region" aria-label="Sri Lanka school branch map"></div>
-      ${networkFleetOverlay(networkBuses, network, options.paused)}
+      ${networkFleetOverlay(networkBuses, network, options.paused, context)}
     </div>
     ${mode ? `<aside class="network-inspector" aria-labelledby="network-inspector-title">
       <header class="network-inspector-header"><div><span>Sussex College Network</span><h2 id="network-inspector-title" tabindex="-1">${titles[mode]}</h2></div>

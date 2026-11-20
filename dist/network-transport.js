@@ -4,14 +4,14 @@ import { icon } from "./icons.js";
 
 const labels = { all: "All buses", route: "On route", school: "At school", delayed: "Signal delayed" };
 
-export function networkFleetOverlay(fleet, network, paused) {
+export function networkFleetOverlay(fleet, network, paused, context) {
   const summary = fleetSummary(fleet);
   const schools = [...new Map(fleet.map((bus) => [bus.branch, bus.branchName]))];
-  return '<div class="network-map-hud"><div class="network-hud-title"><div><strong>School transport across Sri Lanka</strong><span>' + summary.branches + ' branches · ' + summary.total + ' buses · Simulated GPS</span></div>' +
+  return '<div class="network-map-hud"><div class="network-hud-title"><div><strong>' + (context?.role === "principal" ? 'School transport · ' + e(fleet[0]?.branchName || "Assigned school") : 'School transport across Sri Lanka') + '</strong><span>' + (context?.role === "principal" ? 'Assigned school' : summary.branches + ' branches') + ' · ' + summary.total + ' buses · Simulated GPS</span></div>' +
     button(paused ? "Resume" : "Pause", "pause", { variant: "secondary compact", iconName: paused ? "play" : "pause" }) + '</div>' +
     '<div class="network-fleet-status" role="group" aria-label="Filter network buses">' +
     ["all", "route", "school", "delayed"].map((status) => '<button type="button" class="' + status + (network.status === status ? ' is-active' : '') + '" data-action="network-fleet-status" data-value="' + status + '" aria-pressed="' + (network.status === status) + '">' + labels[status] + '<strong>' + (status === "all" ? summary.total : summary[status]) + '</strong></button>').join("") + '</div>' +
-    '<div class="network-hud-footer"><label class="network-school-jump"><span class="select-wrap"><select data-change="network-map-branch" aria-label="Find a school on the map"><option value="">Find a school</option>' + schools.map(([id, name]) => '<option value="' + e(id) + '">' + e(name) + '</option>').join("") + '</select>' + icon("chevronDown", 13) + '</span></label>' + button("View all buses", "network-fleet", { variant: "secondary compact", iconName: "bus" }) + '</div></div>';
+    '<div class="network-hud-footer">' + (context?.role === "principal" ? button("School details", "network-select", { value: context.branch, variant: "secondary compact", iconName: "school" }) : '<label class="network-school-jump"><span class="select-wrap"><select data-change="network-map-branch" aria-label="Find a school on the map"><option value="">Find a school</option>' + schools.map(([id, name]) => '<option value="' + e(id) + '">' + e(name) + '</option>').join("") + '</select>' + icon("chevronDown", 13) + '</span></label>') + button("View all buses", "network-fleet", { variant: "secondary compact", iconName: "bus" }) + '</div></div>';
 }
 
 function fleetRows(fleet, options) {
@@ -26,8 +26,8 @@ export function networkFleetPage(options) {
   const allowedBranches = state.branches.filter((branch) => context.branch === "all" || branch.id === context.branch);
   const filtered = networkBuses.filter((bus) => (network.status === "all" || bus.status === network.status) && (network.busBranch === "all" || bus.branch === network.busBranch));
   return '<p class="network-data-note">Demonstration fleet. Vehicle locations, routes and occupancy are simulated.</p>' +
-    '<label class="network-filter"><span>School branch</span><span class="select-wrap"><select data-change="network-fleet-branch" aria-label="Filter buses by school"><option value="all">All schools in view</option>' +
-    allowedBranches.map((branch) => '<option value="' + branch.id + '" ' + (network.busBranch === branch.id ? "selected" : "") + '>' + e(branch.name) + '</option>').join("") + '</select>' + icon("chevronDown", 15) + '</span></label>' +
+    (context.role === "principal" ? '<p class="principal-fleet-scope">' + e(allowedBranches[0].school) + '</p>' : '<label class="network-filter"><span>School branch</span><span class="select-wrap"><select data-change="network-fleet-branch" aria-label="Filter buses by school"><option value="all">All schools in view</option>' +
+    allowedBranches.map((branch) => '<option value="' + branch.id + '" ' + (network.busBranch === branch.id ? "selected" : "") + '>' + e(branch.name) + '</option>').join("") + '</select>' + icon("chevronDown", 15) + '</span></label>') +
     '<div class="network-list-heading"><h3>' + labels[network.status] + '</h3>' + badge(filtered.length + " buses", "neutral") + '</div>' + fleetRows(filtered, options);
 }
 
@@ -48,6 +48,7 @@ export function networkBusPage(options, bus) {
     button("Back to " + e(bus.branchName), "network-select", { value: bus.branch, variant: "secondary compact" }) +
     '<div class="network-bus-heading"><span class="network-bus-symbol ' + bus.status + '">' + icon("bus", 26) + '</span><div><h2>BUS ' + e(bus.label) + '</h2><p>' + e(bus.name) + '</p></div></div>' +
     statusBadge(bus.status) + '<p class="network-data-note bus-demo-note">Simulated GPS · Sample route and occupancy</p>' +
+    (options.context.role === "principal" && bus.operational ? '<div class="principal-bus-actions">' + button("Manage bus", "edit-bus", { value: bus.id, variant: "secondary", iconName: "edit" }) + button(bus.status === "route" ? "End trip" : "Start trip", "principal-trip", { value: bus.id + (bus.status === "route" ? "|school" : "|route"), iconName: bus.status === "route" ? "checkCircle" : "play" }) + '</div>' : "") +
     '<dl class="network-trip-metrics"><div><dt>Students on board</dt><dd>' + bus.studentsOnBoard + '<small> / ' + bus.capacity + '</small></dd></div><div><dt>Speed</dt><dd><span data-network-value="speed">' + telemetry.speed + '</span><small> km/h</small></dd></div><div><dt>School arrival</dt><dd data-network-value="eta">' + (bus.status === "school" ? "Arrived" : telemetry.eta + " min") + '</dd></div><div><dt>Last update</dt><dd class="network-update-time" data-network-value="updated">' + telemetry.updated + '</dd></div></dl>' +
     '<section class="network-trip-next"><span>' + (bus.status === "school" ? "Arrived at" : "Next stop") + '</span><strong data-network-value="nextStop">' + e(telemetry.nextStop) + '</strong><progress data-network-value="progress" value="' + telemetry.progress + '" max="1" aria-label="Trip progress"></progress></section>' +
     '<dl class="network-driver-details"><div><dt>School</dt><dd>' + e(bus.branchName) + '</dd></div><div><dt>Driver</dt><dd>' + e(bus.driver || "Unassigned") + '</dd></div><div><dt>Vehicle</dt><dd>' + e(bus.registration) + '</dd></div></dl>' +

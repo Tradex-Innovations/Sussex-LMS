@@ -13,11 +13,14 @@ const round = (value) => Math.round(value * 10) / 10;
 export function assessmentResult(branch, options) {
   const index = branch.directoryIndex;
   const subjectIndex = subjects.findIndex((subject) => subject.id === options.subject);
-  const count = Math.min(sampleGradeEnrollment(branch, options.grade), 36 + ((index * 7 + options.grade * 3) % 35));
+  const cohort = Math.min(sampleGradeEnrollment(branch, options.grade), 36 + ((index * 7 + options.grade * 3) % 35));
   const variation = subjectIndex === 0 ? 0 : ((index * 3 + subjectIndex * 7) % 17) - 8;
   const termDip = options.term === 3 && index % 6 === 1 ? -8 : 0;
   const baseline = sampleAverages[index] + variation + termDip - (3 - options.term) * (2 + index % 3) - (options.grade - 8) * 0.4;
-  const marks = Array.from({ length: count }, (_, student) => Math.max(12, Math.min(100, Math.round(baseline + ((student * 11 + index * 3) % 57) - 28))));
+  const allMarks = Array.from({ length: cohort }, (_, student) => Math.max(12, Math.min(100, Math.round(baseline + ((student * 11 + index * 3) % 57) - 28))));
+  const classMatch = String(options.className || "").match(/^(\d+)([AB])$/);
+  const marks = classMatch && Number(classMatch[1]) === Number(options.grade) ? allMarks.filter((_, index) => index % 2 === (classMatch[2] === "A" ? 0 : 1)) : allMarks;
+  const count = marks.length;
   return {
     branch,
     count,

@@ -37,7 +37,19 @@ The Chairman's Overview has five views. Transport Activity opens first with the 
 - [Staffing Overview](http://127.0.0.1:4183/#chairman/overview/staffing): branch headcounts, teaching capacity, coverage and vacancies; available/absent/on-leave filters; searchable and paginated staff profiles; leadership drill-downs; persistent vacancy review and links to branch appointments. Existing prototype accounts appear once per school alongside labelled illustrative staff. Assigned subjects come from actual prototype course assignments.
 - [Executive Reports](http://127.0.0.1:4183/#chairman/overview/reports): executive brief or individual transport/academic/attendance/staffing reports; selectable branch scope and relevant filters; generated previews; CSV and standalone HTML downloads with embedded logo; browser Print / Save PDF; latest eight saved report snapshots. Editing filters does not alter an already captured report.
 
-The shared School branch filter controls scope throughout these views. Principal and Vice Principal views keep their existing branch-scoped portal. All Chairman data and actions remain a browser-only demonstration. Sample registers use 20 November 2026 by default and support dates from 12 October through 20 November. Academic cohorts are capped by the same illustrative grade enrolment used by attendance and staffing.
+The shared School branch filter controls scope throughout the Chairman views. All data and actions remain a browser-only demonstration. Sample registers use 20 November 2026 by default and support dates from 12 October through 20 November. Academic cohorts are capped by the same illustrative grade enrolment used by attendance and staffing.
+
+### Principal workspace
+
+The Principal role now opens [its assigned-school overview](http://127.0.0.1:4183/#principal/overview/transport), with the same five main tabs and a daily school pulse. Use **Demo Principal** to preview Malini Senanayake at Nugegoda or Suresh Jayawardena at Malabe. Changing the demo account changes the assigned school and resets the view filters; the Principal does not have a branch selector.
+
+- **Transport Activity** opens centred on the assigned school's routes. Principals can filter their own fleet, inspect buses, manage existing bus/driver/student assignments and start or end demo trips. Resetting the map returns to the school routes.
+- **Academic Performance** compares classes, subjects, grades and teachers within the school. Class cohorts reconcile with grade totals. Prototype teacher assignments and published materials appear for matching course records. Principals can open lecture materials, assign courses and export the selected comparison.
+- **Attendance** includes school and class registers, student calendars, grade/class/date/period filters, staff attendance and repeated absence views.
+- **Staffing Overview** includes leadership, staff capacity, directory filters, profiles, vacancies and sample leave requests. Leave approval/decline is saved in the browser and updates the school pulse, staff availability, attendance and newly generated reports. Appointment management uses the existing branch-scoped role forms; Principal and Chairman appointments remain excluded from the Principal's assignable roles.
+- **Executive Reports** generates one-school briefs and transport/academic/attendance/staffing exports. CSV, standalone HTML with embedded logo, and Print / Save PDF are available. Principal report history is separated by school and from Chairman report history; each workspace retains its latest eight snapshots.
+
+All Principal records, actions and exports use the assigned Principal grant's school. The Vice Principal portal retains its existing scope. GPS, attendance, assessments, staffing complements and leave requests remain illustrative.
 
 ### School portal
 

@@ -60,13 +60,13 @@ export class SchoolNetworkMap {
     stage.insertAdjacentHTML("beforeend", '<div class="school-map-controls" role="group" aria-label="Map controls">' +
       '<button type="button" data-school-map="in" aria-label="Zoom in" title="Zoom in">' + icon("plus", 19) + '</button>' +
       '<button type="button" data-school-map="out" aria-label="Zoom out" title="Zoom out">' + icon("minus", 19) + '</button>' +
-      '<button type="button" data-school-map="reset" aria-label="View whole island" title="View whole island">' + icon("locate", 19) + '</button></div>');
+      '<button type="button" data-school-map="reset" aria-label="' + (options.homeBranch ? 'View school routes' : 'View whole island') + '" title="Reset map">' + icon("locate", 19) + '</button></div>');
     const { signal } = this.controller;
     for (const control of stage.querySelectorAll("[data-school-map]")) {
       control.addEventListener("click", () => {
         if (control.dataset.schoolMap === "in") this.map.zoomIn();
         else if (control.dataset.schoolMap === "out") this.map.zoomOut();
-        else this.fitIsland();
+        else this.fitHome();
       }, { signal });
       L.DomEvent.disableClickPropagation(control);
     }
@@ -74,7 +74,7 @@ export class SchoolNetworkMap {
     L.DomEvent.disableScrollPropagation(this.bubbleLayer);
     this.map.on("move zoom resize", () => { this.updateMarkers(); this.drawLabels(); });
     if (options.viewport?.center) this.map.setView(options.viewport.center, options.viewport.zoom, { animate: false });
-    else this.fitIsland();
+    else this.fitHome();
     this.resize = new ResizeObserver(() => {
       this.map.invalidateSize({ pan: false });
       this.drawLabels();
@@ -93,6 +93,11 @@ export class SchoolNetworkMap {
   fitIsland() {
     const hud = this.stage.parentElement.querySelector(".network-map-hud");
     this.map.fitBounds([[5.7, 79.35], [9.95, 82.05]], { paddingTopLeft: [30, Math.max(70, (hud?.offsetHeight || 0) + 35)], paddingBottomRight: [30, 35], animate: false });
+  }
+
+  fitHome() {
+    if (this.options.homeBranch) this.focusBranch(this.options.homeBranch);
+    else this.fitIsland();
   }
 
   focusBranch(id) {
@@ -129,7 +134,7 @@ export class SchoolNetworkMap {
 
   updateMarkers() {
     const L = window.L;
-    const detailed = this.map.getZoom() >= 10;
+    const detailed = this.map.getZoom() >= 10 || Boolean(this.options.selectedBus);
     this.markerObstacles = [];
     if (!detailed) {
       for (const marker of this.busMarkers.values()) this.map.removeLayer(marker);

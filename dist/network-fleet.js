@@ -4,7 +4,8 @@ const routeCache = new WeakMap();
 const startedAt = performance.now();
 
 export function networkFleet(state, branches) {
-  return branches.flatMap((branch, index) => {
+  return branches.flatMap((branch) => {
+    const index = branch.directoryIndex;
     const assigned = state.buses.filter((bus) => bus.branch === branch.id);
     const buses = assigned.length ? assigned : [0, 1].map((number) => ({
       id: "demo-" + branch.id + "-" + (number + 1),

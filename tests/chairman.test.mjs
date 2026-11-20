@@ -101,7 +101,7 @@ test("Executive reports enforce scope, reject empty selections and preserve capt
   assert.deepEqual(report.criteria.scope.sort(), ["galle", "kandy"]);
   assert.ok(report.buses.every((bus) => ["Galle", "Kandy"].includes(bus.school)));
   assert.deepEqual(report.summary.academic, networkSummary(rankedResults(state.branches.filter((branch) => ["galle", "kandy"].includes(branch.id)), academic)));
-  assert.throws(() => generateExecutiveReport(state, contextFor(state, "principal"), settings, academic), /Chairman/);
+  assert.throws(() => generateExecutiveReport(state, contextFor(state, "teacher"), settings, academic), /leadership/);
   assert.throws(() => generateExecutiveReport(state, chairman, { ...settings, reportBranches: [] }, academic), /Select/);
   const scoped = contextFor(state, "chairman", undefined, "galle");
   assert.equal(chairmanBranches(state, scoped).length, 1);

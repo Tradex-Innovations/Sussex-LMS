@@ -23,12 +23,26 @@ export function chairmanDefaults() {
   return { date: demoDate, period: "day", attendanceGrade: "all", audience: "students", attendanceFlag: "repeated", studentQuery: "", studentPage: 1,
     staffGroup: "all", staffStatus: "all", staffQuery: "", staffPage: 1, staffingTab: "people",
     reportType: "brief", reportPeriod: "week", reportBranches: null, reportId: "", reportFormat: "csv",
-    detail: "", personId: "", branchId: "", academicSort: "average", attendanceSort: "rate" };
+    detail: "", personId: "", branchId: "", academicSort: "average", attendanceSort: "rate", academicClass: "all", academicCompare: "classes", attendanceClass: "all" };
+}
+
+export function isSchoolLeader(context) { return ["chairman", "principal"].includes(context?.role); }
+
+export function reportOwnerKey(context) {
+  return context?.role === "principal" ? "principal:" + (context.grant?.branch || context.branch) : "chairman:" + context?.account?.id;
+}
+
+export function visibleExecutiveReports(state, context) {
+  if (!isSchoolLeader(context)) return [];
+  const allowed = new Set(chairmanBranches(state, context).map((branch) => branch.id));
+  const owner = reportOwnerKey(context);
+  return (state.executiveReports || []).filter((report) => (report.owner?.key ? report.owner.key === owner : context.role === "chairman") && report.criteria.scope.every((branch) => allowed.has(branch)));
 }
 
 export function chairmanBranches(state, context, selected = null) {
   if (!["chairman", "principal", "vice_principal"].includes(context?.role)) return [];
-  const scoped = state.branches.filter((branch) => context.branch === "all" || context.branch === branch.id);
+  const scope = context.role === "chairman" ? context.branch : context.grant?.branch || context.branch;
+  const scoped = state.branches.filter((branch) => context.role === "chairman" && scope === "all" || scope === branch.id);
   return selected === null ? scoped : scoped.filter((branch) => selected.includes(branch.id));
 }
 
@@ -91,19 +105,31 @@ export function branchStaff(state, branch, date = demoDate) {
   const target = Math.ceil(schoolEnrollment(branch) / 21);
   for (let i = staff.filter((person) => category(person) === "teachers").length; i < target; i += 1) add("teacher", i);
   for (let i = staff.filter((person) => category(person) === "support").length; i < 7 + branch.directoryIndex % 4; i += 1) add(["admin", "librarian", "transport", "driver"][i % 4], i);
+  const requestDay = Math.floor(Date.parse(demoDate + "T12:00:00Z") / 86400000);
+  const requestStaff = new Set(staff.filter((person) => category(person) === "teachers" && (hash(person.id) + requestDay * 7) % 23 >= 2 && (hash(person.id) + requestDay) % 29 !== 0).slice(0, 3).map((person) => person.id));
   return staff.map((person, index) => {
     const key = hash(person.id);
     const day = Math.floor(Date.parse(date + "T12:00:00Z") / 86400000);
     const absent = (key + day * 7) % 23 < 2;
     const leave = (key + day) % 29 === 0;
-    const status = leave ? "leave" : absent ? "absent" : "present";
+    const approved = requestStaff.has(person.id) && date === demoDate && state.principalLeaveReviews?.["leave-" + branch.id + "-" + person.id]?.decision === "approved";
+    const status = approved || leave ? "leave" : absent ? "absent" : "present";
     const primaryRole = ["principal", "vice_principal", "section_head", "coordinator", "class_teacher", "teacher", "admin", "transport", "librarian", "driver"].find((role) => person.roles.includes(role));
     const assignedCourses = state.courses.filter((course) => course.branch === branch.id && state.assignments[course.id]?.teacher === person.id);
     const assignedSubjects = [...new Set(assignedCourses.map((course) => course.title))];
-    return { ...person, category: category(person), primaryRole, designation: staffRoles[primaryRole], status,
+    return { ...person, category: category(person), primaryRole, designation: staffRoles[primaryRole], status, leaveRequestEligible: requestStaff.has(person.id),
       assignedCourses,
       subject: category(person) === "teachers" ? person.sample ? subjects[(index + branch.directoryIndex) % subjects.length].name : assignedSubjects.join(", ") || "No courses assigned" : "—",
       email: person.sample ? "sample." + (index + 1) + "@school.example" : "demo." + person.id + "@school.example" };
+  });
+}
+
+export function schoolLeaveRequests(state, branch) {
+  return branchStaff(state, branch, demoDate).filter((person) => person.leaveRequestEligible).map((person, index) => {
+    const id = "leave-" + branch.id + "-" + person.id;
+    const review = state.principalLeaveReviews?.[id];
+    return { id, branch: branch.id, person: person.id, name: person.name, designation: person.designation, date: demoDate,
+      reason: ["Personal leave", "Family commitment", "Professional development"][index], decision: review?.decision || "pending", reviewedBy: review?.by || "", sample: true };
   });
 }
 
@@ -117,10 +143,10 @@ export function branchVacancies(state, branch) {
   });
 }
 
-export function studentDaySummary(branch, date, grade = "all") {
-  const key = branch.id + ":" + date + ":" + grade;
+export function studentDaySummary(branch, date, grade = "all", className = "all") {
+  const key = branch.id + ":" + date + ":" + grade + ":" + className;
   if (attendanceCache.has(key)) return attendanceCache.get(key);
-  const roster = studentRoster(branch, grade);
+  const roster = studentRoster(branch, grade).filter((student) => className === "all" || student.className === className);
   const counts = { expected: roster.length, present: 0, absent: 0, late: 0 };
   for (const student of roster) {
     const status = studentStatus(student, date);
@@ -141,7 +167,7 @@ export function attendanceResult(state, branch, options = {}) {
       const staff = branchStaff(state, branch, date);
       day = { expected: staff.length, present: staff.filter((person) => person.status === "present").length,
         absent: staff.filter((person) => person.status === "absent").length, late: 0, leave: staff.filter((person) => person.status === "leave").length };
-    } else day = { ...studentDaySummary(branch, date, options.attendanceGrade || "all"), leave: 0 };
+    } else day = { ...studentDaySummary(branch, date, options.attendanceGrade || "all", options.attendanceClass || "all"), leave: 0 };
     for (const key of Object.keys(counts)) counts[key] += day[key];
     return { date, ...day, rate: day.expected ? round(day.present / day.expected * 100) : 0 };
   });
@@ -150,7 +176,7 @@ export function attendanceResult(state, branch, options = {}) {
   previous.setUTCDate(previous.getUTCDate() - 1);
   const priorDate = schoolDays(previous.toISOString().slice(0, 10), "day")[0];
   const current = trend.at(-1);
-  const prior = audience === "students" ? studentDaySummary(branch, priorDate, options.attendanceGrade || "all") : null;
+  const prior = audience === "students" ? studentDaySummary(branch, priorDate, options.attendanceGrade || "all", options.attendanceClass || "all") : null;
   return { branch, dates, ...counts, rate: counts.expected ? round(counts.present / counts.expected * 100) : 0, trend,
     change: prior?.expected && current ? round(current.rate - prior.present / prior.expected * 100) : null };
 }
@@ -171,7 +197,8 @@ export function attendanceExceptions(branches, options) {
     const missed = repeatDates.filter((date) => studentStatus(student, date) === "absent").length;
     const status = studentStatus(student, dates.at(-1));
     return { ...student, missed, status };
-  })).filter((student) => options.attendanceFlag === "repeated" ? student.missed >= 3
+  })).filter((student) => (!options.attendanceClass || options.attendanceClass === "all" || options.attendanceClass === student.className))
+    .filter((student) => options.attendanceFlag === "all" ? true : options.attendanceFlag === "repeated" ? student.missed >= 3
     : options.attendanceFlag === "late" ? student.status === "late" : student.status === "absent")
     .filter((student) => !options.studentQuery || (student.name + " " + student.admission + " " + student.branchName).toLowerCase().includes(options.studentQuery.toLowerCase()))
     .sort((a, b) => b.missed - a.missed || a.name.localeCompare(b.name));
@@ -207,7 +234,8 @@ export function academicDistribution(branches, options) {
 }
 
 export function generateExecutiveReport(state, context, settings, academic, telemetry = {}) {
-  if (context?.role !== "chairman") throw new Error("Chairman access required.");
+  if (!isSchoolLeader(context)) throw new Error("School leadership access required.");
+  if (context.role === "principal" && settings.reportBranches?.some((id) => id !== (context.grant?.branch || context.branch))) throw new Error("Reports are limited to your assigned school.");
   const branches = chairmanBranches(state, context, settings.reportBranches);
   if (!branches.length) throw new Error("Select at least one school for the report.");
   const dates = schoolDays(settings.date, settings.reportPeriod);
@@ -232,9 +260,10 @@ export function generateExecutiveReport(state, context, settings, academic, tele
     row.vacancies >= 3 ? { branch: row.id, school: row.school, view: "staffing", message: row.vacancies + " open staffing positions." } : null,
     row.academic < 75 ? { branch: row.id, school: row.school, view: "academic", message: "Subject average is " + row.academic + "%." } : null,
   ].filter(Boolean));
-  return { id: "report-" + crypto.randomUUID(), generatedAt: new Date().toISOString(), type: settings.reportType, title: reportTypes[settings.reportType] || reportTypes.brief,
+  return { id: "report-" + crypto.randomUUID(), generatedAt: new Date().toISOString(), type: settings.reportType, title: context.role === "principal" && settings.reportType === "brief" ? "School executive brief" : reportTypes[settings.reportType] || reportTypes.brief,
+    owner: { key: reportOwnerKey(context), role: context.role, name: context.account.name, school: context.role === "principal" ? branches[0].school : "" },
     sample: true, criteria: { date: settings.date, from: dates[0], to: dates.at(-1), schoolDays: dates.length, period: settings.reportPeriod,
-      grade: academic.grade, term: academic.term, subject: academic.subject, audience, attendanceGrade: settings.attendanceGrade, scope: branches.map((branch) => branch.id) },
+      grade: academic.grade, term: academic.term, subject: academic.subject, className: academic.className || "all", audience, attendanceGrade: settings.attendanceGrade, attendanceClass: settings.attendanceClass || "all", scope: branches.map((branch) => branch.id) },
     summary: { academic: networkSummary(assessments), attendance: attendanceSummary(attendance), staffing: staffingSummary(staffing), fleet: fleetSummary(fleet) },
     rows, insights, buses: fleet.map((bus) => {
       const signal = networkTelemetry(bus, telemetry);
@@ -254,7 +283,7 @@ export function reportColumns(type, audience = "students") {
 }
 
 export function reportCSV(report) {
-  const columns = reportColumns(report.type, report.criteria.audience);
+  const columns = report.customColumns || reportColumns(report.type, report.criteria.audience);
   const safe = (value) => {
     let text = String(value ?? "");
     if (/^[=+\-@]/.test(text)) text = "'" + text;
@@ -263,6 +292,9 @@ export function reportCSV(report) {
   const metadata = [["Sussex College Network", report.title], ["Data", "SAMPLE DATA - PROTOTYPE"], ["Reporting period", report.criteria.from + " to " + report.criteria.to],
     ...(["brief", "attendance"].includes(report.type) ? [["Attendance period", report.criteria.from + " to " + report.criteria.to], ["Attendance for", report.criteria.audience]] : []),
     ...(["brief", "academic"].includes(report.type) ? [["Academic assessment", report.criteria.subject + " / Grade " + report.criteria.grade + " / Term " + report.criteria.term]] : []), ["Generated UTC", report.generatedAt], []];
-  const rows = report.type === "transport" ? report.buses : report.rows;
+  if (report.criteria.className && report.criteria.className !== "all") metadata.splice(-1, 0, ["Academic class", report.criteria.className]);
+  if (report.criteria.attendanceClass && report.criteria.attendanceClass !== "all") metadata.splice(-1, 0, ["Attendance class", report.criteria.attendanceClass]);
+  if (report.criteria.comparison) metadata.splice(-1, 0, ["Comparison", report.criteria.comparison]);
+  const rows = report.customRows || (report.type === "transport" ? report.buses : report.rows);
   return "\uFEFF" + [...metadata, columns.map(([, label]) => label), ...rows.map((row) => columns.map(([key]) => row[key]))].map((row) => row.map(safe).join(",")).join("\r\n");
 }
