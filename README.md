@@ -1,6 +1,6 @@
 # Sussex College Network
 
-A browser-only school portal prototype for a client walkthrough. Sussex College Network, the fleet, courses, and orders are sample data. The bus positions and trip statuses are simulated. Demo changes are saved in the current browser.
+A browser-only school portal prototype for a client walkthrough. Official Sussex school names and approximate locations are paired with sample academic, attendance, staffing, fleet, course and order data. Bus positions and trip statuses are simulated. Demo changes are saved in the current browser.
 
 ## Run locally
 
@@ -26,6 +26,20 @@ Open [Parent login](http://127.0.0.1:4183/#parent/login). Use a student's admiss
 The account cards fill in demo credentials. Sign in to open that student's bus, courses, and library portal. Log out to choose another admission number. The session survives a tab refresh. Student admission numbers appear in the staff directory and can be edited by authorized branch staff.
 
 ## Walkthrough
+
+### Chairman workspace
+
+The Chairman's Overview has five views. Transport Activity opens first with the full map; each view also has a direct link:
+
+- [Transport Activity](http://127.0.0.1:4183/#chairman/overview/transport): all 20 branches and 44 simulated buses, status filters, branch and vehicle drill-downs, next stops, route progress and pause/resume.
+- [Academic Performance](http://127.0.0.1:4183/#chairman/overview/academic): subject, grade and term filters; weighted averages and pass rates; branch rankings; changes against the previous term; distribution and trend charts; branch results and CSV export.
+- [Attendance](http://127.0.0.1:4183/#chairman/overview/attendance): student or staff registers, grade and reporting-date filters, one/five/twenty-school-day periods, weighted branch comparisons, trends, repeated absence watchlists, searchable student records and a personal 20-day calendar. Late arrivals are included in present totals; period totals count attendance-days.
+- [Staffing Overview](http://127.0.0.1:4183/#chairman/overview/staffing): branch headcounts, teaching capacity, coverage and vacancies; available/absent/on-leave filters; searchable and paginated staff profiles; leadership drill-downs; persistent vacancy review and links to branch appointments. Existing prototype accounts appear once per school alongside labelled illustrative staff. Assigned subjects come from actual prototype course assignments.
+- [Executive Reports](http://127.0.0.1:4183/#chairman/overview/reports): executive brief or individual transport/academic/attendance/staffing reports; selectable branch scope and relevant filters; generated previews; CSV and standalone HTML downloads with embedded logo; browser Print / Save PDF; latest eight saved report snapshots. Editing filters does not alter an already captured report.
+
+The shared School branch filter controls scope throughout these views. Principal and Vice Principal views keep their existing branch-scoped portal. All Chairman data and actions remain a browser-only demonstration. Sample registers use 20 November 2026 by default and support dates from 12 October through 20 November. Academic cohorts are capped by the same illustrative grade enrolment used by attendance and staffing.
+
+### School portal
 
 1. Start in **Chairman → Overview**. An interactive OpenStreetMap street map shows Sri Lanka and a simulated network fleet of 44 buses across all 20 branches. Nearby vehicles form bus-count groups; click a group to zoom in and see individual buses. Branch-name bubbles appear near their geographic positions where space permits. Use **View all buses** to find every branch's vehicles, or filter by On route, At school and Signal delayed. Pan, zoom, pause or resume the simulation, or choose **View whole island** to reset. Street tiles require an internet connection; a notice appears if they cannot load.
 2. Select a branch bubble for **Bus activity** and **Performance** tabs. Selecting a bus shows its illustrative route, animated position, next stop, school arrival estimate, sample occupancy, driver and trip progress. The mobile details sheet keeps the route map and attribution visible above it. In **Performance**, use **Compare schools** to compare sample results by subject, grade and term. Closing the panel or pressing Escape restores the full map. A Principal stays within their assigned school. The overview preserves the eight existing operational demo records for Nugegoda and Malabe and adds two illustrative buses for each of the other 18 branches; these additional vehicles do not create student, staff or assignment records.

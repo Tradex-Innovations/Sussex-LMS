@@ -48,10 +48,11 @@ export class SchoolNetworkMap {
       label.className = "school-branch-bubble" + (options.selected === branch.id ? " is-selected" : "");
       label.dataset.branch = branch.id;
       label.dataset.focus = "network-pin-" + branch.id;
-      label.textContent = branch.name;
-      label.setAttribute("aria-label", "View " + branch.name + " performance");
+      const metric = options.metricValues?.[branch.id];
+      label.innerHTML = e(branch.name) + (metric ? '<strong class="branch-map-metric tone-' + metric.tone + '">' + e(metric.value) + '</strong>' : "");
+      label.setAttribute("aria-label", "View " + branch.name + " " + (options.metricLabel || "performance"));
       label.setAttribute("aria-pressed", String(options.selected === branch.id));
-      label.title = branch.name + ": " + counts.route + " on route, " + counts.school + " at school, " + counts.delayed + " signal delayed";
+      label.title = metric ? branch.name + ": " + metric.value + " · Sample data" : branch.name + ": " + counts.route + " on route, " + counts.school + " at school, " + counts.delayed + " signal delayed";
       label.addEventListener("click", () => options.onSelect(branch.id), { signal: this.controller.signal });
       this.bubbleLayer.append(label);
       this.labels.push({ branch, label });
@@ -81,7 +82,7 @@ export class SchoolNetworkMap {
     this.resize.observe(stage);
     document.fonts.ready.then(() => { if (!signal.aborted) this.drawLabels(); });
     this.updateMarkers();
-    this.timer = setInterval(() => { this.updateMarkers(); this.drawLabels(); options.onTick?.(); }, 1000);
+    if (!options.metricValues) this.timer = setInterval(() => { this.updateMarkers(); this.drawLabels(); options.onTick?.(); }, 1000);
   }
 
   get viewport() {
@@ -108,7 +109,7 @@ export class SchoolNetworkMap {
   }
 
   focusPadding() {
-    const inspector = this.stage.closest(".network-experience").querySelector(".network-inspector");
+    const inspector = this.stage.closest(".network-experience")?.querySelector(".network-inspector");
     if (inspector && innerWidth <= 750) return { paddingTopLeft: [30, 25], paddingBottomRight: [50, inspector.offsetHeight + 28] };
     const hud = this.stage.parentElement.querySelector(".network-map-hud");
     return { paddingTopLeft: [45, Math.max(80, (hud?.offsetHeight || 0) + 40)], paddingBottomRight: [50, 75] };

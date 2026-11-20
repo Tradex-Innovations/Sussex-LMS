@@ -9,6 +9,8 @@ import { subjects } from "./network-analytics.js";
 import { SchoolNetworkMap } from "./network-map.js";
 import { networkFleet } from "./network-fleet.js";
 import { updateNetworkBusDetails } from "./network-transport.js";
+import { chairmanOverviewPage, chairmanMapMetrics, chairmanBranchPanel, chairmanStudentPanel, chairmanStaffPanel, chairmanVacancyPanel, executiveReportHTML } from "./chairman.js";
+import { chairmanDefaults, chairmanViews, chairmanBranches, studentRoster, branchStaff, branchVacancies, schoolDays, generateExecutiveReport, reportCSV, reportTypes, demoDate } from "./chairman-data.js";
 import { FleetMap } from "./map.js";
 import { mountMapSummary, transportPage, updateTripDetails } from "./transport.js";
 import { avatar, button, emptyState, escapeHtml as e, iconTile } from "./ui.js";
@@ -34,13 +36,14 @@ let mapViewKey;
 let dialogMode;
 let view = getView();
 const ui = { accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", grade: "all", query: "", paused: false, runningSince: performance.now(), elapsed: 0, starts: {},
-  network: { subject: "mathematics", grade: 8, term: 3, selected: "", mode: "", compare: null, category: "all", tab: "transport", status: "all", busId: "", busBranch: "all" } };
+  network: { subject: "mathematics", grade: 8, term: 3, selected: "", mode: "", compare: null, category: "all", tab: "transport", status: "all", busId: "", busBranch: "all" }, chairman: chairmanDefaults() };
 
 function getView() {
-  const [requestedRole, requestedPage] = location.hash.slice(1).split("/");
+  const [requestedRole, requestedPage, requestedModule] = location.hash.slice(1).split("/");
   const role = Object.hasOwn(roles, requestedRole) ? requestedRole : "chairman";
   const page = roles[role].pages.includes(requestedPage) ? requestedPage : roles[role].start;
-  return { role, page };
+  const module = role === "chairman" && page === "overview" && chairmanViews.some((item) => item.id === requestedModule) ? requestedModule : "transport";
+  return { role, page, module };
 }
 
 function context() {
@@ -57,7 +60,7 @@ function childFor(ctx) {
 function optionsFor(ctx = context()) {
   const children = linkedChildren(state, ctx);
   const child = childFor(ctx);
-  return { state, context: ctx, children, child, fleet: visibleBuses(state, ctx, child), filter: ui.filter, selected: ui.bus, paused: ui.paused, progress, courseId: ui.courseId, grade: ui.grade, query: ui.query, network: ui.network };
+  return { state, context: ctx, children, child, fleet: visibleBuses(state, ctx, child), filter: ui.filter, selected: ui.bus, paused: ui.paused, progress, courseId: ui.courseId, grade: ui.grade, query: ui.query, network: ui.network, chairman: { ...ui.chairman, view: view.module } };
 }
 
 function elapsed() {
@@ -120,6 +123,7 @@ function scopeBar(ctx) {
 
 function render(focus, { scrollTop = false } = {}) {
   const pickerOpen = app.querySelector(".network-branch-picker")?.open;
+  const reportSchoolsScroll = app.querySelector(".chairman-report-schools > section")?.scrollTop || 0;
   const previousViewport = map?.viewport;
   const previousSchoolViewport = schoolMap?.viewport;
   map?.destroy();
@@ -147,10 +151,10 @@ function render(focus, { scrollTop = false } = {}) {
     }
     if (!options.fleet.some((bus) => bus.id === ui.bus)) ui.bus = options.fleet[0]?.id;
     options.selected = ui.bus;
-    const pages = { overview: networkOverviewPage, courses: coursesPage, people: peoplePage, library: libraryPage, access: accessPage };
+    const pages = { overview: ctx.role === "chairman" ? chairmanOverviewPage : networkOverviewPage, courses: coursesPage, people: peoplePage, library: libraryPage, access: accessPage };
     body = view.page === "transport" ? transportPage(view.role, options) : pages[view.page](options);
   }
-  document.title = `${navigation[view.page].label} · ${roles[view.role].name} · Sussex College Network`;
+  document.title = `${view.role === "chairman" && view.page === "overview" ? chairmanViews.find((item) => item.id === view.module).name : navigation[view.page].label} · ${roles[view.role].name} · Sussex College Network`;
   const mobileNavigation = roles[view.role].pages.length > 1;
   app.innerHTML = `<div class="app-shell role-${view.role} ${mobileNavigation ? "has-mobile-nav" : ""}">
     ${sidebar(ctx)}<div class="desktop-content">${topbar(ctx)}<main id="main" class="page page-${view.page}">${view.page === "overview" ? "" : scopeBar(ctx)}${body}</main></div>
@@ -158,9 +162,11 @@ function render(focus, { scrollTop = false } = {}) {
   </div>`;
   const networkStage = app.querySelector("#school-network-map");
   if (networkStage) {
-    const branches = networkBranches(state, ctx, ui.network);
-    const key = `${ctx.account.id}-${ctx.branch}-${branches.map((branch) => branch.id).join(",")}`;
-    schoolMap = new SchoolNetworkMap(networkStage, { branches, fleet: options.networkBuses, selected: ui.network.selected,
+    const metricView = ctx.role === "chairman" && view.module !== "transport";
+    const branches = metricView ? chairmanBranches(state, ctx) : networkBranches(state, ctx, ui.network);
+    const key = `${ctx.account.id}-${ctx.branch}-${view.module}-${branches.map((branch) => branch.id).join(",")}`;
+    schoolMap = new SchoolNetworkMap(networkStage, { branches, fleet: metricView ? [] : options.networkBuses, selected: metricView ? ui.chairman.branchId : ui.network.selected,
+      metricValues: metricView ? chairmanMapMetrics(options) : null, metricLabel: metricView ? view.module : "",
       selectedBus: ui.network.mode === "bus" ? ui.network.busId : "", status: ui.network.status, paused: ui.paused, progress, elapsed,
       onSelect: selectNetworkBranch, onBusSelect: selectNetworkBus,
       onTick: () => updateNetworkBusDetails(app, options.networkBuses, progress, ui.paused, elapsed()),
@@ -190,6 +196,10 @@ function render(focus, { scrollTop = false } = {}) {
     if (isFleet) mountMapSummary(stage, bus, progress(bus));
   }
   if (scrollTop) window.scrollTo({ top: 0, behavior: "instant" });
+  const activeView = app.querySelector('.chairman-view-bar [aria-current="page"]');
+  if (activeView) activeView.parentElement.scrollLeft = Math.max(0, activeView.offsetLeft - activeView.parentElement.offsetLeft - 18);
+  const reportSchools = app.querySelector(".chairman-report-schools > section");
+  if (reportSchools) reportSchools.scrollTop = reportSchoolsScroll;
   if (focus) app.querySelector(`[data-focus="${CSS.escape(focus)}"]`)?.focus({ preventScroll: true });
 }
 
@@ -214,6 +224,7 @@ function update(mutator, activity) {
 
 function showDialog(mode, title, description, content) {
   dialogMode = mode;
+  dialog.classList.toggle("chairman-dialog", mode.startsWith("chairman-"));
   dialog.innerHTML = `<header class="dialog-heading"><div><h2 id="dialog-title">${e(title)}</h2>${description ? `<p>${e(description)}</p>` : ""}</div><button type="button" class="icon-button" aria-label="Close dialog" data-action="close-dialog">${icon("x", 21)}</button></header>${content}`;
   if (!dialog.open) dialog.showModal();
 }
@@ -225,6 +236,74 @@ function closeDialog() {
 
 function confirmDialog(mode, title, description, label, action, value) {
   showDialog(mode, title, description, `<footer class="dialog-actions">${button("Cancel", "close-dialog", { variant: "secondary" })}${button(label, action, { value })}</footer>`);
+}
+
+function chairmanPerson(kind, id, ctx = context()) {
+  if (ctx?.role !== "chairman") return null;
+  for (const branch of chairmanBranches(state, ctx)) {
+    const list = kind === "student" ? studentRoster(branch)
+      : kind === "staff" ? branchStaff(state, branch, schoolDays(ui.chairman.date)[0]) : branchVacancies(state, branch);
+    const person = list.find((person) => person.id === id);
+    if (person) return { person, branch };
+  }
+  return null;
+}
+
+function permittedReport(id, ctx = context()) {
+  if (ctx?.role !== "chairman") return null;
+  const allowed = new Set(chairmanBranches(state, ctx).map((branch) => branch.id));
+  return (state.executiveReports || []).find((report) => report.id === id && report.criteria.scope.every((branch) => allowed.has(branch)));
+}
+
+function captureExecutiveReport(type, fromBuilder = false) {
+  const settings = { ...ui.chairman, reportType: type,
+    reportBranches: fromBuilder ? ui.chairman.reportBranches : null,
+    reportPeriod: ["transport", "staffing", "academic"].includes(type) ? "day" : fromBuilder ? ui.chairman.reportPeriod : ui.chairman.period };
+  if (type === "transport") settings.date = demoDate;
+  const report = generateExecutiveReport(state, context(), settings, ui.network, { progress, paused: ui.paused, elapsed: elapsed() });
+  if (!update((next) => { next.executiveReports = [report, ...(next.executiveReports || [])].slice(0, 8); })) return null;
+  ui.chairman.reportId = report.id;
+  return report;
+}
+
+async function downloadExecutiveReport(report, format = "csv", print = false) {
+  try {
+    let content;
+    if (format === "html" || print) {
+      let logo = "";
+      try {
+        const response = await fetch("./assets/sussex-college-network-logo.png");
+        if (response.ok) {
+          const blob = await response.blob();
+          logo = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(blob);
+          });
+        }
+      } catch {}
+      content = executiveReportHTML(report, logo);
+    } else content = reportCSV(report);
+    if (print) {
+      const frame = document.createElement("iframe");
+      frame.title = "Executive report print preview";
+      frame.style.cssText = "position:fixed;left:-12000px;top:0;width:1120px;height:800px;border:0";
+      frame.addEventListener("load", () => {
+        frame.contentWindow.addEventListener("afterprint", () => frame.remove(), { once: true });
+        frame.contentWindow.focus(); frame.contentWindow.print();
+        setTimeout(() => frame.remove(), 60000);
+      }, { once: true });
+      frame.srcdoc = content;
+      document.body.append(frame);
+      return;
+    }
+    const url = URL.createObjectURL(new Blob([content], { type: format === "html" ? "text/html;charset=utf-8" : "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "sussex-" + report.type + "-SAMPLE-" + report.criteria.to + "." + format;
+    document.body.append(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+    toast("Sample report downloaded.");
+  } catch { toast("The report could not be exported. Please try again."); }
 }
 
 function selectBus(id, focus) {
@@ -239,6 +318,13 @@ function selectBus(id, focus) {
 function selectNetworkBranch(id, focus) {
   const ctx = context();
   if (!["chairman", "principal", "vice_principal"].includes(ctx?.role)) return;
+  if (ctx.role === "chairman" && view.page === "overview" && view.module !== "transport") {
+    const branch = chairmanBranches(state, ctx).find((branch) => branch.id === id);
+    if (!branch) return;
+    ui.chairman.branchId = id;
+    showDialog("chairman-branch", branch.school, "Sample data · " + chairmanViews.find((item) => item.id === view.module)?.name, chairmanBranchPanel(optionsFor(ctx), branch));
+    return;
+  }
   if (!networkBranches(state, ctx, ui.network).some((branch) => branch.id === id)) return;
   ui.network.selected = id;
   ui.network.mode = "branch";
@@ -328,6 +414,21 @@ function authorizedAction(name, value, ctx) {
   const material = state.materials.find((item) => item.id === value);
   const materialCourse = visibleCourses(state, ctx, options.child).find((item) => item.id === material?.course);
   const guards = {
+    "chairman-student": ctx.role === "chairman" && name === "chairman-student" && Boolean(chairmanPerson("student", value, ctx)),
+    "chairman-staff": ctx.role === "chairman" && name === "chairman-staff" && Boolean(chairmanPerson("staff", value, ctx)),
+    "chairman-vacancy": ctx.role === "chairman" && name === "chairman-vacancy" && Boolean(chairmanPerson("vacancy", value, ctx)),
+    "chairman-review-vacancy": ctx.role === "chairman" && name === "chairman-review-vacancy" && Boolean(chairmanPerson("vacancy", value, ctx)),
+    "chairman-manage-staff": ctx.role === "chairman" && chairmanBranches(state, ctx).some((branch) => branch.id === value),
+    "chairman-staff-tab": ctx.role === "chairman" && ["people", "vacancies"].includes(value),
+    "chairman-page": ctx.role === "chairman" && /^(staff|student)\|[1-9]\d*$/.test(value),
+    "chairman-alert": ctx.role === "chairman" && chairmanViews.some((item) => item.id === value?.split("|")[0]) && chairmanBranches(state, ctx).some((branch) => branch.id === value?.split("|")[1]),
+    "chairman-export": ctx.role === "chairman" && Object.hasOwn(reportTypes, value),
+    "chairman-generate-report": ctx.role === "chairman",
+    "chairman-open-report": ctx.role === "chairman" && Boolean(permittedReport(value, ctx)),
+    "chairman-download-report": ctx.role === "chairman" && Boolean(permittedReport(value, ctx)),
+    "chairman-print-report": ctx.role === "chairman" && Boolean(permittedReport(value, ctx)),
+    "chairman-report-all": ctx.role === "chairman",
+    "chairman-report-none": ctx.role === "chairman",
     "network-select": ["chairman", "principal", "vice_principal"].includes(ctx.role) && networkBranches(state, ctx, ui.network).some((branch) => branch.id === value),
     "network-open": ["chairman", "principal", "vice_principal"].includes(ctx.role) && networkBranches(state, ctx, ui.network).some((branch) => branch.id === value),
     "network-all": ctx.role === "chairman" && ctx.branch === "all",
@@ -394,6 +495,51 @@ function action(event) {
   const ctx = context();
   if (!authorizedAction(name, value, ctx)) return toast("This action is outside the current role’s assigned access.");
   switch (name) {
+    case "chairman-student":
+    case "chairman-staff":
+    case "chairman-vacancy": {
+      const kind = name.slice(9), { person, branch } = chairmanPerson(kind, value, ctx);
+      const content = kind === "student" ? chairmanStudentPanel(optionsFor(ctx), person, branch)
+        : kind === "staff" ? chairmanStaffPanel(optionsFor(ctx), person, branch) : chairmanVacancyPanel(optionsFor(ctx), person);
+      showDialog(name, kind === "vacancy" ? "Vacancy review" : kind === "staff" ? "Staff profile" : "Student attendance", "Sample data · " + branch.name, content);
+      break;
+    }
+    case "chairman-review-vacancy": {
+      const { person, branch } = chairmanPerson("vacancy", value, ctx);
+      if (update((next) => {
+        next.executiveReviews ??= {};
+        if (next.executiveReviews[value]) delete next.executiveReviews[value]; else next.executiveReviews[value] = new Date().toISOString();
+      }, { branch: branch.id, category: "people", message: person.subject + " vacancy review " + (person.reviewed ? "reopened." : "completed.") })) {
+        render();
+        showDialog("chairman-vacancy", "Vacancy review", "Sample data · " + branch.name, chairmanVacancyPanel(optionsFor(ctx), chairmanPerson("vacancy", value, ctx).person));
+      }
+      break;
+    }
+    case "chairman-manage-staff": ui.branch = value; closeDialog(); location.hash = "chairman/access"; break;
+    case "chairman-staff-tab": ui.chairman.staffingTab = value; render(); break;
+    case "chairman-page": {
+      const [kind, page] = value.split("|"); ui.chairman[kind === "student" ? "studentPage" : "staffPage"] = Number(page); render(); break;
+    }
+    case "chairman-alert": {
+      const [module, branch] = value.split("|"); ui.branch = branch; ui.chairman.reportBranches = null;
+      if (view.module === module) render(); else location.hash = "chairman/overview/" + module;
+      break;
+    }
+    case "chairman-report-all": ui.chairman.reportBranches = null; render(); break;
+    case "chairman-report-none": ui.chairman.reportBranches = []; render(); break;
+    case "chairman-generate-report": {
+      try { if (captureExecutiveReport(ui.chairman.reportType, true)) { render(); app.querySelector(".chairman-report-result")?.scrollIntoView({ block: "start", behavior: "smooth" }); toast("Sample report generated and saved."); } }
+      catch (error) { toast(error.message); }
+      break;
+    }
+    case "chairman-export": {
+      try { const report = captureExecutiveReport(value); if (report) downloadExecutiveReport(report); }
+      catch (error) { toast(error.message); }
+      break;
+    }
+    case "chairman-open-report": ui.chairman.reportId = value; render(); app.querySelector(".chairman-report-result")?.scrollIntoView({ block: "start", behavior: "smooth" }); break;
+    case "chairman-download-report": downloadExecutiveReport(permittedReport(value, ctx), ui.chairman.reportFormat); break;
+    case "chairman-print-report": downloadExecutiveReport(permittedReport(value, ctx), "html", true); break;
     case "network-select": selectNetworkBranch(value, focus); break;
     case "network-bus": selectNetworkBus(value); break;
     case "network-fleet": ui.network.mode = "fleet"; ui.network.busBranch = "all"; render(); break;
@@ -480,6 +626,7 @@ function action(event) {
       if (saveState(freshState())) {
         state = freshState(); Object.assign(ui, { accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", starts: {}, paused: false, runningSince: performance.now(), elapsed: 0 });
         ui.network = { subject: "mathematics", grade: 8, term: 3, selected: "", mode: "", compare: null, category: "all", tab: "transport", status: "all", busId: "", busBranch: "all" };
+        ui.chairman = chairmanDefaults();
         parentSession = null;
         saveParentSession(null);
         closeDialog(); location.hash = "chairman/transport"; render(); toast("Demo reset.");
@@ -493,6 +640,36 @@ function change(event) {
   const name = element.dataset.change;
   const ctx = context();
   if (!ctx) return;
+  if (name?.startsWith("chairman-")) {
+    if (ctx.role !== "chairman") return;
+    if (name === "chairman-report-branch") {
+      const branches = chairmanBranches(state, ctx);
+      if (!branches.some((branch) => branch.id === element.value)) return;
+      const selected = new Set(ui.chairman.reportBranches || branches.map((branch) => branch.id));
+      if (element.checked) selected.add(element.value); else selected.delete(element.value);
+      ui.chairman.reportBranches = [...selected]; render(); return;
+    }
+    const rules = {
+      "chairman-period": ["period", ["day", "week", "month"]], "chairman-audience": ["audience", ["students", "staff"]],
+      "chairman-grade": ["attendanceGrade", ["all", ...Array.from({ length: 13 }, (_, i) => String(i + 1))]],
+      "chairman-staff-group": ["staffGroup", ["all", "leadership", "teachers", "support"]],
+      "chairman-staff-status": ["staffStatus", ["all", "present", "absent", "leave"]],
+      "chairman-attendance-flag": ["attendanceFlag", ["repeated", "absent", "late"]],
+      "chairman-attendance-sort": ["attendanceSort", ["rate", "lowest"]],
+      "chairman-academic-sort": ["academicSort", ["average", "pass", "change"]],
+      "chairman-report-type": ["reportType", Object.keys(reportTypes)],
+      "chairman-report-period": ["reportPeriod", ["day", "week", "month"]],
+      "chairman-report-format": ["reportFormat", ["csv", "html"]],
+    };
+    if (name === "chairman-date") {
+      const date = element.value;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || date < "2026-10-12" || date > demoDate || new Date(date + "T12:00Z").toISOString().slice(0, 10) !== date) { element.value = ui.chairman.date; return; }
+      ui.chairman.date = date;
+    } else if (rules[name]?.[1].includes(element.value)) ui.chairman[rules[name][0]] = element.value;
+    else return;
+    ui.chairman.staffPage = 1; ui.chairman.studentPage = 1;
+    render(); return;
+  }
   switch (name) {
     case "network-fleet-branch":
       if (!["chairman", "principal", "vice_principal"].includes(ctx.role)) return;
@@ -526,6 +703,7 @@ function change(event) {
     case "branch":
       if (ctx.role !== "chairman") return;
       ui.branch = element.value; ui.courseId = ""; ui.filter = "all";
+      ui.chairman.reportBranches = null; ui.chairman.staffPage = 1; ui.chairman.studentPage = 1; ui.chairman.branchId = "";
       if (element.value !== "all") ui.network.selected = element.value;
       closeDialog(); render(); break;
     case "child":
@@ -752,6 +930,11 @@ document.addEventListener("change", change);
 document.addEventListener("submit", submit);
 document.addEventListener("input", (event) => {
   if (event.target.dataset.change === "book-search") { ui.query = event.target.value; updateCatalog(); }
+  const key = event.target.dataset.change;
+  if (context()?.role === "chairman" && ["chairman-staff-search", "chairman-student-search"].includes(key)) {
+    ui.chairman[key === "chairman-staff-search" ? "staffQuery" : "studentQuery"] = event.target.value.slice(0, 80);
+    ui.chairman.staffPage = 1; ui.chairman.studentPage = 1; render(key);
+  }
 });
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !dialog.open) {
@@ -768,7 +951,7 @@ window.addEventListener("hashchange", () => {
   const previous = view;
   view = getView();
   if (previous.role !== view.role || previous.page !== view.page) { ui.courseId = ""; ui.filter = "all"; }
-  if (view.page === "overview" && (previous.role !== view.role || previous.page !== view.page)) {
+  if (view.page === "overview" && (previous.role !== view.role || previous.page !== view.page || previous.module !== view.module)) {
     ui.network.selected = ""; ui.network.mode = ""; ui.network.compare = null; ui.network.busId = ""; ui.network.status = "all"; schoolMapKey = null;
   }
   closeDialog();
