@@ -1658,7 +1658,7 @@ dialog.chairman-dialog { width: min(920px, calc(100vw - 30px)); max-width: 920px
 .principal-school-pulse button:hover { border-color: #8bb195; background: #edf5e8; }
 .principal-school-pulse button > span { flex: 1; font-size: 12px; }
 .principal-school-pulse strong { font-size: 20px; color: #276348; letter-spacing: -.035em; }
-.principal-portal .network-experience { height: calc(100dvh - var(--topbar-height) - var(--map-nav-height, 0px) - var(--chairman-view-height) - var(--principal-context-height)); }
+.principal-portal .network-experience { height: calc(100dvh - var(--topbar-height) - var(--map-nav-height, 0px) - var(--chairman-view-height) - var(--principal-context-height) - var(--vice-task-height, 0px)); }
 .principal-school-scope { display: flex; align-items: center; gap: 11px; padding: 1px 8px 1px 0; min-width: 0; }
 .principal-school-scope > svg { color: #34714c; }
 .principal-school-scope small { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
@@ -1721,4 +1721,61 @@ dialog.chairman-dialog { width: min(920px, calc(100vw - 30px)); max-width: 920px
   .principal-demo-account { width: 133px; }
   .principal-school-heading h1 { font-size: 16px; }
   .principal-school-header { padding-inline: 10px; }
+}
+
+/* Vice Principal daily coordination */
+.role-vice_principal .principal-portal { --vice-task-height: 57px; }
+.vice-task-bar { min-height: var(--vice-task-height); display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 9px 24px; background: #f0f6ed; border-bottom: 1px solid #dce7d6; }
+.vice-task-bar > span, .vice-task-bar > div { display: flex; align-items: center; gap: 9px; }
+.vice-task-bar > span { color: #3d6c4c; }
+.vice-task-bar strong { font-size: 12px; }
+.vice-task-bar small { color: var(--muted); font-size: 11px; margin-left: 5px; }
+.vice-task-bar .button { min-height: 34px; font-size: 12px; }
+.vice-cover-section { padding: 0 24px 26px; }
+.vice-board-intro { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px; }
+.vice-board-intro p { font-size: 13px; color: var(--muted); }
+.vice-followup-list { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 15px; padding: 0 20px 20px; }
+.vice-followup-card { padding: 18px; border: 1px solid var(--line); border-radius: 12px; }
+.vice-followup-card > div { display: flex; justify-content: space-between; gap: 8px; }
+.vice-followup-card h3 { font-size: 17px; line-height: 1.45; margin: 16px 0 7px; }
+.vice-followup-card p { font-size: 12px; color: var(--muted); line-height: 1.7; }
+.vice-followup-card blockquote { margin: 14px 0; border-left: 3px solid #c4dbbf; padding: 4px 0 4px 12px; font-size: 13px; color: #48644e; line-height: 1.7; overflow-wrap: anywhere; }
+.vice-followup-card .button { margin-top: 6px; }
+.vice-cover-list { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; padding: 0 20px 20px; }
+.vice-cover-list > .empty-state { grid-column: 1 / -1; }
+.vice-cover-card { padding: 17px; border: 1px solid var(--line); border-radius: 11px; }
+.vice-cover-card > div { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.vice-cover-card strong { font-size: 14px; line-height: 1.5; }
+.vice-cover-card p { margin-top: 12px; font-size: 13px; line-height: 1.7; }
+.vice-cover-card > small { display: block; font-size: 12px; line-height: 1.8; margin-top: 6px; color: var(--muted); overflow-wrap: anywhere; }
+.vice-cover-card > .button { margin-top: 14px; }
+.vice-course-cover { color: #2d714b; }
+.vice-leave-recommendation { background: #f0f6ed; border: 1px solid #dce8d6; border-radius: 8px; padding: 12px; margin-top: 15px; }
+.vice-leave-recommendation strong { font-size: 12px; line-height: 1.6; }
+.vice-leave-recommendation small { display: block; font-size: 11px; color: var(--muted); margin-top: 7px; }
+form[data-form^="vice-"] .form-row { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin-block: 12px; }
+form[data-form^="vice-"] .form-row .field { margin: 0; }
+form[data-form^="vice-"] .form-body > p { font-size: 13px; line-height: 1.7; color: var(--muted); margin-bottom: 15px; }
+form[data-form^="vice-"] .form-error { margin: 0 18px 12px; }
+.vice-note-history { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 16px; }
+.vice-note-history h3 { font-size: 13px; margin-bottom: 12px; }
+.vice-note-history article { padding: 10px 0; }
+.vice-note-history p { font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; }
+.vice-note-history small { display: block; color: var(--muted); font-size: 11px; margin-top: 5px; }
+@media (max-width: 1100px) {
+  .vice-task-bar { padding-inline: 18px; }
+  .vice-task-bar small { display: none; }
+}
+@media (max-width: 750px) {
+  .role-vice_principal .principal-portal { --vice-task-height: 84px; }
+  .vice-task-bar { flex-wrap: wrap; align-content: center; gap: 6px; padding: 7px 13px; }
+  .vice-task-bar > span { width: 100%; gap: 7px; }
+  .vice-task-bar > span > svg { width: 14px; height: 14px; }
+  .vice-task-bar strong { font-size: 11px; }
+  .vice-task-bar > div { width: 100%; }
+  .vice-task-bar .button { flex: 1; min-height: 33px; font-size: 11px; padding: 5px 9px; }
+  .vice-cover-section { padding: 0 13px 20px; }
+  .vice-followup-list, .vice-cover-list { grid-template-columns: minmax(0,1fr); padding-inline: 15px; }
+  .vice-board-intro { padding-inline: 15px; flex-wrap: wrap; }
+  .vice-operations-panel .chairman-panel-heading { flex-wrap: wrap; }
 }

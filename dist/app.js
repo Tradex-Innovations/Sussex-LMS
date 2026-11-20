@@ -10,9 +10,11 @@ import { SchoolNetworkMap } from "./network-map.js";
 import { networkFleet } from "./network-fleet.js";
 import { updateNetworkBusDetails } from "./network-transport.js";
 import { chairmanOverviewPage, chairmanMapMetrics, chairmanBranchPanel, chairmanStudentPanel, chairmanStaffPanel, chairmanVacancyPanel, executiveReportHTML } from "./chairman.js";
-import { chairmanDefaults, chairmanViews, chairmanBranches, studentRoster, branchStaff, branchVacancies, schoolDays, generateExecutiveReport, reportCSV, reportTypes, demoDate, isSchoolLeader, visibleExecutiveReports, reportOwnerKey, schoolLeaveRequests } from "./chairman-data.js";
+import { chairmanDefaults, chairmanViews, chairmanBranches, studentRoster, branchStaff, branchVacancies, schoolDays, generateExecutiveReport, reportCSV, reportTypes, demoDate, isSchoolLeader, visibleExecutiveReports, reportOwnerKey, schoolLeaveRequests, isSchoolOperator } from "./chairman-data.js";
 import { principalOverviewPage } from "./principal.js";
 import { schoolAcademicComparison, schoolAcademicAttention } from "./principal-data.js";
+import { schoolFollowups, schoolTemporaryCovers, coverTeachers, saveSchoolFollowup, saveTemporaryCover, cancelTemporaryCover, saveLeaveRecommendation, followupCategories } from "./vice-data.js";
+import { viceFollowupBoard, viceFollowupForm, temporaryCoverForm, leaveRecommendationForm } from "./vice-principal.js";
 import { FleetMap } from "./map.js";
 import { mountMapSummary, transportPage, updateTripDetails } from "./transport.js";
 import { avatar, button, emptyState, escapeHtml as e, iconTile } from "./ui.js";
@@ -38,13 +40,13 @@ let mapViewKey;
 let dialogMode;
 let view = getView();
 const ui = { accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", grade: "all", query: "", paused: false, runningSince: performance.now(), elapsed: 0, starts: {},
-  network: { subject: "mathematics", grade: 8, term: 3, selected: "", mode: "", compare: null, category: "all", tab: "transport", status: "all", busId: "", busBranch: "all" }, chairman: { ...chairmanDefaults(), ...(view.role === "principal" ? { attendanceFlag: "all" } : {}) } };
+  network: { subject: "mathematics", grade: 8, term: 3, selected: "", mode: "", compare: null, category: "all", tab: "transport", status: "all", busId: "", busBranch: "all" }, chairman: { ...chairmanDefaults(), ...(["principal", "vice_principal"].includes(view.role) ? { attendanceFlag: "all" } : {}) } };
 
 function getView() {
   const [requestedRole, requestedPage, requestedModule] = location.hash.slice(1).split("/");
   const role = Object.hasOwn(roles, requestedRole) ? requestedRole : "chairman";
   const page = roles[role].pages.includes(requestedPage) ? requestedPage : roles[role].start;
-  const module = ["chairman", "principal"].includes(role) && page === "overview" && chairmanViews.some((item) => item.id === requestedModule) ? requestedModule : "transport";
+  const module = ["chairman", "principal", "vice_principal"].includes(role) && page === "overview" && chairmanViews.some((item) => item.id === requestedModule) ? requestedModule : "transport";
   return { role, page, module };
 }
 
@@ -62,7 +64,7 @@ function childFor(ctx) {
 function optionsFor(ctx = context()) {
   const children = linkedChildren(state, ctx);
   const child = childFor(ctx);
-  return { state, context: ctx, children, child, fleet: visibleBuses(state, ctx, child), filter: ui.filter, selected: ui.bus, paused: ui.paused, progress, courseId: ui.courseId, grade: ui.grade, query: ui.query, network: ctx?.role === "principal" ? { ...ui.network, className: ui.chairman.academicClass } : ui.network, chairman: { ...ui.chairman, view: view.module } };
+  return { state, context: ctx, children, child, fleet: visibleBuses(state, ctx, child), filter: ui.filter, selected: ui.bus, paused: ui.paused, progress, courseId: ui.courseId, grade: ui.grade, query: ui.query, network: isSchoolOperator(ctx) ? { ...ui.network, className: ui.chairman.academicClass } : ui.network, chairman: { ...ui.chairman, view: view.module } };
 }
 
 function elapsed() {
@@ -153,10 +155,10 @@ function render(focus, { scrollTop = false } = {}) {
     }
     if (!options.fleet.some((bus) => bus.id === ui.bus)) ui.bus = options.fleet[0]?.id;
     options.selected = ui.bus;
-    const pages = { overview: ctx.role === "chairman" ? chairmanOverviewPage : ctx.role === "principal" ? principalOverviewPage : networkOverviewPage, courses: coursesPage, people: peoplePage, library: libraryPage, access: accessPage };
+    const pages = { overview: ctx.role === "chairman" ? chairmanOverviewPage : isSchoolOperator(ctx) ? principalOverviewPage : networkOverviewPage, courses: coursesPage, people: peoplePage, library: libraryPage, access: accessPage };
     body = view.page === "transport" ? transportPage(view.role, options) : pages[view.page](options);
   }
-  document.title = `${["chairman", "principal"].includes(view.role) && view.page === "overview" ? chairmanViews.find((item) => item.id === view.module).name : navigation[view.page].label} · ${roles[view.role].name} · Sussex College Network`;
+  document.title = `${["chairman", "principal", "vice_principal"].includes(view.role) && view.page === "overview" ? chairmanViews.find((item) => item.id === view.module).name : navigation[view.page].label} · ${roles[view.role].name} · Sussex College Network`;
   const mobileNavigation = roles[view.role].pages.length > 1;
   app.innerHTML = `<div class="app-shell role-${view.role} ${mobileNavigation ? "has-mobile-nav" : ""}">
     ${sidebar(ctx)}<div class="desktop-content">${topbar(ctx)}<main id="main" class="page page-${view.page}">${view.page === "overview" ? "" : scopeBar(ctx)}${body}</main></div>
@@ -167,7 +169,7 @@ function render(focus, { scrollTop = false } = {}) {
     const metricView = ctx.role === "chairman" && view.module !== "transport";
     const branches = metricView ? chairmanBranches(state, ctx) : networkBranches(state, ctx, ui.network);
     const key = `${ctx.account.id}-${ctx.branch}-${view.module}-${branches.map((branch) => branch.id).join(",")}`;
-    schoolMap = new SchoolNetworkMap(networkStage, { branches, fleet: metricView ? [] : options.networkBuses, selected: metricView ? ui.chairman.branchId : ui.network.selected || (ctx.role === "principal" ? ctx.branch : ""), homeBranch: ctx.role === "principal" ? ctx.branch : null,
+    schoolMap = new SchoolNetworkMap(networkStage, { branches, fleet: metricView ? [] : options.networkBuses, selected: metricView ? ui.chairman.branchId : ui.network.selected || (isSchoolOperator(ctx) ? ctx.branch : ""), homeBranch: isSchoolOperator(ctx) ? ctx.branch : null,
       metricValues: metricView ? chairmanMapMetrics(options) : null, metricLabel: metricView ? view.module : "",
       selectedBus: ui.network.mode === "bus" ? ui.network.busId : "", status: ui.network.status, paused: ui.paused, progress, elapsed,
       onSelect: selectNetworkBranch, onBusSelect: selectNetworkBus,
@@ -262,14 +264,23 @@ function captureExecutiveReport(type, fromBuilder = false) {
     reportPeriod: ["transport", "staffing", "academic"].includes(type) ? "day" : fromBuilder ? ui.chairman.reportPeriod : ui.chairman.period };
   if (type === "transport") settings.date = demoDate;
   const ctx = context();
-  if (ctx.role === "principal") settings.reportBranches = [ctx.grant.branch];
+  if (isSchoolOperator(ctx)) settings.reportBranches = [ctx.grant.branch];
   const report = generateExecutiveReport(state, ctx, settings, optionsFor(ctx).network, { progress, paused: ui.paused, elapsed: elapsed() });
-  if (ctx.role === "principal" && type === "academic") {
+  if (isSchoolOperator(ctx) && type === "academic") {
     const branch = chairmanBranches(state, ctx)[0];
     const comparison = schoolAcademicComparison(state, branch, optionsFor(ctx).network, ui.chairman.academicCompare);
     report.customColumns = comparison.columns;
     report.customRows = comparison.rows.map((row) => Object.fromEntries(comparison.columns.map(([key]) => [key, row[key]])));
     report.criteria.comparison = comparison.mode;
+  }
+  if (ctx.role === "vice_principal" && type === "brief") {
+    const branch = chairmanBranches(state, ctx)[0];
+    report.operations = {
+      date: demoDate,
+      followups: schoolFollowups(state, branch).map(({ title, category, status, due }) => ({ title, category, status, due })),
+      covers: schoolTemporaryCovers(state, branch).filter((item) => item.status === "active").map(({ className, title, teacherName, date }) => ({ className, title, teacherName, date })),
+      recommendations: schoolLeaveRequests(state, branch).filter((item) => item.recommendation && item.decision === "pending").length,
+    };
   }
   if (!update((next) => {
     const key = reportOwnerKey(ctx);
@@ -428,21 +439,30 @@ function authorizedAction(name, value, ctx) {
   const course = visibleCourses(state, ctx, options.child).find((item) => item.id === value);
   const material = state.materials.find((item) => item.id === value);
   const materialCourse = visibleCourses(state, ctx, options.child).find((item) => item.id === material?.course);
+  const viceBranch = ctx.role === "vice_principal" ? chairmanBranches(state, ctx)[0] : null;
   const guards = {
-    "principal-pulse": ctx.role === "principal" && ["academic", "attendance", "staffing", "transport"].includes(value),
-    "principal-class": ctx.role === "principal" && new RegExp("^" + ui.network.grade + "[AB]$").test(value),
-    "principal-grade": ctx.role === "principal" && [6, 8, 10, 11].includes(Number(value)),
-    "principal-subject": ctx.role === "principal" && subjects.some((subject) => subject.id === value),
-    "principal-attendance-class": ctx.role === "principal" && /^(?:[1-9]|1[0-3])[AB]$/.test(value),
-    "principal-course": ctx.role === "principal" && Boolean(course),
+    "vice-followups": Boolean(viceBranch),
+    "vice-new-followup": Boolean(viceBranch) && Object.hasOwn(followupCategories, value),
+    "vice-edit-followup": Boolean(viceBranch) && schoolFollowups(state, viceBranch).some((item) => item.id === value),
+    "vice-student-followup": Boolean(viceBranch) && Boolean(chairmanPerson("student", value, ctx)),
+    "vice-bus-followup": Boolean(viceBranch) && networkFleet(state, [viceBranch]).some((bus) => bus.id === value),
+    "vice-cover": Boolean(viceBranch) && (!value || Boolean(course)),
+    "vice-cancel-cover": Boolean(viceBranch) && schoolTemporaryCovers(state, viceBranch).some((item) => item.id === value && item.status === "active"),
+    "vice-leave-recommend": Boolean(viceBranch) && schoolLeaveRequests(state, viceBranch).some((item) => item.id === value && item.decision === "pending"),
+    "principal-pulse": isSchoolOperator(ctx) && ["academic", "attendance", "staffing", "transport"].includes(value),
+    "principal-class": isSchoolOperator(ctx) && new RegExp("^" + ui.network.grade + "[AB]$").test(value),
+    "principal-grade": isSchoolOperator(ctx) && [6, 8, 10, 11].includes(Number(value)),
+    "principal-subject": isSchoolOperator(ctx) && subjects.some((subject) => subject.id === value),
+    "principal-attendance-class": isSchoolOperator(ctx) && /^(?:[1-9]|1[0-3])[AB]$/.test(value),
+    "principal-course": isSchoolOperator(ctx) && Boolean(course),
     "principal-review-leave": ctx.role === "principal" && ["approved", "declined"].includes(value?.split("|")[1]) && schoolLeaveRequests(state, chairmanBranches(state, ctx)[0]).some((request) => request.id === value?.split("|")[0]),
     "principal-trip": ctx.role === "principal" && can(ctx, "transport.manage") && ["route", "school"].includes(value?.split("|")[1]) && options.fleet.some((bus) => bus.id === value?.split("|")[0]),
     "chairman-student": isSchoolLeader(ctx) && name === "chairman-student" && Boolean(chairmanPerson("student", value, ctx)),
     "chairman-staff": isSchoolLeader(ctx) && name === "chairman-staff" && Boolean(chairmanPerson("staff", value, ctx)),
     "chairman-vacancy": isSchoolLeader(ctx) && name === "chairman-vacancy" && Boolean(chairmanPerson("vacancy", value, ctx)),
     "chairman-review-vacancy": isSchoolLeader(ctx) && name === "chairman-review-vacancy" && Boolean(chairmanPerson("vacancy", value, ctx)),
-    "chairman-manage-staff": isSchoolLeader(ctx) && chairmanBranches(state, ctx).some((branch) => branch.id === value),
-    "chairman-staff-tab": isSchoolLeader(ctx) && (["people", "vacancies"].includes(value) || ctx.role === "principal" && value === "leave"),
+    "chairman-manage-staff": can(ctx, "roles.manage") && chairmanBranches(state, ctx).some((branch) => branch.id === value),
+    "chairman-staff-tab": isSchoolLeader(ctx) && (["people", "vacancies"].includes(value) || isSchoolOperator(ctx) && value === "leave"),
     "chairman-page": isSchoolLeader(ctx) && /^(staff|student)\|[1-9]\d*$/.test(value),
     "chairman-alert": isSchoolLeader(ctx) && chairmanViews.some((item) => item.id === value?.split("|")[0]) && chairmanBranches(state, ctx).some((branch) => branch.id === value?.split("|")[1]),
     "chairman-export": isSchoolLeader(ctx) && Object.hasOwn(reportTypes, value),
@@ -518,18 +538,52 @@ function action(event) {
   const ctx = context();
   if (!authorizedAction(name, value, ctx)) return toast("This action is outside the current role’s assigned access.");
   switch (name) {
+    case "vice-followups": {
+      const branch = chairmanBranches(state, ctx)[0];
+      showDialog("chairman-vice-board", "School follow-up board", "Owners, due dates and progress for your assigned school", viceFollowupBoard(optionsFor(ctx), branch));
+      break;
+    }
+    case "vice-new-followup":
+    case "vice-student-followup":
+    case "vice-bus-followup":
+    case "vice-edit-followup": {
+      const branch = chairmanBranches(state, ctx)[0];
+      const item = name === "vice-edit-followup" ? schoolFollowups(state, branch).find((item) => item.id === value) : null;
+      const student = name === "vice-student-followup" ? chairmanPerson("student", value, ctx).person : null;
+      const bus = name === "vice-bus-followup" ? networkFleet(state, [branch]).find((item) => item.id === value) : null;
+      const category = student ? "attendance" : bus ? "transport" : name === "vice-new-followup" ? value : item?.category;
+      const title = student ? "Attendance: " + student.name + " · " + student.admission : bus ? "Transport: BUS " + bus.label + " · " + bus.name : "";
+      showDialog("vice-followup", item ? "Update school follow-up" : "New school follow-up", branch.school, viceFollowupForm(optionsFor(ctx), branch, item, category, title));
+      break;
+    }
+    case "vice-cover": {
+      const branch = chairmanBranches(state, ctx)[0];
+      showDialog("vice-cover", "Assign temporary teaching cover", branch.school, temporaryCoverForm(optionsFor(ctx), branch, value));
+      break;
+    }
+    case "vice-cancel-cover": {
+      try {
+        if (update((next) => cancelTemporaryCover(next, ctx, value), { branch: ctx.branch, category: "academic", message: "Temporary teaching cover cancelled." })) { render(); toast("Temporary cover cancelled."); }
+      } catch (error) { toast(error.message); }
+      break;
+    }
+    case "vice-leave-recommend": {
+      const branch = chairmanBranches(state, ctx)[0], request = schoolLeaveRequests(state, branch).find((item) => item.id === value);
+      showDialog("vice-leave", "Leave recommendation", "For Principal review · " + branch.name, leaveRecommendationForm(request));
+      break;
+    }
     case "principal-pulse": {
       const branch = chairmanBranches(state, ctx)[0];
       ui.chairman.date = demoDate;
-      if (value === "attendance") { ui.chairman.audience = "students"; ui.chairman.period = "day"; ui.chairman.attendanceGrade = "all"; ui.chairman.attendanceClass = "all"; ui.chairman.studentQuery = ""; ui.chairman.studentPage = 1; }
+      if (value === "attendance") { ui.chairman.audience = "students"; ui.chairman.attendanceFlag = "all"; ui.chairman.period = "day"; ui.chairman.attendanceGrade = "all"; ui.chairman.attendanceClass = "all"; ui.chairman.studentQuery = ""; ui.chairman.studentPage = 1; }
       if (value === "staffing") { ui.chairman.staffGroup = "teachers"; ui.chairman.staffStatus = "unavailable"; ui.chairman.staffingTab = "people"; ui.chairman.staffQuery = ""; ui.chairman.staffPage = 1; }
       if (value === "academic") {
         const weakest = schoolAcademicAttention(state, branch)[0];
         ui.network.subject = weakest.subjectId; ui.network.grade = weakest.grade; ui.network.term = 3;
         ui.chairman.academicClass = weakest.className; ui.chairman.academicCompare = "classes";
       }
-      if (value === "transport") ui.network.status = "delayed";
-      if (view.module === value) render(); else location.hash = "principal/overview/" + value;
+      if (value === "transport") { ui.network.status = "delayed"; ui.pendingPulseTransport = view.module !== value; }
+      if (view.module === value) render(); else location.hash = view.role + "/overview/" + value;
       break;
     }
     case "principal-class": ui.chairman.academicClass = value; render(); break;
@@ -538,7 +592,7 @@ function action(event) {
     case "principal-attendance-class":
       ui.chairman.attendanceGrade = value.slice(0, -1); ui.chairman.attendanceClass = value; ui.chairman.attendanceFlag = "all"; ui.chairman.studentPage = 1; render(); break;
     case "principal-course":
-      ui.pendingCourse = value; closeDialog(); location.hash = "principal/courses"; break;
+      ui.pendingCourse = value; closeDialog(); location.hash = view.role + "/courses"; break;
     case "principal-review-leave": {
       const [id, decision] = value.split("|"), branch = chairmanBranches(state, ctx)[0];
       const request = schoolLeaveRequests(state, branch).find((request) => request.id === id);
@@ -606,9 +660,9 @@ function action(event) {
     case "network-bus": selectNetworkBus(value); break;
     case "network-fleet": ui.network.mode = "fleet"; ui.network.busBranch = "all"; render(); break;
     case "network-fleet-status": ui.network.status = value; render(); break;
-    case "network-tab": if (ctx.role === "principal" && value === "performance") location.hash = "principal/overview/academic"; else { ui.network.tab = value; render(); } break;
+    case "network-tab": if (isSchoolOperator(ctx) && value === "performance") location.hash = view.role + "/overview/academic"; else { ui.network.tab = value; render(); } break;
     case "network-performance":
-      if (ctx.role === "principal") { location.hash = "principal/overview/academic"; break; }
+      if (isSchoolOperator(ctx)) { location.hash = view.role + "/overview/academic"; break; }
       ui.network.mode = "comparison"; render();
       app.querySelector("#network-inspector-title")?.focus({ preventScroll: true });
       break;
@@ -703,8 +757,17 @@ function change(event) {
   const name = element.dataset.change;
   const ctx = context();
   if (!ctx) return;
+  if (name === "vice-cover-course") {
+    if (ctx.role !== "vice_principal") return;
+    const branch = chairmanBranches(state, ctx)[0];
+    const course = state.courses.find((item) => item.id === element.value && item.branch === branch.id);
+    if (!course) return;
+    const select = dialog.querySelector('[name="teacher"]');
+    select.innerHTML = coverTeachers(state, branch).filter((person) => person.id !== state.assignments[course.id]?.teacher).map((person) => '<option value="' + e(person.id) + '">' + e(person.name + (person.sample ? " · Sample teacher" : "")) + '</option>').join("");
+    return;
+  }
   if (name?.startsWith("principal-")) {
-    if (ctx.role !== "principal") return;
+    if (!isSchoolOperator(ctx)) return;
     if (name === "principal-academic-class" && (element.value === "all" || new RegExp("^" + ui.network.grade + "[AB]$").test(element.value))) ui.chairman.academicClass = element.value;
     else if (name === "principal-compare" && ["classes", "subjects", "grades", "teachers"].includes(element.value)) {
       ui.chairman.academicCompare = element.value;
@@ -774,7 +837,7 @@ function change(event) {
     }
     case "account":
       ui.accounts[view.role] = element.value; ui.courseId = ""; ui.filter = "all"; ui.chairman = chairmanDefaults();
-      if (ctx.role === "principal") ui.chairman.attendanceFlag = "all";
+      if (isSchoolOperator(ctx)) ui.chairman.attendanceFlag = "all";
       ui.network.selected = ""; ui.network.mode = ""; ui.network.busId = ""; ui.network.compare = null; ui.network.status = "all"; ui.network.busBranch = "all"; ui.network.mapFocus = null; schoolMapKey = null;
       closeDialog(); render(); break;
     case "branch":
@@ -867,6 +930,18 @@ async function submit(event) {
   const options = optionsFor(ctx);
   const allowedBranch = (branch) => state.branches.some((item) => item.id === branch) && (ctx.branch === "all" || ctx.branch === branch);
   const fail = (message = "This change is outside your assigned scope.") => showError(form, message);
+
+  if (["vice-followup", "vice-cover", "vice-leave"].includes(mode)) {
+    if (ctx?.role !== "vice_principal") return fail();
+    const input = Object.fromEntries(values);
+    const saveAction = { "vice-followup": saveSchoolFollowup, "vice-cover": saveTemporaryCover, "vice-leave": saveLeaveRecommendation }[mode];
+    const category = mode === "vice-cover" ? "academic" : mode === "vice-leave" ? "people" : Object.hasOwn(followupCategories, input.category) ? input.category : "people";
+    const message = mode === "vice-cover" ? "Temporary teaching cover assigned." : mode === "vice-leave" ? "Leave recommendation recorded for Principal review." : "School follow-up updated.";
+    try {
+      if (update((next) => saveAction(next, ctx, input), { branch: ctx.grant.branch, category, message })) { closeDialog(); render(); toast(message); }
+    } catch (error) { fail(error.message); }
+    return;
+  }
 
   const formActivity = {
     assignment: ["academic", "Course assignments updated.", state.courses.find((course) => course.id === values.get("course"))?.branch],
@@ -1031,7 +1106,9 @@ window.addEventListener("hashchange", () => {
   if (view.page === "overview" && (previous.role !== view.role || previous.page !== view.page || previous.module !== view.module)) {
     ui.network.selected = ""; ui.network.mode = ""; ui.network.compare = null; ui.network.busId = ""; ui.network.status = "all"; schoolMapKey = null;
   }
-  if (previous.role !== view.role) { ui.chairman = chairmanDefaults(); if (view.role === "principal") ui.chairman.attendanceFlag = "all"; }
+  if (previous.role !== view.role) { ui.chairman = chairmanDefaults(); if (["principal", "vice_principal"].includes(view.role)) ui.chairman.attendanceFlag = "all"; }
+  if (ui.pendingPulseTransport && view.module === "transport") { ui.network.status = "delayed"; }
+  ui.pendingPulseTransport = false;
   if (ui.pendingCourse && view.page === "courses") {
     if (visibleCourses(state, context()).some((course) => course.id === ui.pendingCourse)) ui.courseId = ui.pendingCourse;
     ui.pendingCourse = "";

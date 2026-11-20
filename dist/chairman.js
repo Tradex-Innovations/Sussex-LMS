@@ -3,7 +3,9 @@ import { badge, button, emptyState, escapeHtml as e } from "./ui.js";
 import { networkOverviewPage } from "./network.js";
 import { subjects, rankedResults, networkSummary, assessmentResult, performanceTone } from "./network-analytics.js";
 import { chairmanViews, chairmanBranches, schoolDays, demoDate, studentRoster, studentStatus, attendanceResult, attendanceSummary, attendanceExceptions,
-  branchStaff, branchVacancies, staffingResult, staffingSummary, academicTrend, academicDistribution, reportTypes, reportColumns, round, visibleExecutiveReports, schoolLeaveRequests } from "./chairman-data.js";
+  branchStaff, branchVacancies, staffingResult, staffingSummary, academicTrend, academicDistribution, reportTypes, reportColumns, round, visibleExecutiveReports, schoolLeaveRequests, isSchoolOperator } from "./chairman-data.js";
+
+import { leaveRecommendations } from "./vice-data.js";
 
 const percent = (value) => value.toFixed(1) + "%";
 const number = (value) => new Intl.NumberFormat("en-GB").format(value);
@@ -13,7 +15,7 @@ const statusTone = { present: "green", absent: "amber", leave: "blue", late: "am
 
 export function chairmanViewBar(active, role = "chairman") {
   const short = { transport: "Transport", academic: "Academic", attendance: "Attendance", staffing: "Staffing", reports: "Reports" };
-  return '<nav class="chairman-view-bar" aria-label="' + (role === "principal" ? "Principal" : "Chairman") + ' views">' + chairmanViews.map((view) => '<a href="#' + role + '/overview/' + view.id + '" aria-label="' + view.name + '" class="' + (active === view.id ? "is-active" : "") + '" ' + (active === view.id ? 'aria-current="page"' : "") + '>' + icon(view.icon, 18) + '<span class="chairman-view-full">' + view.name + '</span><span class="chairman-view-short">' + short[view.id] + '</span></a>').join("") + '</nav>';
+  return '<nav class="chairman-view-bar" aria-label="' + (role === "vice_principal" ? "Vice Principal" : role === "principal" ? "Principal" : "Chairman") + ' views">' + chairmanViews.map((view) => '<a href="#' + role + '/overview/' + view.id + '" aria-label="' + view.name + '" class="' + (active === view.id ? "is-active" : "") + '" ' + (active === view.id ? 'aria-current="page"' : "") + '>' + icon(view.icon, 18) + '<span class="chairman-view-full">' + (role === "vice_principal" && view.id === "reports" ? "School Reports" : view.name) + '</span><span class="chairman-view-short">' + short[view.id] + '</span></a>').join("") + '</nav>';
 }
 
 function select(label, key, values, current) {
@@ -26,7 +28,7 @@ function dateFilter(current) {
 }
 
 function branchFilter(options) {
-  if (options.context.role === "principal") return '<div class="principal-school-scope">' + icon("school", 19) + '<div><small>Assigned school</small><strong>' + e(options.state.branches.find((branch) => branch.id === options.context.branch)?.school || "") + '</strong></div>' + badge("School access", "green") + '</div>';
+  if (isSchoolOperator(options.context)) return '<div class="principal-school-scope">' + icon("school", 19) + '<div><small>Assigned school</small><strong>' + e(options.state.branches.find((branch) => branch.id === options.context.branch)?.school || "") + '</strong></div>' + badge("School access", "green") + '</div>';
   return select("School branch", "branch", [["all", "All 20 branches"], ...options.state.branches.map((branch) => [branch.id, branch.name])], options.context.branch);
 }
 
@@ -40,7 +42,7 @@ function filters(options, view) {
     select("Period", "chairman-period", [["day", "One school day"], ["week", "Last 5 school days"], ["month", "Last 20 school days"]], c.period) +
     select("Attendance for", "chairman-audience", [["students", "Students"], ["staff", "Staff"]], c.audience) +
     (c.audience === "students" ? select("Student grade", "chairman-grade", [["all", "All grades"], ...Array.from({ length: 13 }, (_, i) => [i + 1, "Grade " + (i + 1)])], c.attendanceGrade) : "") +
-    (options.context.role === "principal" && c.audience === "students" && c.attendanceGrade !== "all" ? select("Class", "principal-attendance-class", [["all", "All classes"], ...["A", "B"].map((letter) => [c.attendanceGrade + letter, "Class " + c.attendanceGrade + letter])], c.attendanceClass) : "");
+    (isSchoolOperator(options.context) && c.audience === "students" && c.attendanceGrade !== "all" ? select("Class", "principal-attendance-class", [["all", "All classes"], ...["A", "B"].map((letter) => [c.attendanceGrade + letter, "Class " + c.attendanceGrade + letter])], c.attendanceClass) : "");
   else if (view === "staffing") fields += dateFilter(c.date);
   return '<div class="chairman-filters">' + fields + '</div>';
 }
@@ -153,13 +155,13 @@ function search(label, key, value) {
 function attendanceWatchlist(options, branches) {
   const c = options.chairman;
   if (c.audience === "staff") {
-    const staff = branches.flatMap((branch) => branchStaff(options.state, branch, schoolDays(c.date)[0])).filter((person) => options.context.role === "principal" || person.status !== "present");
-    return panel(options.context.role === "principal" ? "Staff register" : "Staff attendance exceptions", "Latest school day in the selected period", staffTable(staff, c.staffPage) + pager(staff.length, c.staffPage, "staff"));
+    const staff = branches.flatMap((branch) => branchStaff(options.state, branch, schoolDays(c.date)[0])).filter((person) => isSchoolOperator(options.context) || person.status !== "present");
+    return panel(isSchoolOperator(options.context) ? "Staff register" : "Staff attendance exceptions", "Latest school day in the selected period", staffTable(staff, c.staffPage) + pager(staff.length, c.staffPage, "staff"));
   }
   const people = attendanceExceptions(branches, c);
-  const body = '<div class="chairman-list-tools">' + select("Attendance watchlist", "chairman-attendance-flag", [...(options.context.role === "principal" ? [["all", "All students"]] : []), ["repeated", "3+ absences in 20 school days"], ["absent", "Absent on latest school day"], ["late", "Late on latest school day"]], c.attendanceFlag) + search("Search student or admission", "chairman-student-search", c.studentQuery) + '</div>' +
+  const body = '<div class="chairman-list-tools">' + select("Attendance watchlist", "chairman-attendance-flag", [...(isSchoolOperator(options.context) ? [["all", "All students"]] : []), ["repeated", "3+ absences in 20 school days"], ["absent", "Absent on latest school day"], ["late", "Late on latest school day"]], c.attendanceFlag) + search("Search student or admission", "chairman-student-search", c.studentQuery) + '</div>' +
     table(["Student", "School / class", "Absences in 20 days", "Latest status"], paged(people, c.studentPage).map((student) => '<tr><td><button type="button" class="chairman-person-link" data-action="chairman-student" data-value="' + student.id + '">' + e(student.name) + '</button><small>' + student.admission + '</small></td><td>' + e(student.branchName) + '<small>Class ' + student.className + '</small></td><td><strong>' + student.missed + '</strong></td><td>' + badge(statusLabel[student.status], statusTone[student.status]) + '</td></tr>').join(""), "Student attendance watchlist") + pager(people.length, c.studentPage, "student");
-  return panel(options.context.role === "principal" ? "Student register" : "Attendance watchlist", "Illustrative student records · Repeated absences always use the last 20 school days", body);
+  return panel(isSchoolOperator(options.context) ? "Student register" : "Attendance watchlist", "Illustrative student records · Repeated absences always use the last 20 school days", body);
 }
 
 function attendancePage(options, branches) {
@@ -168,14 +170,14 @@ function attendancePage(options, branches) {
   const dates = schoolDays(c.date, c.period), days = dates.length;
   const sorted = [...results].sort((a, b) => c.attendanceSort === "lowest" ? a.rate - b.rate : b.rate - a.rate);
   const rows = sorted.map((row) => schoolRow(row.branch, '<td><strong>' + percent(row.rate) + '</strong></td><td>' + number(row.present) + '</td><td>' + number(row.absent + row.leave) + '</td><td>' + (c.audience === "staff" ? row.leave : row.late) + '</td>')).join("");
-  return header("Attendance", "Follow student and staff attendance, spot changes and review repeated absences.", button(options.context.role === "principal" ? "School summary CSV" : "Branch summary CSV", "chairman-export", { value: "attendance", variant: "secondary", iconName: "download" })) +
+  return header("Attendance", "Follow student and staff attendance, spot changes and review repeated absences.", button(isSchoolOperator(options.context) ? "School summary CSV" : "Branch summary CSV", "chairman-export", { value: "attendance", variant: "secondary", iconName: "download" })) +
     filters(options, "attendance") + '<p class="chairman-filter-note">' + dateLabel(dates[0]) + (days > 1 ? " – " + dateLabel(dates.at(-1)) : "") + " · " + days + " school day" + (days > 1 ? "s · Totals are attendance-days" : "") + " · Late arrivals are included in present totals.</p>" +
     '<div class="chairman-metrics">' + metric("Attendance rate", percent(summary.rate), c.audience === "staff" ? "Staff attendance" : "Student attendance", "checkCircle") +
     metric("Present", number(summary.present), "Out of " + number(summary.expected) + " expected attendance-days", "users", "blue") +
     metric("Not present", number(summary.absent + summary.leave), summary.leave ? summary.leave + " on approved sample leave" : "Absences in the selected period", "alert", "amber") +
     metric(c.audience === "staff" ? "On leave" : "Late arrivals", number(c.audience === "staff" ? summary.leave : summary.late), results.filter((row) => row.rate < 90).length + " branches below 90%", "clock") + '</div>' +
     attention(results.filter((row) => row.rate < 90).slice(0, 3).map((row) => ({ view: "attendance", branch: row.branch.id, text: row.branch.name + " · " + percent(row.rate) }))) +
-    (options.context.role === "principal" ? principalClassAttendance(options, branches[0]) : '<div class="chairman-map-comparison">' + mapCard("attendance") + panel("Branch attendance", "Same reporting period and audience across schools",
+    (isSchoolOperator(options.context) ? principalClassAttendance(options, branches[0]) : '<div class="chairman-map-comparison">' + mapCard("attendance") + panel("Branch attendance", "Same reporting period and audience across schools",
       '<div class="chairman-panel-filter">' + select("Sort attendance", "chairman-attendance-sort", [["rate", "Highest attendance"], ["lowest", "Needs most attention"]], c.attendanceSort) + '</div>' +
       table(["School", "Rate", "Present", "Not present", c.audience === "staff" ? "On leave" : "Late"], rows, "Attendance branch comparison", "scroll-table")) + '</div>') +
     panel("Attendance trend", (c.period === "day" ? "Last 5 school days" : "Selected reporting period") + " · Weighted attendance across selected schools", sparkline(attendanceTrends(options, branches), "Attendance trend")) +
@@ -206,24 +208,24 @@ function staffingPage(options, branches) {
   const results = branches.map((branch) => staffingResult(options.state, branch, schoolDays(c.date)[0])), summary = staffingSummary(results);
   const people = filteredStaff(options, branches);
   const rows = results.map((row) => schoolRow(row.branch, '<td><strong>' + row.total + '</strong></td><td>' + row.teachers + '</td><td>' + row.available + '</td><td>' + row.vacancies.length + '</td><td>' + row.ratio.toFixed(1) + ':1</td>')).join("");
-  const tabs = '<nav class="chairman-sub-tabs" aria-label="Staffing lists">' + [["people", "Staff directory"], ["vacancies", "Open vacancies"], ...(options.context.role === "principal" ? [["leave", "Leave requests"]] : [])].map(([id, label]) => '<button type="button" data-action="chairman-staff-tab" data-value="' + id + '" aria-pressed="' + (c.staffingTab === id) + '">' + label + '</button>').join("") + '</nav>';
+  const tabs = '<nav class="chairman-sub-tabs" aria-label="Staffing lists">' + [["people", "Staff directory"], ["vacancies", "Open vacancies"], ...(isSchoolOperator(options.context) ? [["leave", options.context.role === "vice_principal" ? "Leave recommendations" : "Leave requests"]] : [])].map(([id, label]) => '<button type="button" data-action="chairman-staff-tab" data-value="' + id + '" aria-pressed="' + (c.staffingTab === id) + '">' + label + '</button>').join("") + '</nav>';
   const directory = '<div class="chairman-list-tools">' + select("Staff group", "chairman-staff-group", [["all", "All staff"], ["leadership", "Leadership"], ["teachers", "Teaching staff"], ["support", "Support staff"]], c.staffGroup) +
-    select("Availability", "chairman-staff-status", [["all", "All statuses"], ["present", "Present"], ["absent", "Absent"], ["leave", "On leave"], ...(options.context.role === "principal" ? [["unavailable", "Unavailable staff"]] : [])], c.staffStatus) + search("Search staff, role or subject", "chairman-staff-search", c.staffQuery) + '</div>' +
+    select("Availability", "chairman-staff-status", [["all", "All statuses"], ["present", "Present"], ["absent", "Absent"], ["leave", "On leave"], ...(isSchoolOperator(options.context) ? [["unavailable", "Unavailable staff"]] : [])], c.staffStatus) + search("Search staff, role or subject", "chairman-staff-search", c.staffQuery) + '</div>' +
     staffTable(people, c.staffPage) + pager(people.length, c.staffPage, "staff");
-  return header("Staffing Overview", "See school leadership, teaching capacity, availability and open positions.", button(options.context.role === "principal" ? "School summary CSV" : "Branch summary CSV", "chairman-export", { value: "staffing", variant: "secondary", iconName: "download" })) +
+  return header("Staffing Overview", "See school leadership, teaching capacity, availability and open positions.", button(isSchoolOperator(options.context) ? "School summary CSV" : "Branch summary CSV", "chairman-export", { value: "staffing", variant: "secondary", iconName: "download" })) +
     filters(options, "staffing") + '<p class="chairman-filter-note">Availability as of ' + dateLabel(schoolDays(c.date)[0]) + ". Appointed staff are combined with clearly labelled illustrative records.</p>" +
     '<div class="chairman-metrics">' + metric("Total staff", number(summary.total), summary.leadership + " leaders · " + summary.support + " support staff", "users") +
     metric("Teaching staff", number(summary.teachers), summary.ratio.toFixed(1) + " sample students per teacher", "book", "blue") +
     metric("Available today", number(summary.available), summary.onLeave + " on leave · " + summary.absent + " absent", "checkCircle") +
     metric("Open vacancies", summary.vacancies, percent(summary.coverage) + " of required positions filled", "badge", "amber") + '</div>' +
     attention(results.filter((row) => row.vacancies.length >= 3).slice(0, 3).map((row) => ({ view: "staffing", branch: row.branch.id, text: row.branch.name + " · " + row.vacancies.length + " vacancies" }))) +
-    (options.context.role === "principal" ? principalStaffingSummary(options, results[0]) : '<div class="chairman-map-comparison">' + mapCard("staffing") + panel("Branch staffing comparison", "Headcount, availability and student-to-teacher ratio",
+    (isSchoolOperator(options.context) ? principalStaffingSummary(options, results[0]) : '<div class="chairman-map-comparison">' + mapCard("staffing") + panel("Branch staffing comparison", "Headcount, availability and student-to-teacher ratio",
       table(["School", "Staff", "Teachers", "Available", "Vacancies", "Ratio"], rows, "Staffing branch comparison", "scroll-table")) + '</div>') +
-    panel("People and positions", "Select a person, vacancy or leave request for details", tabs + (c.staffingTab === "people" ? directory : c.staffingTab === "leave" && options.context.role === "principal" ? principalLeaveCards(options, branches[0]) : vacancyCards(options, branches)));
+    panel("People and positions", "Select a person, vacancy or leave request for details", tabs + (c.staffingTab === "people" ? directory : c.staffingTab === "leave" && isSchoolOperator(options.context) ? principalLeaveCards(options, branches[0]) : vacancyCards(options, branches)));
 }
 
 function reportScope(options, branches) {
-  if (options.context.role === "principal") return '<div class="principal-report-scope">' + icon("school", 19) + '<div><strong>' + e(branches[0].school) + '</strong><p>This report includes your assigned school.</p></div></div>';
+  if (isSchoolOperator(options.context)) return '<div class="principal-report-scope">' + icon("school", 19) + '<div><strong>' + e(branches[0].school) + '</strong><p>This report includes your assigned school.</p></div></div>';
   const selected = options.chairman.reportBranches;
   return '<fieldset class="chairman-report-schools"><legend>Schools to include</legend><div>' + button("Select all", "chairman-report-all", { variant: "secondary compact" }) +
     button("Clear", "chairman-report-none", { variant: "secondary compact" }) + '</div><section>' + branches.map((branch) => '<label><input type="checkbox" data-change="chairman-report-branch" value="' + branch.id + '" ' + (selected === null || selected.includes(branch.id) ? "checked" : "") + '><span>' + e(branch.name) + '</span></label>').join("") + '</section></fieldset>';
@@ -249,6 +251,9 @@ export function reportPreview(report) {
     '<p class="executive-report-criteria">' + e(criteria.join(" ")) + '</p>' +
     table(columns.map(([, label]) => label), rows.map((row) => '<tr>' + columns.map(([key]) => '<td>' + e(row[key]) + '</td>').join("") + '</tr>').join(""), "Generated executive report") +
     (report.insights.length && report.type === "brief" ? '<section class="executive-report-insights"><h3>Items for branch review</h3>' + report.insights.slice(0, 12).map((item) => '<p><strong>' + e(item.school) + '</strong> · ' + e(item.message) + '</p>').join("") + '</section>' : "") +
+    (report.operations ? '<section class="executive-report-insights"><h3>School coordination snapshot</h3><p>As of ' + e(report.operations.date || report.criteria.to) + ' · ' + report.operations.followups.filter((item) => item.status !== "resolved").length + ' pending follow-ups · ' + report.operations.covers.length + ' active cover assignments · ' + report.operations.recommendations + ' leave recommendations awaiting a Principal decision.</p>' +
+      table(["Follow-up", "Category", "Status", "Due"], report.operations.followups.map((item) => '<tr><td>' + e(item.title) + '</td><td>' + e(item.category) + '</td><td>' + e(item.status.replaceAll("_", " ")) + '</td><td>' + e(item.due) + '</td></tr>').join(""), "School coordination follow-ups") +
+      (report.operations.covers.length ? table(["Cover class", "Subject", "Cover teacher", "Date"], report.operations.covers.map((item) => '<tr><td>' + e(item.className) + '</td><td>' + e(item.title) + '</td><td>' + e(item.teacherName) + '</td><td>' + e(item.date) + '</td></tr>').join(""), "School temporary cover snapshot") : "") + '</section>' : "") +
     '<footer>Generated ' + new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Colombo" }).format(new Date(report.generatedAt)) + " · Sri Lanka time. Illustrative data for client demonstration.</footer></article>";
 }
 
@@ -258,12 +263,12 @@ function reportsPage(options, branches) {
   const report = history.find((report) => report.id === c.reportId);
   let assessmentFields = "";
   if (["brief", "academic"].includes(c.reportType)) assessmentFields += select("Subject", "network-subject", subjects.map((subject) => [subject.id, subject.name]), options.network.subject) + select("Grade", "network-grade", [6, 8, 10, 11].map((grade) => [grade, "Grade " + grade]), options.network.grade) + select("Assessment", "network-term", [1, 2, 3].map((term) => [term, "Term " + term]), options.network.term);
-  if (options.context.role === "principal" && ["brief", "academic"].includes(c.reportType)) assessmentFields += select("Academic class", "principal-academic-class", [["all", "All classes"], ...["A", "B"].map((letter) => [options.network.grade + letter, "Class " + options.network.grade + letter])], c.academicClass);
+  if (isSchoolOperator(options.context) && ["brief", "academic"].includes(c.reportType)) assessmentFields += select("Academic class", "principal-academic-class", [["all", "All classes"], ...["A", "B"].map((letter) => [options.network.grade + letter, "Class " + options.network.grade + letter])], c.academicClass);
   if (c.reportType === "attendance") assessmentFields += select("Attendance for", "chairman-audience", [["students", "Students"], ["staff", "Staff"]], c.audience);
   if (c.reportType === "brief" || c.reportType === "attendance" && c.audience === "students") assessmentFields += select("Attendance grade", "chairman-grade", [["all", "All grades"], ...Array.from({ length: 13 }, (_, i) => [i + 1, "Grade " + (i + 1)])], c.attendanceGrade);
-  if (options.context.role === "principal" && (c.reportType === "brief" || c.reportType === "attendance" && c.audience === "students") && c.attendanceGrade !== "all") assessmentFields += select("Attendance class", "principal-attendance-class", [["all", "All classes"], ...["A", "B"].map((letter) => [c.attendanceGrade + letter, "Class " + c.attendanceGrade + letter])], c.attendanceClass);
+  if (isSchoolOperator(options.context) && (c.reportType === "brief" || c.reportType === "attendance" && c.audience === "students") && c.attendanceGrade !== "all") assessmentFields += select("Attendance class", "principal-attendance-class", [["all", "All classes"], ...["A", "B"].map((letter) => [c.attendanceGrade + letter, "Class " + c.attendanceGrade + letter])], c.attendanceClass);
   const builder = '<section class="surface chairman-report-builder"><header class="chairman-panel-heading"><div><h2>Build a report</h2><p>Choose a scope and capture a snapshot</p></div></header><div class="chairman-report-form">' +
-    select("Report type", "chairman-report-type", Object.entries(reportTypes).map(([id, label]) => [id, id === "brief" && options.context.role === "principal" ? "School executive brief" : label]), c.reportType) + (c.reportType !== "transport" ? dateFilter(c.date) : '<p class="chairman-filter-note">Fleet status is captured when you generate the report.</p>') +
+    select("Report type", "chairman-report-type", Object.entries(reportTypes).map(([id, label]) => [id, id === "brief" && isSchoolOperator(options.context) ? (options.context.role === "vice_principal" ? "School operational brief" : "School executive brief") : label]), c.reportType) + (c.reportType !== "transport" ? dateFilter(c.date) : '<p class="chairman-filter-note">Fleet status is captured when you generate the report.</p>') +
     (["brief", "attendance"].includes(c.reportType) ? select("Report period", "chairman-report-period", [["day", "One school day"], ["week", "Last 5 school days"], ["month", "Last 20 school days"]], c.reportPeriod) : "") +
     (assessmentFields ? '<div class="chairman-report-assessment">' + assessmentFields + '</div>' : "") +
     reportScope(options, branches) + button("Generate report", "chairman-generate-report", { variant: "primary", iconName: "file" }) +
@@ -272,7 +277,7 @@ function reportsPage(options, branches) {
     button("Download report", "chairman-download-report", { value: report.id, variant: "secondary", iconName: "download" }) + button("Print / Save PDF", "chairman-print-report", { value: report.id, variant: "secondary", iconName: "file" }) : '<span>Report preview</span>') + '</div>' +
     (report ? reportPreview(report) : emptyState("file", "Your executive brief starts here", "Select schools and a reporting period, then generate a report to preview, download or print.")) + '</section>';
   const cards = history.map((item) => '<button type="button" class="chairman-history-card ' + (item.id === c.reportId ? "is-selected" : "") + '" data-action="chairman-open-report" data-value="' + item.id + '">' + icon("file", 22) + '<span><strong>' + e(item.title) + '</strong><small>' + item.rows.length + " schools · " + dateLabel(item.criteria.to) + '</small></span><span>' + badge("Sample", "neutral") + '</span></button>').join("");
-  return header("Executive Reports", "Turn branch activity into a clear, downloadable management brief.") + '<div class="chairman-filters">' + branchFilter(options) + '</div>' +
+  return header(options.context.role === "vice_principal" ? "School Reports" : "Executive Reports", options.context.role === "vice_principal" ? "Capture school activity for the Principal with downloadable operational reports." : "Turn branch activity into a clear, downloadable management brief.") + '<div class="chairman-filters">' + branchFilter(options) + '</div>' +
     '<div class="chairman-reports-layout">' + builder + preview + '</div>' +
     panel("Saved report snapshots", history.length + " reports in this scope · Latest 8 retained in this browser", '<div class="chairman-report-history">' + (cards || '<p class="chairman-no-history">Your generated reports will appear here.</p>') + '</div>');
 }
@@ -319,7 +324,7 @@ export function chairmanBranchPanel(options, branch) {
   return heading + '<div class="chairman-detail-stats"><div><span>Total staff</span><strong>' + staffing.total + '</strong></div><div><span>Teachers</span><strong>' + staffing.teachers + '</strong></div><div><span>Vacancies</span><strong>' + staffing.vacancies.length + '</strong></div></div>' +
     panel("School leadership", "Sample leadership and prototype appointments", '<div class="chairman-leadership">' + staffing.staff.filter((person) => person.category === "leadership" || person.roles.includes("section_head")).map((person) => '<button type="button" data-action="chairman-staff" data-value="' + person.id + '"><span>' + icon("user", 20) + '</span><div><strong>' + e(person.name) + '</strong><small>' + person.designation + '</small></div></button>').join("") + '</div>') +
     panel("Open positions", "Vacancy review is saved in this browser", vacancyCards(options, [branch])) +
-    button("Manage branch appointments", "chairman-manage-staff", { value: branch.id, variant: "secondary", iconName: "badge" });
+    (options.context.role !== "vice_principal" ? button("Manage branch appointments", "chairman-manage-staff", { value: branch.id, variant: "secondary", iconName: "badge" }) : "");
 }
 
 export function chairmanStudentPanel(options, student, branch) {
@@ -329,6 +334,7 @@ export function chairmanStudentPanel(options, student, branch) {
   return button("Back to " + e(branch.name), "network-select", { value: branch.id, variant: "secondary compact" }) +
     '<div class="chairman-person-heading"><h3>' + e(student.name) + '</h3><p>' + student.admission + " · " + e(branch.name) + " · Class " + student.className + '</p>' + badge("Illustrative student", "amber") + '</div>' +
     '<div class="chairman-detail-stats"><div><span>School days</span><strong>20</strong></div><div><span>Absent</span><strong>' + absent + '</strong></div><div><span>Late</span><strong>' + days.filter((day) => day.status === "late").length + '</strong></div></div>' +
+    (options.context.role === "vice_principal" ? button("Record attendance follow-up", "vice-student-followup", { value: student.id, variant: "secondary" }) : "") +
     '<div class="chairman-attendance-calendar">' + days.map((day) => '<div class="' + day.status + '"><span>' + dateLabel(day.date) + '</span><strong>' + statusLabel[day.status] + '</strong></div>').join("") + '</div>';
 }
 
@@ -339,19 +345,19 @@ export function chairmanStaffPanel(options, person, branch) {
     '<div class="chairman-person-heading"><h3>' + e(person.name) + '</h3><p>' + e(branch.name) + " · " + person.designation + '</p>' + badge(person.sample ? "Illustrative staff record" : "Appointed in prototype", "neutral") + '</div>' +
     '<dl class="chairman-person-facts"><div><dt>Availability</dt><dd>' + statusLabel[person.status] + '</dd></div><div><dt>Subject</dt><dd>' + e(person.subject) + '</dd></div><div><dt>Roles</dt><dd>' + person.roles.map((role) => e(role.replaceAll("_", " "))).join(", ") + '</dd></div><div><dt>Demo contact</dt><dd>' + e(person.email) + '</dd></div></dl>' +
     '<div class="chairman-detail-stats"><div><span>Present in 20 days</span><strong>' + days.filter((day) => day?.status === "present").length + '</strong></div><div><span>On leave</span><strong>' + days.filter((day) => day?.status === "leave").length + '</strong></div><div><span>Absent</span><strong>' + days.filter((day) => day?.status === "absent").length + '</strong></div></div>' +
-    button("Manage branch appointments", "chairman-manage-staff", { value: branch.id, variant: "secondary", iconName: "badge" });
+    (options.context.role !== "vice_principal" ? button("Manage branch appointments", "chairman-manage-staff", { value: branch.id, variant: "secondary", iconName: "badge" }) : "");
 }
 
 export function chairmanVacancyPanel(options, vacancy) {
   return '<div class="chairman-person-heading"><h3>' + e(vacancy.subject + " · " + vacancy.role) + '</h3><p>' + e(vacancy.branchName) + '</p>' + badge(vacancy.reviewed ? "Reviewed" : "Open vacancy", vacancy.reviewed ? "blue" : "amber") + '</div><p class="chairman-filter-note">Illustrative staffing requirement. Review status tracks management follow-up; open positions remain listed.</p>' +
     '<div class="chairman-vacancy-actions">' + button(vacancy.reviewed ? "Reopen review" : "Mark reviewed", "chairman-review-vacancy", { value: vacancy.id, iconName: "check" }) +
-    button("Manage branch appointments", "chairman-manage-staff", { value: vacancy.branch, variant: "secondary", iconName: "badge" }) + '</div>';
+    (options.context.role !== "vice_principal" ? button("Manage branch appointments", "chairman-manage-staff", { value: vacancy.branch, variant: "secondary", iconName: "badge" }) : "") + '</div>';
 }
 
 export function executiveReportHTML(report, logo = "") {
   return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>' + e(report.title) +
     ' · SAMPLE · Sussex College Network</title><style>@page{size:A4 landscape;margin:14mm}*{box-sizing:border-box}body{font:14px/1.5 Arial,sans-serif;color:#18382c;max-width:1180px;margin:36px auto;padding:0 18px}h2{font-size:28px;line-height:1.2;margin:10px 0}h3{margin-top:24px}.export-brand{display:flex;gap:15px;align-items:center;padding-bottom:20px;border-bottom:3px solid #1b6752}.export-brand img{width:65px;height:80px;object-fit:contain}.export-brand strong{font-size:20px}.chairman-eyebrow{font-size:11px;letter-spacing:1px}.executive-report-preview>header{padding:22px 0}.badge{display:inline-block;border:1px solid #d8be73;background:#fff5d5;color:#775520;border-radius:6px;padding:4px 8px;font-size:11px;margin-top:8px}.executive-report-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;padding:20px;background:#edf5ee}.executive-report-stats span{display:block;font-size:12px}.executive-report-stats strong{display:block;font-size:25px;margin-top:8px}.executive-report-criteria{font-size:12px;margin:20px 0;color:#52685b}table{border-collapse:collapse;width:100%;font-size:12px}th,td{border-bottom:1px solid #dce7dc;padding:9px 7px;text-align:left}th{background:#edf5ee}thead{display:table-header-group}tr{break-inside:avoid}.executive-report-insights p{margin:7px 0}footer{margin-top:25px;border-top:1px solid #dce7dc;padding-top:14px;font-size:11px;color:#52685b}@media print{body{margin:0;padding:0;max-width:none}.executive-report-stats{print-color-adjust:exact}h2,h3{break-after:avoid}.executive-report-preview>header{padding-top:14px}}</style></head><body><div class="export-brand">' +
-    (logo ? '<img alt="Sussex College Network logo" src="' + e(logo) + '">' : "") + '<div><strong>Sussex College Network</strong><div>' + (report.owner?.role === "principal" ? 'Principal’s office · ' + e(report.owner.school) : 'Chairman’s office · Executive reporting') + '</div></div></div>' + reportPreview(report) + '</body></html>';
+    (logo ? '<img alt="Sussex College Network logo" src="' + e(logo) + '">' : "") + '<div><strong>Sussex College Network</strong><div>' + (report.owner?.role === "vice_principal" ? 'Vice Principal’s office · ' + e(report.owner.school) : report.owner?.role === "principal" ? 'Principal’s office · ' + e(report.owner.school) : 'Chairman’s office · Executive reporting') + '</div></div></div>' + reportPreview(report) + '</body></html>';
 }
 
 function principalClassAttendance(options, branch) {
@@ -379,7 +385,7 @@ function principalStaffingSummary(options, result) {
   const leaders = result.staff.filter((person) => person.category === "leadership" || person.roles.includes("section_head"));
   const roster = '<div class="chairman-leadership">' + leaders.map((person) => '<button type="button" data-action="chairman-staff" data-value="' + person.id + '">' + icon("user", 20) + '<div><strong>' + e(person.name) + '</strong><small>' + person.designation + '</small></div></button>').join("") + '</div>';
   const capacity = '<div class="principal-capacity"><div><span>Teaching positions</span><strong>' + result.teachers + '</strong></div><div><span>Support staff</span><strong>' + result.support + '</strong></div><div><span>Students per teacher</span><strong>' + result.ratio.toFixed(1) + ':1</strong></div><div><span>Positions filled</span><strong>' + percent(result.coverage) + '</strong></div></div><div class="principal-capacity-action">' +
-    button("Manage school appointments", "chairman-manage-staff", { value: result.branch.id, variant: "secondary", iconName: "badge" }) + '</div>';
+    (options.context.role !== "vice_principal" ? button("Manage school appointments", "chairman-manage-staff", { value: result.branch.id, variant: "secondary", iconName: "badge" }) : "") + '</div>';
   return '<div class="chairman-two-columns">' + panel("School leadership", result.branch.school, roster) + panel("Staffing capacity", "Illustrative enrolment and staffing positions", capacity) + '</div>';
 }
 
@@ -387,9 +393,10 @@ function principalLeaveCards(options, branch) {
   return '<div class="principal-leave-grid">' + schoolLeaveRequests(options.state, branch).map((request) =>
     '<article class="principal-leave-card"><div>' + badge(request.decision[0].toUpperCase() + request.decision.slice(1), request.decision === "approved" ? "green" : request.decision === "declined" ? "neutral" : "amber") +
     '<small>Sample request</small></div><h3>' + e(request.name) + '</h3><p>' + e(request.designation) + '</p><dl><div><dt>Date</dt><dd>' + dateLabel(request.date) + '</dd></div><div><dt>Reason</dt><dd>' + request.reason + '</dd></div></dl>' +
+    (request.recommendation ? '<div class="vice-leave-recommendation"><strong>Vice Principal: ' + e(leaveRecommendations[request.recommendation.recommendation]) + '</strong><p>' + e(request.recommendation.note) + '</p><small>' + e(request.recommendation.by) + '</small></div>' : "") +
     (request.reviewedBy ? '<p class="principal-leave-reviewed">Reviewed by ' + e(request.reviewedBy) + '</p>' : "") +
-    '<div class="principal-leave-actions">' + (request.decision !== "approved" ? button("Approve", "principal-review-leave", { value: request.id + "|approved", variant: "primary compact" }) : "") +
-    (request.decision !== "declined" ? button("Decline", "principal-review-leave", { value: request.id + "|declined", variant: "secondary compact" }) : "") + '</div></article>').join("") + '</div>';
+    '<div class="principal-leave-actions">' + (options.context.role === "vice_principal" ? (request.decision === "pending" ? button(request.recommendation ? "Edit recommendation" : "Recommend to Principal", "vice-leave-recommend", { value: request.id, variant: "secondary compact" }) : '<small>Final decision by Principal</small>') : (request.decision !== "approved" ? button("Approve", "principal-review-leave", { value: request.id + "|approved", variant: "primary compact" }) : "") +
+    (request.decision !== "declined" ? button("Decline", "principal-review-leave", { value: request.id + "|declined", variant: "secondary compact" }) : "")) + '</div></article>').join("") + '</div>';
 }
 
 export { attendancePage, staffingPage, reportsPage, metric, panel, table, select, header, sparkline, histogram };

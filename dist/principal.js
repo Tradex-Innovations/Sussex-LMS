@@ -7,12 +7,16 @@ import { chairmanBranches, attendanceResult, branchStaff, demoDate, academicTren
 import { schoolClassResults, schoolAcademicComparison, schoolAcademicAttention } from "./principal-data.js";
 import { chairmanViewBar, attendancePage, staffingPage, reportsPage, metric, panel, table, select, header, sparkline, histogram } from "./chairman.js";
 
+import { viceTaskBar, temporaryCoverPanel } from "./vice-principal.js";
+import { schoolTemporaryCovers } from "./vice-data.js";
+
 const pct = (value) => value.toFixed(1) + "%";
 
 function principalIdentity(options, branch) {
-  const entries = options.state.accounts.flatMap((person) => person.grants.map((grant, index) => ({ person, grant, index }))).filter(({ grant }) => grant.role === "principal");
+  const entries = options.state.accounts.flatMap((person) => person.grants.map((grant, index) => ({ person, grant, index }))).filter(({ grant }) => grant.role === options.context.role);
   const selected = options.context.account.id + "|" + options.context.account.grants.indexOf(options.context.grant);
-  const accountPicker = '<label class="principal-demo-account"><span>Demo Principal</span><span class="select-wrap"><select data-change="account" aria-label="Preview Principal">' +
+  const roleName = options.context.role === "vice_principal" ? "Vice Principal" : "Principal";
+  const accountPicker = '<label class="principal-demo-account"><span>Demo ' + roleName + '</span><span class="select-wrap"><select data-change="account" aria-label="Preview ' + roleName + '">' +
     entries.map(({ person, grant, index }) => '<option value="' + person.id + "|" + index + '" ' + (selected === person.id + "|" + index ? "selected" : "") + '>' + e(person.name) + " · " + e(options.state.branches.find((branch) => branch.id === grant.branch)?.name || "") + '</option>').join("") + '</select>' + icon("chevronDown", 14) + '</span></label>';
   const attendance = attendanceResult(options.state, branch, { date: demoDate, period: "day", audience: "students" });
   const teachers = branchStaff(options.state, branch, demoDate).filter((person) => person.category === "teachers" && person.status !== "present");
@@ -20,7 +24,7 @@ function principalIdentity(options, branch) {
   const delayed = fleetSummary(networkFleet(options.state, [branch])).delayed;
   const items = [["attendance", "Student attendance", pct(attendance.rate), "checkCircle"], ["staffing", "Teachers unavailable", teachers.length, "users"],
     ["academic", "Classes to review", support, "book"], ["transport", "Bus signals delayed", delayed, "bus"]];
-  return '<header class="principal-school-header"><div class="principal-school-heading"><div><span class="chairman-eyebrow">PRINCIPAL WORKSPACE</span><h1>' + e(branch.school) + '</h1><small>School pulse · 20 Nov 2026 · Sample data</small></div>' + accountPicker + '</div>' +
+  return '<header class="principal-school-header"><div class="principal-school-heading"><div><span class="chairman-eyebrow">' + roleName.toUpperCase() + ' WORKSPACE</span><h1>' + e(branch.school) + '</h1><small>School pulse · 20 Nov 2026 · Sample data</small></div>' + accountPicker + '</div>' +
     '<div class="principal-school-pulse" aria-label="School daily pulse">' + items.map(([id, label, value, name]) => '<button type="button" data-action="principal-pulse" data-value="' + id + '">' + icon(name, 17) + '<span>' + label + '</span><strong>' + value + '</strong></button>').join("") + '</div></header>';
 }
 
@@ -41,9 +45,10 @@ function principalAcademicPage(options, branch) {
     const assignment = options.state.assignments[course.id], materials = options.state.materials.filter((item) => item.course === course.id);
     const completed = assignment.students.reduce((sum, id) => sum + materials.filter((material) => options.state.completed[id]?.includes(material.id)).length, 0);
     const total = assignment.students.length * materials.length;
+    const cover = schoolTemporaryCovers(options.state, branch).find((item) => item.course === course.id && item.date === demoDate && item.status === "active");
     const teacher = options.state.accounts.find((person) => person.id === assignment.teacher)?.name || "Unassigned";
-    return '<tr><td>Class ' + e(course.className) + '</td><td>' + e(teacher) + '</td><td>' + materials.length + '</td><td>' + completed + " / " + total + '</td><td>' +
-      button("View materials", "principal-course", { value: course.id, variant: "secondary compact" }) + '</td></tr>';
+    return '<tr><td>Class ' + e(course.className) + '</td><td>' + e(teacher) + (cover ? '<small class="vice-course-cover">Today’s cover: ' + e(cover.teacherName) + '</small>' : '') + '</td><td>' + materials.length + '</td><td>' + completed + " / " + total + '</td><td>' +
+      button("View materials", "principal-course", { value: course.id, variant: "secondary compact" }) + (options.context.role === "vice_principal" ? button("Assign cover", "vice-cover", { value: course.id, variant: "secondary compact" }) : "") + '</td></tr>';
   }).join("");
   return header("Academic Performance", "Compare classes, subjects, grades and teachers within your school.",
       button("Assign courses", "assign", { variant: "secondary", iconName: "edit" }) + button("Comparison CSV", "chairman-export", { value: "academic", variant: "secondary", iconName: "download" })) +
@@ -66,9 +71,9 @@ function principalAcademicPage(options, branch) {
 
 export function principalOverviewPage(options) {
   const branch = chairmanBranches(options.state, options.context)[0];
-  if (!branch) return emptyState("school", "No school assigned", "A Principal appointment is needed to open this workspace.");
+  if (!branch) return emptyState("school", "No school assigned", "A school leadership appointment is needed to open this workspace.");
   const view = options.chairman.view;
   const content = view === "transport" ? networkOverviewPage(options) : '<div class="chairman-analytics">' +
     (view === "academic" ? principalAcademicPage(options, branch) : view === "attendance" ? attendancePage(options, [branch]) : view === "staffing" ? staffingPage(options, [branch]) : reportsPage(options, [branch])) + '</div>';
-  return '<section class="chairman-portal principal-portal">' + principalIdentity(options, branch) + chairmanViewBar(view, "principal") + content + '</section>';
+  return '<section class="chairman-portal principal-portal">' + principalIdentity(options, branch) + (options.context.role === "vice_principal" ? viceTaskBar(options, branch) : "") + chairmanViewBar(view, options.context.role) + content + (options.context.role === "vice_principal" && ["academic", "staffing"].includes(view) ? '<div class="vice-cover-section">' + temporaryCoverPanel(options, branch) + '</div>' : "") + '</section>';
 }

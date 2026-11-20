@@ -49,7 +49,19 @@ The Principal role now opens [its assigned-school overview](http://127.0.0.1:418
 - **Staffing Overview** includes leadership, staff capacity, directory filters, profiles, vacancies and sample leave requests. Leave approval/decline is saved in the browser and updates the school pulse, staff availability, attendance and newly generated reports. Appointment management uses the existing branch-scoped role forms; Principal and Chairman appointments remain excluded from the Principal's assignable roles.
 - **Executive Reports** generates one-school briefs and transport/academic/attendance/staffing exports. CSV, standalone HTML with embedded logo, and Print / Save PDF are available. Principal report history is separated by school and from Chairman report history; each workspace retains its latest eight snapshots.
 
-All Principal records, actions and exports use the assigned Principal grant's school. The Vice Principal portal retains its existing scope. GPS, attendance, assessments, staffing complements and leave requests remain illustrative.
+All Principal records, actions and exports use the assigned Principal grant's school. GPS, attendance, assessments, staffing complements and leave requests remain illustrative.
+
+### Vice Principal workspace
+
+Open [Vice Principal → Overview](http://127.0.0.1:4183/#vice_principal/overview/transport). **Demo Vice Principal** switches between Roshani Fernando at Nugegoda and Dilan Mendis at Malabe. The five views use the appointed school, with no branch selector or permanent staff appointments.
+
+- **Transport Activity:** assigned-school street map, fleet and signal filters, bus routes, next stops and simulated GPS. A bus's **Record transport issue** action creates a follow-up with its bus reference.
+- **Academic Performance:** school classes, subjects, grades and teacher comparisons; course assignments, lecture materials and completion; comparison CSV. **Assign cover** records one-day teaching cover for 20 November without changing the permanent course teacher or granting extra access. Available teachers include clearly labelled illustrative staff; cover can be cancelled and is also visible alongside course teaching details to the Principal.
+- **Attendance:** student and staff registers, class/grade/date/period filters, 20-day personal calendars and repeated absences. Student details can open a named attendance follow-up.
+- **Staffing Overview:** school leadership, staff availability and capacity, vacancy follow-up, temporary cover and **Leave recommendations**. A Vice Principal adds a recommendation and note; the request stays pending and availability remains unchanged. The Principal sees the recommendation in **Leave requests** and makes the final approval/decline decision.
+- **School Reports:** school operational briefs plus transport, academic, attendance and staffing snapshots, CSV/HTML exports and Print / Save PDF. The operational brief also captures follow-ups, active cover and leave recommendations pending Principal decision. The latest eight reports are retained per school and role, separate from Principal and Chairman histories.
+
+The daily school pulse links into the relevant filtered view. **Follow-up board** contains three initial sample tasks and any added items, with a school owner, due date, status and note history. Use **Review follow-up** to record progress or resolve an item. All changes persist only in the current browser; assigning an owner or recommending leave does not send a message. The source and browser checks cover both demo schools, foreign-school action rejection, preserved course assignments, separate recommendation/final decisions and 320px/390px layouts.
 
 ### School portal
 

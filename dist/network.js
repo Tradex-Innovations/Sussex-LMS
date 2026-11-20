@@ -53,7 +53,7 @@ function branchDetail(state, context, result, network) {
   ];
   return `<section class="selected-school-heading">
     <div><h2>${e(branch.school)}</h2><p>${e(branch.address)}</p></div>
-    <div class="branch-report-actions"><a class="button secondary" href="${e(branch.source)}" target="_blank" rel="noopener noreferrer">Official school page</a>${button(context.role === "principal" ? "Open academics" : "Compare schools", "network-performance", { variant: "secondary", iconName: "school" })}</div>
+    <div class="branch-report-actions"><a class="button secondary" href="${e(branch.source)}" target="_blank" rel="noopener noreferrer">Official school page</a>${button(["principal", "vice_principal"].includes(context.role) ? "Open academics" : "Compare schools", "network-performance", { variant: "secondary", iconName: "school" })}</div>
   </section>
   ${assessmentFilters(network)}
   <div class="selected-school-grid">

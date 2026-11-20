@@ -26,10 +26,12 @@ export function chairmanDefaults() {
     detail: "", personId: "", branchId: "", academicSort: "average", attendanceSort: "rate", academicClass: "all", academicCompare: "classes", attendanceClass: "all" };
 }
 
-export function isSchoolLeader(context) { return ["chairman", "principal"].includes(context?.role); }
+export function isSchoolOperator(context) { return ["principal", "vice_principal"].includes(context?.role); }
+
+export function isSchoolLeader(context) { return context?.role === "chairman" || isSchoolOperator(context); }
 
 export function reportOwnerKey(context) {
-  return context?.role === "principal" ? "principal:" + (context.grant?.branch || context.branch) : "chairman:" + context?.account?.id;
+  return isSchoolOperator(context) ? context.role + ":" + (context.grant?.branch || context.branch) : "chairman:" + context?.account?.id;
 }
 
 export function visibleExecutiveReports(state, context) {
@@ -129,7 +131,7 @@ export function schoolLeaveRequests(state, branch) {
     const id = "leave-" + branch.id + "-" + person.id;
     const review = state.principalLeaveReviews?.[id];
     return { id, branch: branch.id, person: person.id, name: person.name, designation: person.designation, date: demoDate,
-      reason: ["Personal leave", "Family commitment", "Professional development"][index], decision: review?.decision || "pending", reviewedBy: review?.by || "", sample: true };
+      reason: ["Personal leave", "Family commitment", "Professional development"][index], decision: review?.decision || "pending", reviewedBy: review?.by || "", recommendation: state.viceLeaveRecommendations?.[id] || null, sample: true };
   });
 }
 
@@ -235,7 +237,7 @@ export function academicDistribution(branches, options) {
 
 export function generateExecutiveReport(state, context, settings, academic, telemetry = {}) {
   if (!isSchoolLeader(context)) throw new Error("School leadership access required.");
-  if (context.role === "principal" && settings.reportBranches?.some((id) => id !== (context.grant?.branch || context.branch))) throw new Error("Reports are limited to your assigned school.");
+  if (isSchoolOperator(context) && settings.reportBranches?.some((id) => id !== (context.grant?.branch || context.branch))) throw new Error("Reports are limited to your assigned school.");
   const branches = chairmanBranches(state, context, settings.reportBranches);
   if (!branches.length) throw new Error("Select at least one school for the report.");
   const dates = schoolDays(settings.date, settings.reportPeriod);
@@ -260,8 +262,8 @@ export function generateExecutiveReport(state, context, settings, academic, tele
     row.vacancies >= 3 ? { branch: row.id, school: row.school, view: "staffing", message: row.vacancies + " open staffing positions." } : null,
     row.academic < 75 ? { branch: row.id, school: row.school, view: "academic", message: "Subject average is " + row.academic + "%." } : null,
   ].filter(Boolean));
-  return { id: "report-" + crypto.randomUUID(), generatedAt: new Date().toISOString(), type: settings.reportType, title: context.role === "principal" && settings.reportType === "brief" ? "School executive brief" : reportTypes[settings.reportType] || reportTypes.brief,
-    owner: { key: reportOwnerKey(context), role: context.role, name: context.account.name, school: context.role === "principal" ? branches[0].school : "" },
+  return { id: "report-" + crypto.randomUUID(), generatedAt: new Date().toISOString(), type: settings.reportType, title: isSchoolOperator(context) && settings.reportType === "brief" ? (context.role === "vice_principal" ? "School operational brief" : "School executive brief") : reportTypes[settings.reportType] || reportTypes.brief,
+    owner: { key: reportOwnerKey(context), role: context.role, name: context.account.name, school: isSchoolOperator(context) ? branches[0].school : "" },
     sample: true, criteria: { date: settings.date, from: dates[0], to: dates.at(-1), schoolDays: dates.length, period: settings.reportPeriod,
       grade: academic.grade, term: academic.term, subject: academic.subject, className: academic.className || "all", audience, attendanceGrade: settings.attendanceGrade, attendanceClass: settings.attendanceClass || "all", scope: branches.map((branch) => branch.id) },
     summary: { academic: networkSummary(assessments), attendance: attendanceSummary(attendance), staffing: staffingSummary(staffing), fleet: fleetSummary(fleet) },
@@ -296,5 +298,8 @@ export function reportCSV(report) {
   if (report.criteria.attendanceClass && report.criteria.attendanceClass !== "all") metadata.splice(-1, 0, ["Attendance class", report.criteria.attendanceClass]);
   if (report.criteria.comparison) metadata.splice(-1, 0, ["Comparison", report.criteria.comparison]);
   const rows = report.customRows || (report.type === "transport" ? report.buses : report.rows);
-  return "\uFEFF" + [...metadata, columns.map(([, label]) => label), ...rows.map((row) => columns.map(([key]) => row[key]))].map((row) => row.map(safe).join(",")).join("\r\n");
+  const operations = report.operations ? [[], ["School coordination snapshot"], ["Leave recommendations pending Principal decision", report.operations.recommendations],
+    ["Follow-up", "Category", "Status", "Due"], ...report.operations.followups.map((item) => [item.title, item.category, item.status, item.due]), [],
+    ["Cover class", "Subject", "Cover teacher", "Date"], ...report.operations.covers.map((item) => [item.className, item.title, item.teacherName, item.date])] : [];
+  return "\uFEFF" + [...metadata, columns.map(([, label]) => label), ...rows.map((row) => columns.map(([key]) => row[key])), ...operations].map((row) => row.map(safe).join(",")).join("\r\n");
 }
