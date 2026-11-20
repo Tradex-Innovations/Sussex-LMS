@@ -1,5 +1,7 @@
 import { rankedResults, networkSummary, performanceTone, assessmentResult, branchActivity, subjects } from "./network-analytics.js";
 import { icon } from "./icons.js";
+import { networkFleetOverlay, networkFleetPage, branchTransportPage, networkBusPage } from "./network-transport.js";
+import { networkFleet } from "./network-fleet.js";
 import { badge, button, emptyState, escapeHtml as e, iconTile } from "./ui.js";
 
 export function networkBranches(state, context, network) {
@@ -45,7 +47,7 @@ function branchDetail(state, context, result, network) {
     ["Students in demo", state.students.filter((student) => student.branch === branch.id).length],
     ["Assigned teachers", state.accounts.filter((person) => person.grants.some((grant) => ["teacher", "class_teacher"].includes(grant.role) && grant.branch === branch.id)).length],
     ["Course classes", state.courses.filter((course) => course.branch === branch.id).length],
-    ["Assigned buses", state.buses.filter((bus) => bus.branch === branch.id).length],
+    ["Buses in demo", networkFleet(state, [branch]).length],
     ["Library orders", state.orders.filter((order) => order.branch === branch.id).length],
     ["Lessons completed", state.students.filter((student) => student.branch === branch.id).reduce((sum, student) => sum + (state.completed[student.id]?.length || 0), 0)],
   ];
@@ -104,23 +106,28 @@ function comparisonPanel(options, results) {
     </section>`;
 }
 
+
 export function networkOverviewPage(options) {
-  const { state, context, network } = options;
+  const { state, context, network, networkBuses } = options;
   const results = rankedResults(networkBranches(state, context, network), network);
   const selected = results.find((result) => result.branch.id === network.selected);
-  const mode = network.mode === "comparison" ? "comparison" : network.mode === "branch" && selected ? "branch" : "";
+  const bus = networkBuses.find((bus) => bus.id === network.busId);
+  const mode = ["comparison", "fleet"].includes(network.mode) ? network.mode
+    : network.mode === "bus" && bus ? "bus" : network.mode === "branch" && selected ? "branch" : "";
+  const titles = { branch: "Branch overview", comparison: "Compare schools", fleet: "Network bus activity", bus: "Bus activity" };
   return `<section class="network-experience ${mode ? "has-inspector" : ""}">
     <div class="network-map-viewport">
-      <h1 class="sr-only">School network map</h1>
+      <h1 class="sr-only">Sri Lanka school transport map</h1>
       <div id="school-network-map" class="school-network-map" tabindex="0" role="region" aria-label="Sri Lanka school branch map"></div>
-      <footer class="map-explorer-attribution">Approximate branch locations · <a href="https://www.sussexcollege.lk/branches/" target="_blank" rel="noopener noreferrer">Sussex College Network</a> · <a href="https://www.naturalearthdata.com/about/terms-of-use/" target="_blank" rel="noopener noreferrer">Natural Earth</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap</a></footer>
+      ${networkFleetOverlay(networkBuses, network, options.paused)}
     </div>
     ${mode ? `<aside class="network-inspector" aria-labelledby="network-inspector-title">
-      <header class="network-inspector-header"><div><span>Sussex College Network</span><h2 id="network-inspector-title" tabindex="-1">${mode === "branch" ? "School performance" : "Compare schools"}</h2></div>
-        <button type="button" class="icon-button" data-action="network-close" aria-label="Close performance panel">${icon("x", 21)}</button>
+      <header class="network-inspector-header"><div><span>Sussex College Network</span><h2 id="network-inspector-title" tabindex="-1">${titles[mode]}</h2></div>
+        <button type="button" class="icon-button" data-action="network-close" aria-label="Close panel">${icon("x", 21)}</button>
       </header>
+      ${mode === "branch" ? `<nav class="branch-panel-tabs" aria-label="Branch details"><button type="button" data-action="network-tab" data-value="transport" aria-pressed="${network.tab === "transport"}">${icon("bus", 17)} Bus activity</button><button type="button" data-action="network-tab" data-value="performance" aria-pressed="${network.tab === "performance"}">${icon("book", 17)} Performance</button></nav>` : ""}
       <div class="network-inspector-content">
-        ${mode === "branch" ? `${badge("Sample results", "amber")}${branchDetail(state, context, selected, network)}` : comparisonPanel(options, results)}
+        ${mode === "bus" ? networkBusPage(options, bus) : mode === "fleet" ? networkFleetPage(options) : mode === "branch" ? network.tab === "transport" ? branchTransportPage(options, selected.branch) : `${badge("Sample results", "amber")}${branchDetail(state, context, selected, network)}` : comparisonPanel(options, results)}
       </div>
     </aside>` : ""}
   </section>`;

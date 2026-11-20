@@ -5,8 +5,10 @@ import { assignmentForm, coursesPage, materialForm } from "./learning.js";
 import { branchBooks, bookForm, cartForm, cartFor, cartItems, catalogResults, libraryPage, orderHistory } from "./library.js";
 import { accessPage, branchForm, busForm, peoplePage, roleForm, scopeLabel, studentForm } from "./management.js";
 import { networkBranches, networkOverviewPage } from "./network.js";
-import { rankedResults, subjects } from "./network-analytics.js";
+import { subjects } from "./network-analytics.js";
 import { SchoolNetworkMap } from "./network-map.js";
+import { networkFleet } from "./network-fleet.js";
+import { updateNetworkBusDetails } from "./network-transport.js";
 import { FleetMap } from "./map.js";
 import { mountMapSummary, transportPage, updateTripDetails } from "./transport.js";
 import { avatar, button, emptyState, escapeHtml as e, iconTile } from "./ui.js";
@@ -32,7 +34,7 @@ let mapViewKey;
 let dialogMode;
 let view = getView();
 const ui = { accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", grade: "all", query: "", paused: false, runningSince: performance.now(), elapsed: 0, starts: {},
-  network: { subject: "mathematics", grade: 8, term: 3, selected: "", mode: "", compare: null, category: "all" } };
+  network: { subject: "mathematics", grade: 8, term: 3, selected: "", mode: "", compare: null, category: "all", tab: "transport", status: "all", busId: "", busBranch: "all" } };
 
 function getView() {
   const [requestedRole, requestedPage] = location.hash.slice(1).split("/");
@@ -137,9 +139,11 @@ function render(focus, { scrollTop = false } = {}) {
   if (ctx) {
     options = optionsFor(ctx);
     options.scopeControls = scopeBar(ctx);
+    options.networkBuses = networkFleet(state, networkBranches(state, ctx, ui.network));
+    options.networkElapsed = elapsed();
     if (ui.network.selected && !networkBranches(state, ctx, ui.network).some((branch) => branch.id === ui.network.selected)) {
       ui.network.selected = "";
-      if (ui.network.mode === "branch") ui.network.mode = "";
+      if (["branch", "bus"].includes(ui.network.mode)) ui.network.mode = "";
     }
     if (!options.fleet.some((bus) => bus.id === ui.bus)) ui.bus = options.fleet[0]?.id;
     options.selected = ui.bus;
@@ -155,9 +159,16 @@ function render(focus, { scrollTop = false } = {}) {
   const networkStage = app.querySelector("#school-network-map");
   if (networkStage) {
     const branches = networkBranches(state, ctx, ui.network);
-    const results = rankedResults(branches, ui.network);
     const key = `${ctx.account.id}-${ctx.branch}-${branches.map((branch) => branch.id).join(",")}`;
-    schoolMap = new SchoolNetworkMap(networkStage, results, ui.network.selected, selectNetworkBranch, schoolMapKey === key ? previousSchoolViewport : null);
+    schoolMap = new SchoolNetworkMap(networkStage, { branches, fleet: options.networkBuses, selected: ui.network.selected,
+      selectedBus: ui.network.mode === "bus" ? ui.network.busId : "", status: ui.network.status, paused: ui.paused, progress, elapsed,
+      onSelect: selectNetworkBranch, onBusSelect: selectNetworkBus,
+      onTick: () => updateNetworkBusDetails(app, options.networkBuses, progress, ui.paused, elapsed()),
+      viewport: schoolMapKey === key ? previousSchoolViewport : null });
+    if (ui.network.mapFocus?.bus) schoolMap.focusBus(ui.network.mapFocus.bus);
+    else if (ui.network.mapFocus?.branch) schoolMap.focusBranch(ui.network.mapFocus.branch);
+    else if (ui.network.resetMap) schoolMap.fitIsland();
+    ui.network.mapFocus = null; ui.network.resetMap = false;
     schoolMapKey = key;
     const rows = app.querySelector(".ranking-rows");
     const activeRow = rows?.querySelector('[aria-pressed="true"]');
@@ -231,6 +242,20 @@ function selectNetworkBranch(id, focus) {
   if (!networkBranches(state, ctx, ui.network).some((branch) => branch.id === id)) return;
   ui.network.selected = id;
   ui.network.mode = "branch";
+  ui.network.tab = focus?.startsWith("ranking-") ? "performance" : "transport";
+  ui.network.busId = "";
+  ui.network.mapFocus = { branch: id };
+  render();
+  app.querySelector("#network-inspector-title")?.focus({ preventScroll: true });
+}
+
+function selectNetworkBus(id) {
+  const ctx = context();
+  if (!["chairman", "principal", "vice_principal"].includes(ctx?.role)) return;
+  const bus = networkFleet(state, networkBranches(state, ctx, ui.network)).find((bus) => bus.id === id);
+  if (!bus) return;
+  ui.network.selected = bus.branch; ui.network.busId = id; ui.network.mode = "bus";
+  ui.network.mapFocus = { bus: id };
   render();
   app.querySelector("#network-inspector-title")?.focus({ preventScroll: true });
 }
@@ -310,6 +335,10 @@ function authorizedAction(name, value, ctx) {
     "network-activity": ["chairman", "principal", "vice_principal"].includes(ctx.role) && ["all", "academic", "transport", "library", "people"].includes(value),
     "network-performance": ["chairman", "principal", "vice_principal"].includes(ctx.role),
     "network-close": ["chairman", "principal", "vice_principal"].includes(ctx.role),
+    "network-fleet": ["chairman", "principal", "vice_principal"].includes(ctx.role),
+    "network-tab": ["chairman", "principal", "vice_principal"].includes(ctx.role) && ["transport", "performance"].includes(value),
+    "network-fleet-status": ["chairman", "principal", "vice_principal"].includes(ctx.role) && ["all", "route", "school", "delayed"].includes(value),
+    "network-bus": ["chairman", "principal", "vice_principal"].includes(ctx.role) && networkFleet(state, networkBranches(state, ctx, ui.network)).some((bus) => bus.id === value),
     "pause": roles[ctx.role].pages.includes("transport"), "bus": options.fleet.some((bus) => bus.id === value),
     "filter": roles[ctx.role].pages.includes("transport"),
     "assign": can(ctx, "courses.assign") && (!value || Boolean(course)),
@@ -366,13 +395,17 @@ function action(event) {
   if (!authorizedAction(name, value, ctx)) return toast("This action is outside the current role’s assigned access.");
   switch (name) {
     case "network-select": selectNetworkBranch(value, focus); break;
+    case "network-bus": selectNetworkBus(value); break;
+    case "network-fleet": ui.network.mode = "fleet"; ui.network.busBranch = "all"; render(); break;
+    case "network-fleet-status": ui.network.status = value; render(); break;
+    case "network-tab": ui.network.tab = value; render(); break;
     case "network-performance":
       ui.network.mode = "comparison"; render();
       app.querySelector("#network-inspector-title")?.focus({ preventScroll: true });
       break;
     case "network-close": {
       const branch = ui.network.selected;
-      ui.network.mode = ""; ui.network.selected = ""; ui.network.compare = null; render("network-pin-" + branch); break;
+      ui.network.mode = ""; ui.network.selected = ""; ui.network.compare = null; ui.network.busId = ""; ui.network.resetMap = true; render("network-pin-" + branch); break;
     }
     case "network-all": ui.network.compare = null; render(); break;
     case "network-none": ui.network.compare = []; render(); break;
@@ -446,7 +479,7 @@ function action(event) {
     case "confirm-reset":
       if (saveState(freshState())) {
         state = freshState(); Object.assign(ui, { accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", starts: {}, paused: false, runningSince: performance.now(), elapsed: 0 });
-        ui.network = { subject: "mathematics", grade: 8, term: 3, selected: "", mode: "", compare: null, category: "all" };
+        ui.network = { subject: "mathematics", grade: 8, term: 3, selected: "", mode: "", compare: null, category: "all", tab: "transport", status: "all", busId: "", busBranch: "all" };
         parentSession = null;
         saveParentSession(null);
         closeDialog(); location.hash = "chairman/transport"; render(); toast("Demo reset.");
@@ -461,6 +494,15 @@ function change(event) {
   const ctx = context();
   if (!ctx) return;
   switch (name) {
+    case "network-fleet-branch":
+      if (!["chairman", "principal", "vice_principal"].includes(ctx.role)) return;
+      if (element.value === "all" || networkBranches(state, ctx, ui.network).some((branch) => branch.id === element.value)) {
+        ui.network.busBranch = element.value; render();
+      }
+      break;
+    case "network-map-branch":
+      if (element.value) selectNetworkBranch(element.value);
+      break;
     case "network-subject":
     case "network-grade":
     case "network-term":
@@ -717,7 +759,7 @@ document.addEventListener("keydown", (event) => {
     if (menu) { menu.open = false; menu.querySelector("summary").focus(); }
     else if (view.page === "overview" && ui.network.mode) {
       const branch = ui.network.selected;
-      ui.network.mode = ""; ui.network.selected = ""; ui.network.compare = null; render("network-pin-" + branch);
+      ui.network.mode = ""; ui.network.selected = ""; ui.network.compare = null; ui.network.busId = ""; ui.network.resetMap = true; render("network-pin-" + branch);
     }
   }
 });
@@ -727,7 +769,7 @@ window.addEventListener("hashchange", () => {
   view = getView();
   if (previous.role !== view.role || previous.page !== view.page) { ui.courseId = ""; ui.filter = "all"; }
   if (view.page === "overview" && (previous.role !== view.role || previous.page !== view.page)) {
-    ui.network.selected = ""; ui.network.mode = ""; ui.network.compare = null; schoolMapKey = null;
+    ui.network.selected = ""; ui.network.mode = ""; ui.network.compare = null; ui.network.busId = ""; ui.network.status = "all"; schoolMapKey = null;
   }
   closeDialog();
   render(undefined, { scrollTop: true });

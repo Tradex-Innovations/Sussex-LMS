@@ -27,8 +27,8 @@ The account cards fill in demo credentials. Sign in to open that student's bus, 
 
 ## Walkthrough
 
-1. Start in **Chairman → Overview**. The Sri Lanka map fills the workspace with 20 branch-name bubbles. Click a bubble to open that school's performance and activity in a side panel (a bottom sheet on mobile). Close the panel or press Escape to return to the full map. Drag to pan, use the zoom controls, or choose **View whole island** to reset.
-2. Inside a school's panel, use **Compare schools** to compare sample results by subject, grade, and term. Choose schools to filter the comparison and map; closing the panel restores all branches in your scope. The network average is weighted by assessed students. The **School branch** selector is available in the comparison panel and other workspaces. A Principal's overview stays within their assigned school. Functional student, course, transport, and parent demo records use Nugegoda and Malabe. The fleet contains eight simulated buses.
+1. Start in **Chairman → Overview**. An interactive OpenStreetMap street map shows Sri Lanka and a simulated network fleet of 44 buses across all 20 branches. Nearby vehicles form bus-count groups; click a group to zoom in and see individual buses. Branch-name bubbles appear near their geographic positions where space permits. Use **View all buses** to find every branch's vehicles, or filter by On route, At school and Signal delayed. Pan, zoom, pause or resume the simulation, or choose **View whole island** to reset. Street tiles require an internet connection; a notice appears if they cannot load.
+2. Select a branch bubble for **Bus activity** and **Performance** tabs. Selecting a bus shows its illustrative route, animated position, next stop, school arrival estimate, sample occupancy, driver and trip progress. The mobile details sheet keeps the route map and attribution visible above it. In **Performance**, use **Compare schools** to compare sample results by subject, grade and term. Closing the panel or pressing Escape restores the full map. A Principal stays within their assigned school. The overview preserves the eight existing operational demo records for Nugegoda and Malabe and adds two illustrative buses for each of the other 18 branches; these additional vehicles do not create student, staff or assignment records.
 3. Open **Roles & access** as Chairman or Principal. Appoint staff, assign sections, grades, classes or buses, and remove appointments. The Chairman appoints Principals. A Principal appoints lower roles inside their branch. Existing people can receive multiple scoped roles.
 4. Use **Section Head**, **Grade Coordinator**, **Class Teacher**, and **Subject Teacher** views to demonstrate the different academic scopes. Course assignments support teachers from the same branch and students from the matching class. Grade Coordinators can update enrollment.
 5. In an assigned Teacher view, publish or edit a handout. Open the enrolled child's course in **Parent → Courses**, download the handout, and mark it done. Teaching staff and leadership can review completion.
@@ -55,11 +55,15 @@ School names, addresses, and approximate branch positions were verified against 
 
 Assessment marks, term comparisons, and seeded activity entries are illustrative data. They demonstrate comparison of the same subject, grade, and term. Actions inside the prototype also appear in the relevant school's activity feed. Branch workspace totals come from the records in the browser.
 
+Network bus routes follow local OpenStreetMap road geometry with a schematic final approach to each school. They are demonstration routes, not verified Sussex operating routes. Existing vehicle status and driver edits are reflected in the overview; additional branch vehicles, occupancy and arrival estimates are sample data. Bus-count groups account for every visible-scope vehicle. Crowded branch labels appear as you zoom in rather than being moved to unrelated locations.
+
+Use **Find a school** to open any branch directly, including when its label is hidden by map crowding. Each branch panel retains both bus activity and academic performance.
+
 Earlier sample branch IDs are retained internally so existing admission logins, course assignments, orders, and trip state continue to resolve to their associated records. Their display names now identify Nugegoda and Malabe.
 
 ## Assets
 
-- The national map uses the [Natural Earth public-domain coastline](https://www.naturalearthdata.com/about/terms-of-use/) and main roads from OpenStreetMap.
+- The national street map uses [OpenStreetMap tiles](https://operations.osmfoundation.org/policies/tiles/) with visible attribution and normal browser caching. [Leaflet 1.9.4](https://leafletjs.com/) is bundled locally under its [BSD 2-Clause licence](dist/vendor/leaflet/LICENSE). The [Natural Earth public-domain coastline](https://www.naturalearthdata.com/about/terms-of-use/) remains beneath the tile layer as a geographic fallback.
 
 - The local map image and sample route paths use [© OpenStreetMap contributors](https://www.openstreetmap.org/copyright) data under the Open Database License, via [Geofabrik's Sri Lanka extract](https://download.geofabrik.de/asia/sri-lanka.html).
 - DM Sans is bundled with its [Open Font License](dist/assets/DM-Sans-OFL.txt).

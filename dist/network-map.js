@@ -1,232 +1,260 @@
 import { islandPolygons } from "./sri-lanka-land.js";
-import { mainRoads } from "./sri-lanka-roads.js";
 import { icon } from "./icons.js";
+import { escapeHtml as e } from "./ui.js";
+import { fleetSummary, networkTelemetry } from "./network-fleet.js";
 
 export class SchoolNetworkMap {
-  constructor(stage, results, selected, onSelect, viewport) {
+  constructor(stage, options) {
     this.stage = stage;
-    this.selected = selected;
-    this.zoom = viewport?.zoom ?? 1;
-    this.offset = viewport?.offset ?? [0, 0];
+    this.options = options;
     this.controller = new AbortController();
-    this.canvas = document.createElement("canvas");
-    this.canvas.setAttribute("aria-hidden", "true");
-    this.canvas.className = "school-network-canvas";
-    stage.append(this.canvas);
-    this.labels = results.map(({ branch }) => {
+    this.labels = [];
+    this.busMarkers = new Map();
+    this.clusterMarkers = new Map();
+    this.markerObstacles = [];
+    const L = window.L;
+    this.map = L.map(stage, { zoomControl: false, attributionControl: true, minZoom: 6, maxZoom: 18,
+      zoomSnap: 0.25, zoomDelta: 1, scrollWheelZoom: true, maxBounds: [[4.5, 77.5], [11, 84.5]], maxBoundsViscosity: 0.8 });
+    this.map.attributionControl.setPrefix('<a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a>');
+    this.map.createPane("coastline").style.zIndex = 150;
+    L.polygon(islandPolygons.map((polygon) => polygon.map(([lon, lat]) => [lat, lon])), {
+      pane: "coastline", color: "#c5d6bf", fillColor: "#e0ead9", fillOpacity: 1, weight: 1, interactive: false,
+    }).addTo(this.map);
+    this.tiles = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>',
+      updateWhenIdle: true, keepBuffer: 1,
+    }).addTo(this.map);
+    let tilesLoaded = 0;
+    this.tiles.on("tileload", () => {
+      tilesLoaded += 1;
+      stage.querySelector(".network-map-unavailable")?.remove();
+      stage.dataset.tiles = "loaded";
+    });
+    this.tileNoticeTimer = setTimeout(() => {
+      if (!tilesLoaded && !this.controller.signal.aborted) {
+        stage.insertAdjacentHTML("beforeend", '<p class="network-map-unavailable" role="status">Street map unavailable. Check your internet connection. Branches and demo buses are still available.</p>');
+      }
+    }, 7000);
+    this.map.createPane("networkRoutes").style.zIndex = 420;
+    this.drawRoutes();
+    this.bubbleLayer = document.createElement("div");
+    this.bubbleLayer.className = "school-bubbles-layer";
+    stage.append(this.bubbleLayer);
+    for (const branch of options.branches) {
+      const buses = options.fleet.filter((bus) => bus.branch === branch.id);
+      const counts = fleetSummary(buses);
       const label = document.createElement("button");
       label.type = "button";
-      label.className = "school-branch-bubble";
-      label.classList.toggle("is-selected", branch.id === selected);
+      label.className = "school-branch-bubble" + (options.selected === branch.id ? " is-selected" : "");
       label.dataset.branch = branch.id;
       label.dataset.focus = "network-pin-" + branch.id;
       label.textContent = branch.name;
       label.setAttribute("aria-label", "View " + branch.name + " performance");
-      label.setAttribute("aria-pressed", String(branch.id === selected));
-      label.addEventListener("click", () => onSelect(branch.id, label.dataset.focus), { signal: this.controller.signal });
-      stage.append(label);
-      return { branch, label };
+      label.setAttribute("aria-pressed", String(options.selected === branch.id));
+      label.title = branch.name + ": " + counts.route + " on route, " + counts.school + " at school, " + counts.delayed + " signal delayed";
+      label.addEventListener("click", () => options.onSelect(branch.id), { signal: this.controller.signal });
+      this.bubbleLayer.append(label);
+      this.labels.push({ branch, label });
+    }
+    stage.insertAdjacentHTML("beforeend", '<div class="school-map-controls" role="group" aria-label="Map controls">' +
+      '<button type="button" data-school-map="in" aria-label="Zoom in" title="Zoom in">' + icon("plus", 19) + '</button>' +
+      '<button type="button" data-school-map="out" aria-label="Zoom out" title="Zoom out">' + icon("minus", 19) + '</button>' +
+      '<button type="button" data-school-map="reset" aria-label="View whole island" title="View whole island">' + icon("locate", 19) + '</button></div>');
+    const { signal } = this.controller;
+    for (const control of stage.querySelectorAll("[data-school-map]")) {
+      control.addEventListener("click", () => {
+        if (control.dataset.schoolMap === "in") this.map.zoomIn();
+        else if (control.dataset.schoolMap === "out") this.map.zoomOut();
+        else this.fitIsland();
+      }, { signal });
+      L.DomEvent.disableClickPropagation(control);
+    }
+    L.DomEvent.disableClickPropagation(this.bubbleLayer);
+    L.DomEvent.disableScrollPropagation(this.bubbleLayer);
+    this.map.on("move zoom resize", () => { this.updateMarkers(); this.drawLabels(); });
+    if (options.viewport?.center) this.map.setView(options.viewport.center, options.viewport.zoom, { animate: false });
+    else this.fitIsland();
+    this.resize = new ResizeObserver(() => {
+      this.map.invalidateSize({ pan: false });
+      this.drawLabels();
     });
-    stage.insertAdjacentHTML("beforeend", `<div class="school-map-controls" role="group" aria-label="Map controls">
-      <button type="button" data-school-map="in" aria-label="Zoom in" title="Zoom in">${icon("plus", 19)}</button>
-      <button type="button" data-school-map="out" aria-label="Zoom out" title="Zoom out">${icon("minus", 19)}</button>
-      <button type="button" data-school-map="reset" aria-label="View whole island" title="View whole island">${icon("locate", 19)}</button>
-    </div>`);
-    this.bindControls();
-    this.resize = new ResizeObserver(() => this.draw());
     this.resize.observe(stage);
-    document.fonts.ready.then(() => { if (!this.controller.signal.aborted) this.draw(); });
-    this.draw();
+    document.fonts.ready.then(() => { if (!signal.aborted) this.drawLabels(); });
+    this.updateMarkers();
+    this.timer = setInterval(() => { this.updateMarkers(); this.drawLabels(); options.onTick?.(); }, 1000);
   }
 
   get viewport() {
-    return { zoom: this.zoom, offset: this.offset };
+    const center = this.map.getCenter();
+    return { center: [center.lat, center.lng], zoom: this.map.getZoom() };
   }
 
-  bindControls() {
-    const { signal } = this.controller;
-    for (const button of this.stage.querySelectorAll("[data-school-map]")) {
-      button.addEventListener("click", () => {
-        if (button.dataset.schoolMap === "in") this.zoom = Math.min(4, this.zoom * 1.3);
-        if (button.dataset.schoolMap === "out") this.zoom = Math.max(1, this.zoom / 1.3);
-        if (button.dataset.schoolMap === "reset" || this.zoom === 1) {
-          this.offset = [0, 0];
-          this.zoom = 1;
-        }
-        this.draw();
-      }, { signal });
-    }
-    let drag = null;
-    this.stage.addEventListener("pointerdown", (event) => {
-      if (event.button !== 0 || event.target.closest("button, a")) return;
-      drag = { x: event.clientX, y: event.clientY, start: [...this.offset], id: event.pointerId };
-      this.stage.setPointerCapture(event.pointerId);
-      this.stage.classList.add("is-dragging");
-    }, { signal });
-    this.stage.addEventListener("pointermove", (event) => {
-      if (!drag || drag.id !== event.pointerId) return;
-      this.offset = [drag.start[0] + event.clientX - drag.x, drag.start[1] + event.clientY - drag.y];
-      this.scheduleDraw();
-    }, { signal });
-    const endDrag = () => {
-      drag = null;
-      this.stage.classList.remove("is-dragging");
-    };
-    for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) this.stage.addEventListener(type, endDrag, { signal });
-    this.stage.addEventListener("wheel", (event) => {
-      if (!event.ctrlKey && !event.metaKey) return;
-      event.preventDefault();
-      this.zoom = Math.max(1, Math.min(4, this.zoom * (event.deltaY < 0 ? 1.12 : 0.89)));
-      if (this.zoom === 1) this.offset = [0, 0];
-      this.scheduleDraw();
-    }, { signal, passive: false });
-    this.stage.addEventListener("keydown", (event) => {
-      if (event.target !== this.stage) return;
-      const moves = { ArrowLeft: [35, 0], ArrowRight: [-35, 0], ArrowUp: [0, 35], ArrowDown: [0, -35] };
-      const movement = moves[event.key];
-      if (!movement) return;
-      event.preventDefault();
-      this.offset = [this.offset[0] + movement[0], this.offset[1] + movement[1]];
-      this.draw();
-    }, { signal });
+  fitIsland() {
+    const hud = this.stage.parentElement.querySelector(".network-map-hud");
+    this.map.fitBounds([[5.7, 79.35], [9.95, 82.05]], { paddingTopLeft: [30, Math.max(70, (hud?.offsetHeight || 0) + 35)], paddingBottomRight: [30, 35], animate: false });
   }
 
-  scheduleDraw() {
-    if (this.frame) return;
-    this.frame = requestAnimationFrame(() => {
-      this.frame = null;
-      this.draw();
-    });
+  focusBranch(id) {
+    const buses = this.options.fleet.filter((bus) => bus.branch === id);
+    const points = buses.flatMap((bus) => bus.route?.points || []);
+    const branch = this.options.branches.find((branch) => branch.id === id);
+    if (points.length) this.map.fitBounds(points, { ...this.focusPadding(), maxZoom: 13, animate: false });
+    else if (branch) this.map.setView([branch.lat, branch.lon], 12, { animate: false });
   }
 
-  draw() {
-    const width = this.stage.clientWidth;
-    const height = this.stage.clientHeight;
-    if (!width || !height) return;
-    const density = Math.min(devicePixelRatio || 1, 2);
-    this.canvas.width = width * density;
-    this.canvas.height = height * density;
-    const ctx = this.canvas.getContext("2d");
-    ctx.setTransform(density, 0, 0, density, 0, 0);
-    const scale = Math.min((width - 44) / 2.55, (height - 62) / 4) * this.zoom;
-    const project = (lon, lat) => [width / 2 + (lon - 80.7) * scale * 0.99 + this.offset[0], height / 2 - (lat - 7.85) * scale + this.offset[1]];
-    const water = ctx.createLinearGradient(0, 0, width, height);
-    water.addColorStop(0, "#e7f0f3");
-    water.addColorStop(0.55, "#dcebf1");
-    water.addColorStop(1, "#edf4f4");
-    ctx.fillStyle = water;
-    ctx.fillRect(0, 0, width, height);
+  focusBus(id) {
+    const bus = this.options.fleet.find((bus) => bus.id === id);
+    if (bus?.route) this.map.fitBounds(bus.route.points, { ...this.focusPadding(), maxZoom: 14, animate: false });
+  }
 
-    const land = new Path2D();
-    for (const polygon of islandPolygons) {
-      polygon.forEach(([lon, lat], index) => {
-        const [x, y] = project(lon, lat);
-        if (index === 0) land.moveTo(x, y); else land.lineTo(x, y);
-      });
-      land.closePath();
+  focusPadding() {
+    const inspector = this.stage.closest(".network-experience").querySelector(".network-inspector");
+    if (inspector && innerWidth <= 750) return { paddingTopLeft: [30, 25], paddingBottomRight: [50, inspector.offsetHeight + 28] };
+    const hud = this.stage.parentElement.querySelector(".network-map-hud");
+    return { paddingTopLeft: [45, Math.max(80, (hud?.offsetHeight || 0) + 40)], paddingBottomRight: [50, 75] };
+  }
+
+  drawRoutes() {
+    const L = window.L;
+    for (const bus of this.options.fleet) {
+      if (!bus.route || (this.options.selectedBus ? bus.id !== this.options.selectedBus : bus.branch !== this.options.selected)) continue;
+      L.polyline(bus.route.points, {
+        pane: "networkRoutes", color: bus.status === "delayed" ? "#bb701e" : bus.status === "school" ? "#527ca4" : "#168166",
+        opacity: 0.85, weight: bus.id === this.options.selectedBus ? 5 : 3, dashArray: bus.status === "route" ? "7 9" : null,
+        className: bus.status === "route" && !this.options.paused ? "network-bus-route" : "", interactive: false,
+      }).addTo(this.map);
     }
-    ctx.shadowColor = "#628da638";
-    ctx.shadowBlur = 24;
-    ctx.shadowOffsetY = 3;
-    ctx.fillStyle = "#dbe7d4";
-    ctx.fill(land);
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetY = 0;
-    ctx.strokeStyle = "#fbfdf8";
-    ctx.lineWidth = 3;
-    ctx.stroke(land);
+  }
 
-    ctx.save();
-    ctx.clip(land);
-    const terrain = ctx.createLinearGradient(width * 0.4, height * 0.2, width * 0.6, height * 0.85);
-    terrain.addColorStop(0, "#dce7ce");
-    terrain.addColorStop(0.58, "#c7dbb8");
-    terrain.addColorStop(1, "#dce8d3");
-    ctx.fillStyle = terrain;
-    ctx.fillRect(0, 0, width, height);
-    ctx.lineJoin = "round";
-    ctx.lineCap = "round";
-    for (const [kind, points] of mainRoads) {
-      ctx.beginPath();
-      points.forEach(([lon, lat], index) => {
-        const [x, y] = project(lon, lat);
-        if (index === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      });
-      ctx.strokeStyle = kind === "motorway" ? "#e8ca92" : kind === "trunk" ? "#f5edce" : "#f4f7eabf";
-      ctx.lineWidth = (kind === "primary" ? 0.8 : 1.25) * Math.min(this.zoom, 1.8);
-      ctx.stroke();
+  updateMarkers() {
+    const L = window.L;
+    const detailed = this.map.getZoom() >= 10;
+    this.markerObstacles = [];
+    if (!detailed) {
+      for (const marker of this.busMarkers.values()) this.map.removeLayer(marker);
+      this.updateClusters();
+      return;
     }
-    ctx.restore();
-    const [countryX, countryY] = project(80.58, 8.8);
-    ctx.textAlign = "center";
-    ctx.fillStyle = "#6a866277";
-    ctx.font = "650 15px 'DM Sans', sans-serif";
-    ctx.fillText("SRI LANKA", countryX, countryY);
-    ctx.fillStyle = "#7a9bab8c";
-    ctx.font = "500 12px 'DM Sans', sans-serif";
-    const [oceanX, oceanY] = project(81.7, 8.1);
-    ctx.fillText("INDIAN OCEAN", oceanX, oceanY);
-    ctx.fillStyle = "#66848b";
-    ctx.font = "700 12px 'DM Sans', sans-serif";
-    ctx.fillText("N", width - 27, 32);
-    ctx.beginPath(); ctx.moveTo(width - 27, 40); ctx.lineTo(width - 27, 58); ctx.strokeStyle = "#78949a"; ctx.lineWidth = 1; ctx.stroke();
+    for (const marker of this.clusterMarkers.values()) this.map.removeLayer(marker);
+    for (const bus of this.options.fleet) {
+      let marker = this.busMarkers.get(bus.id);
+      const show = (detailed || bus.id === this.options.selectedBus) && (this.options.status === "all" || this.options.status === bus.status);
+      if (!show) { if (marker) this.map.removeLayer(marker); continue; }
+      const telemetry = networkTelemetry(bus, { progress: this.options.progress, paused: this.options.paused, elapsed: this.options.elapsed() });
+      if (!telemetry.position) continue;
+      if (!marker) {
+        marker = L.marker(telemetry.position, {
+          icon: L.divIcon({ className: "network-vehicle " + bus.status + (bus.id === this.options.selectedBus ? " is-selected" : ""),
+            html: '<span class="network-vehicle-icon">' + icon("bus", 18) + '</span><strong>' + e(bus.label) + '</strong>',
+            iconSize: [64, 34], iconAnchor: [32, 17] }),
+          title: "Bus " + bus.label + " · " + bus.branchName, alt: "View bus " + bus.label + " activity", keyboard: true, riseOnHover: true,
+          zIndexOffset: bus.id === this.options.selectedBus ? 900 : 100,
+        });
+        marker.on("click", () => this.options.onBusSelect(bus.id));
+        this.busMarkers.set(bus.id, marker);
+      }
+      marker.setLatLng(telemetry.position);
+      if (!this.map.hasLayer(marker)) marker.addTo(this.map);
+      const element = marker.getElement();
+      if (element) {
+        element.dataset.bus = bus.id;
+        element.setAttribute("role", "button");
+        element.setAttribute("aria-label", "View bus " + bus.label + " activity, " + bus.branchName);
+        element.setAttribute("aria-pressed", String(bus.id === this.options.selectedBus));
+      }
+    }
+  }
 
+  updateClusters() {
+    const L = window.L, groups = new Map(), keep = new Set();
+    for (const bus of this.options.fleet) {
+      if (this.options.status !== "all" && this.options.status !== bus.status) continue;
+      const telemetry = networkTelemetry(bus, { progress: this.options.progress, paused: this.options.paused, elapsed: this.options.elapsed() });
+      if (!telemetry.position) continue;
+      const p = this.map.latLngToContainerPoint(telemetry.position);
+      const key = Math.floor(p.x / 48) + ":" + Math.floor(p.y / 40);
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push({ bus, position: telemetry.position });
+    }
+    for (const entries of groups.values()) {
+      const key = entries.map(({ bus }) => bus.id).sort().join(",");
+      keep.add(key);
+      const position = [0, 1].map((axis) => entries.reduce((sum, entry) => sum + entry.position[axis], 0) / entries.length);
+      let marker = this.clusterMarkers.get(key);
+      if (!marker) {
+        const tone = entries.some(({ bus }) => bus.status === "delayed") ? "delayed" : entries.every(({ bus }) => bus.status === "school") ? "school" : "route";
+        marker = L.marker(position, {
+          icon: L.divIcon({ className: "network-vehicle-cluster " + tone, html: icon("bus", 17) + "<strong>" + entries.length + "</strong>", iconSize: [40, 29], iconAnchor: [20, 14] }),
+          title: entries.length + " buses · " + [...new Set(entries.map(({ bus }) => bus.branchName))].join(", "),
+          keyboard: true, riseOnHover: true,
+        });
+        marker.on("click", () => {
+          if (entries.length === 1) this.options.onBusSelect(entries[0].bus.id);
+          else this.map.fitBounds(entries.map((entry) => entry.position), { ...this.focusPadding(), maxZoom: 13, animate: false });
+        });
+        this.clusterMarkers.set(key, marker);
+      }
+      marker.setLatLng(position);
+      if (!this.map.hasLayer(marker)) marker.addTo(this.map);
+      marker.getElement().dataset.busCount = entries.length;
+      marker.getElement().setAttribute("aria-label", "View " + entries.length + " buses near " + entries[0].bus.branchName);
+      const p = this.map.latLngToContainerPoint(position);
+      this.markerObstacles.push({ x: p.x - 21, y: p.y - 16, width: 42, height: 32 });
+    }
+    for (const [key, marker] of this.clusterMarkers) if (!keep.has(key)) { this.map.removeLayer(marker); this.clusterMarkers.delete(key); }
+  }
+
+  drawLabels() {
+    const width = this.stage.clientWidth, height = this.stage.clientHeight;
     const bubbles = [];
     for (const entry of this.labels) {
-      const [x, y] = project(entry.branch.lon, entry.branch.lat);
-      const hidden = this.zoom > 1 && (x < -65 || x > width + 65 || y < -65 || y > height + 65);
-      entry.label.hidden = hidden;
-      if (hidden) continue;
-      const bubbleWidth = entry.label.offsetWidth;
-      const bubbleHeight = entry.label.offsetHeight;
-      bubbles.push({ ...entry, width: bubbleWidth, height: bubbleHeight, anchorX: x - bubbleWidth / 2, anchorY: y - bubbleHeight / 2, x: x - bubbleWidth / 2, y: y - bubbleHeight / 2 });
+      const { x, y } = this.map.latLngToContainerPoint([entry.branch.lat, entry.branch.lon]);
+      entry.label.hidden = x < -20 || x > width + 20 || y < 50 || y > height - 28;
+      if (entry.label.hidden) continue;
+      const w = entry.label.offsetWidth, h = entry.label.offsetHeight;
+      bubbles.push({ ...entry, width: w, height: h, anchorX: x - w / 2, anchorY: y - h / 2, x: x - w / 2, y: y - h / 2 });
     }
     this.arrangeBubbles(bubbles, width, height);
-    for (const bubble of bubbles) bubble.label.style.transform = `translate(${bubble.x}px, ${bubble.y}px)`;
-    this.stage.querySelector('[data-school-map="in"]').disabled = this.zoom >= 4;
-    this.stage.querySelector('[data-school-map="out"]').disabled = this.zoom <= 1;
+    for (const bubble of bubbles) bubble.label.style.transform = "translate(" + bubble.x + "px," + bubble.y + "px)";
   }
 
   arrangeBubbles(bubbles, width, height) {
-    const padding = 9;
-    const footerHeight = this.stage.parentElement.querySelector(".map-explorer-attribution")?.offsetHeight || 24;
-    const gap = width < 500 ? 5 : 7;
-    for (let iteration = 0; iteration < 450; iteration += 1) {
-      for (const bubble of bubbles) {
-        if (iteration < 120) {
-          bubble.x += (bubble.anchorX - bubble.x) * 0.025;
-          bubble.y += (bubble.anchorY - bubble.y) * 0.025;
-        }
-      }
-      for (let i = 0; i < bubbles.length; i += 1) {
-        for (let j = i + 1; j < bubbles.length; j += 1) {
-          const a = bubbles[i];
-          const b = bubbles[j];
-          const dx = (a.x + a.width / 2) - (b.x + b.width / 2);
-          const dy = (a.y + a.height / 2) - (b.y + b.height / 2);
-          const overlapX = (a.width + b.width) / 2 + gap - Math.abs(dx);
-          const overlapY = (a.height + b.height) / 2 + gap - Math.abs(dy);
-          if (overlapX <= 0 || overlapY <= 0) continue;
-          if (overlapY < overlapX) {
-            const shift = (overlapY / 2 + 0.2) * (a.anchorY >= b.anchorY ? 1 : -1);
-            a.y += shift; b.y -= shift;
-          } else {
-            const shift = (overlapX / 2 + 0.2) * (dx >= 0 ? 1 : -1);
-            a.x += shift; b.x -= shift;
-          }
-        }
-      }
-      for (const bubble of bubbles) {
-        bubble.x = Math.max(padding, Math.min(width - bubble.width - padding, bubble.x));
-        bubble.y = Math.max(26, Math.min(height - bubble.height - footerHeight - 12, bubble.y));
-      }
+    const stageBox = this.stage.getBoundingClientRect();
+    const occupied = this.markerObstacles.map((rect) => ({ ...rect }));
+    const hud = this.stage.parentElement.querySelector(".network-map-hud");
+    const controls = this.stage.querySelector(".school-map-controls");
+    for (const element of [hud, controls]) {
+      if (!element || !element.offsetHeight) continue;
+      const box = element.getBoundingClientRect();
+      occupied.push({ x: box.x - stageBox.x - 5, y: box.y - stageBox.y - 5, width: box.width + 10, height: box.height + 10 });
+    }
+    const overlaps = (candidate) => occupied.some((box) =>
+      candidate.x < box.x + box.width + 5 && candidate.x + candidate.width + 5 > box.x &&
+      candidate.y < box.y + box.height + 5 && candidate.y + candidate.height + 5 > box.y);
+    for (const bubble of bubbles.sort((a, b) => a.anchorY - b.anchorY || a.anchorX - b.anchorX)) {
+      let best = null, score = Infinity;
+      const minX = 9, maxX = width - bubble.width - 9;
+      const minY = 12, maxY = height - bubble.height - 30;
+      const consider = (x, y) => {
+        const candidateScore = (x - bubble.anchorX) ** 2 + (y - bubble.anchorY) ** 2 * 1.2;
+        const maximumDisplacement = width < 550 ? 34 : 70;
+        if (candidateScore > maximumDisplacement ** 2) return;
+        if (candidateScore >= score || overlaps({ x, y, width: bubble.width, height: bubble.height })) return;
+        best = { x, y }; score = candidateScore;
+      };
+      consider(Math.max(minX, Math.min(maxX, bubble.anchorX)), Math.max(minY, Math.min(maxY, bubble.anchorY)));
+      if (score !== 0) for (let y = minY; y <= maxY; y += 8) for (let x = minX; x <= maxX; x += 10) consider(x, y);
+      if (best) { bubble.x = best.x; bubble.y = best.y; }
+      else { bubble.label.hidden = true; continue; }
+      occupied.push({ x: bubble.x, y: bubble.y, width: bubble.width, height: bubble.height });
     }
   }
 
   destroy() {
-    this.resize.disconnect();
+    clearInterval(this.timer);
+    clearTimeout(this.tileNoticeTimer);
     this.controller.abort();
-    if (this.frame) cancelAnimationFrame(this.frame);
+    this.resize.disconnect();
+    this.map.remove();
   }
 }
-
