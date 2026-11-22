@@ -31,7 +31,8 @@ export function contextFor(state, role, accountId, branchId, grantIndex) {
 
 export function withinScope(context, record) {
   if (!context || !record) return false;
-  if (context.branch !== "all" && record.branch !== context.branch) return false;
+  const branch = context.role === "chairman" ? context.branch : context.grant?.branch || context.branch;
+  if (branch !== "all" && record.branch !== branch) return false;
   if (context.role === "section_head") return sectionFor(record.grade) === context.grant.section;
   if (context.role === "coordinator") return Number(record.grade) === Number(context.grant.grade);
   if (context.role === "class_teacher") return record.className === context.grant.className && Number(record.grade) === Number(context.grant.grade);

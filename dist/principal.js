@@ -7,7 +7,7 @@ import { chairmanBranches, attendanceResult, branchStaff, demoDate, academicTren
 import { schoolClassResults, schoolAcademicComparison, schoolAcademicAttention } from "./principal-data.js";
 import { chairmanViewBar, attendancePage, staffingPage, reportsPage, metric, panel, table, select, header, sparkline, histogram } from "./chairman.js";
 
-import { viceTaskBar, temporaryCoverPanel } from "./vice-principal.js";
+import { viceTaskBar, temporaryCoverPanel, incomingSectionCoverPanel } from "./vice-principal.js";
 import { schoolTemporaryCovers } from "./vice-data.js";
 
 const pct = (value) => value.toFixed(1) + "%";
@@ -75,5 +75,5 @@ export function principalOverviewPage(options) {
   const view = options.chairman.view;
   const content = view === "transport" ? networkOverviewPage(options) : '<div class="chairman-analytics">' +
     (view === "academic" ? principalAcademicPage(options, branch) : view === "attendance" ? attendancePage(options, [branch]) : view === "staffing" ? staffingPage(options, [branch]) : reportsPage(options, [branch])) + '</div>';
-  return '<section class="chairman-portal principal-portal">' + principalIdentity(options, branch) + (options.context.role === "vice_principal" ? viceTaskBar(options, branch) : "") + chairmanViewBar(view, options.context.role) + content + (options.context.role === "vice_principal" && ["academic", "staffing"].includes(view) ? '<div class="vice-cover-section">' + temporaryCoverPanel(options, branch) + '</div>' : "") + '</section>';
+  return '<section class="chairman-portal principal-portal">' + principalIdentity(options, branch) + (options.context.role === "vice_principal" ? viceTaskBar(options, branch) : "") + chairmanViewBar(view, options.context.role) + content + (options.context.role === "vice_principal" && ["academic", "staffing"].includes(view) ? '<div class="vice-cover-section">' + (view === "staffing" ? incomingSectionCoverPanel(options) : "") + temporaryCoverPanel(options, branch) + '</div>' : "") + '</section>';
 }

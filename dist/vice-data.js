@@ -52,6 +52,21 @@ export function coverTeachers(state, branch, date = demoDate) {
   return branchStaff(state, branch, date).filter((person) => person.category === "teachers" && person.status === "present");
 }
 
+export function incomingSectionCoverRequests(state, context) {
+  const branch = assignedSchool(state, context);
+  return (state.sectionCoverRequests || []).filter((item) => item.branch === branch.id && item.status === "pending" && state.courses.some((course) => course.id === item.course && course.branch === branch.id));
+}
+
+export function declineSectionCoverRequest(state, context, input) {
+  const request = incomingSectionCoverRequests(state, context).find((item) => item.id === input.id);
+  if (!request) throw new Error("Choose a pending cover request from your school.");
+  const note = String(input.note || "").trim();
+  if (!note || note.length > 500) throw new Error("Enter the reason for declining this request.");
+  request.status = "declined";
+  request.decisionNote = note;
+  request.decidedBy = context.account.name;
+}
+
 export function saveTemporaryCover(state, context, input) {
   const branch = assignedSchool(state, context);
   const course = state.courses.find((course) => course.branch === branch.id && course.id === input.course);
@@ -62,10 +77,13 @@ export function saveTemporaryCover(state, context, input) {
   if (schoolTemporaryCovers(state, branch).some((item) => item.course === course.id && item.date === input.date && item.status === "active")) throw new Error("This class already has active cover. Cancel it before assigning another teacher.");
   const reason = String(input.reason || "").trim();
   if (!reason || reason.length > 500) throw new Error("Enter the reason for temporary cover.");
+  const request = input.requestId ? incomingSectionCoverRequests(state, context).find((item) => item.id === input.requestId && item.course === course.id && item.date === input.date) : null;
+  if (input.requestId && !request) throw new Error("Choose a pending cover request for this school and course.");
   const item = { id: "cover-" + crypto.randomUUID(), branch: branch.id, course: course.id, className: course.className, title: course.title,
     teacher: teacher.id, teacherName: teacher.name, originalTeacher: state.assignments[course.id]?.teacher, date: input.date, reason,
-    status: "active", by: context.account.name, at: new Date().toISOString() };
+    status: "active", by: context.account.name, at: new Date().toISOString(), ...(request ? { requestId: request.id } : {}) };
   state.temporaryCovers = [item, ...(state.temporaryCovers || [])];
+  if (request) { request.status = "fulfilled"; request.teacherName = teacher.name; request.decidedBy = context.account.name; request.decisionNote = "Temporary cover assigned."; }
   return item;
 }
 
@@ -75,6 +93,8 @@ export function cancelTemporaryCover(state, context, id) {
   if (!cover) throw new Error("Active cover is required within your school.");
   cover.status = "cancelled";
   cover.cancelledBy = context.account.name;
+  const request = (state.sectionCoverRequests || []).find((item) => item.id === cover.requestId && item.branch === branch.id && item.status === "fulfilled");
+  if (request) { request.status = "pending"; delete request.teacherName; request.decisionNote = "Previous cover cancelled; awaiting replacement."; }
 }
 
 export function saveLeaveRecommendation(state, context, input) {

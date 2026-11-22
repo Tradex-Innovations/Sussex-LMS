@@ -63,6 +63,7 @@ function detail(course, options) {
   return `
     ${button("All courses", "close-course", { variant: "back-link", focus: "all-courses" })}
     ${pageHeading(course.title, courseTitle(course, state), isParent ? childSelect(child, children) : canPublish(state, context, course) ? button("Add material", "add-material", { value: course.id, iconName: "plus", focus: "add-material" }) : "")}
+    ${!isParent && state.sectionCourseReviews?.[course.id] ? `<section class="section-review-notice"><strong>${state.sectionCourseReviews[course.id].status === "changes_requested" ? "Section Head requested material updates" : "Section Head marked materials ready"}</strong><p>${e(state.sectionCourseReviews[course.id].note)}</p><small>${e(state.sectionCourseReviews[course.id].by)}</small></section>` : ""}
     <section class="surface materials-card">
       <header class="panel-heading"><div><h2>Course materials</h2><p>${items.length} published materials</p></div>${courseIcon(course)}</header>
       <div class="materials-list">${items.map((item) => materialRow(item, options, course)).join("") || emptyState("file", "No materials yet", "Published course materials will appear here.")}</div>

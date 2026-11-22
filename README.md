@@ -12,6 +12,10 @@ python3 -m http.server 4183 --bind 127.0.0.1 --directory dist
 
 Open [the local demo](http://127.0.0.1:4183/). No install or build is required.
 
+## Features and access reference
+
+[ROLE_FEATURES_ACCESS.md](ROLE_FEATURES_ACCESS.md) documents all 12 roles, their implemented views, read/write scope, approvals, cross-role workflows, demo accounts and prototype limits. Project instructions in [AGENTS.md](AGENTS.md) require this reference to be updated alongside future feature and permission changes.
+
 ## Parent demo login
 
 Open [Parent login](http://127.0.0.1:4183/#parent/login). Use a student's admission number and the temporary demo password `1234`.
@@ -62,6 +66,18 @@ Open [Vice Principal → Overview](http://127.0.0.1:4183/#vice_principal/overvie
 - **School Reports:** school operational briefs plus transport, academic, attendance and staffing snapshots, CSV/HTML exports and Print / Save PDF. The operational brief also captures follow-ups, active cover and leave recommendations pending Principal decision. The latest eight reports are retained per school and role, separate from Principal and Chairman histories.
 
 The daily school pulse links into the relevant filtered view. **Follow-up board** contains three initial sample tasks and any added items, with a school owner, due date, status and note history. Use **Review follow-up** to record progress or resolve an item. All changes persist only in the current browser; assigning an owner or recommending leave does not send a message. The source and browser checks cover both demo schools, foreign-school action rejection, preserved course assignments, separate recommendation/final decisions and 320px/390px layouts.
+
+### Section Head workspace
+
+Open [Section Head → Section Overview](http://127.0.0.1:4183/#section_head/overview/summary). **Demo Section Head** previews Dilini Silva (Nugegoda/Middle School), Asha Wickramasinghe (Nugegoda/Primary) or Lakshmi Fernando (Malabe/Middle School). The school and section come from the appointment; the five views are:
+
+- **Section Overview:** daily sample attendance, actual prototype student/course/material counts, teaching priorities, grade summary, trend and recorded follow-ups.
+- **Academic & Courses:** section-grade/class/subject/term comparisons; course teacher/enrolment assignment, lecture materials/progress, material readiness/update reviews and comparison CSV.
+- **Attendance:** section and class registers, date/period filters, search/watchlists, 20-day calendars and owned follow-ups with due dates, status and note history.
+- **Teaching Coordination:** teachers serving the section, their in-section workloads and availability, missing materials/review feedback, temporary-cover requests and Vice Principal outcomes.
+- **Section Reports:** scoped management/academic/attendance/teaching snapshots, CSV/HTML downloads and Print / Save PDF. Each school/section retains its own latest eight reports.
+
+A Section Head requests cover; the school's Vice Principal assigns or declines it from Staffing Overview. Linked cover cancellation reopens the request. Course material review notes appear in staff course details and are hidden from parents. Active Section Head access does not grant material publication, staff appointments, leave decisions or school-wide data. See the full [role reference](ROLE_FEATURES_ACCESS.md#section-head) for boundaries and sample-data details.
 
 ### School portal
 

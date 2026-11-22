@@ -294,6 +294,7 @@ export function reportCSV(report) {
   const metadata = [["Sussex College Network", report.title], ["Data", "SAMPLE DATA - PROTOTYPE"], ["Reporting period", report.criteria.from + " to " + report.criteria.to],
     ...(["brief", "attendance"].includes(report.type) ? [["Attendance period", report.criteria.from + " to " + report.criteria.to], ["Attendance for", report.criteria.audience]] : []),
     ...(["brief", "academic"].includes(report.type) ? [["Academic assessment", report.criteria.subject + " / Grade " + report.criteria.grade + " / Term " + report.criteria.term]] : []), ["Generated UTC", report.generatedAt], []];
+  if (report.owner?.role === "section_head") metadata.splice(-1, 0, ["School", report.owner.school], ["Section", report.owner.sectionName], ["Section grades", report.criteria.grades.join(", ")]);
   if (report.criteria.className && report.criteria.className !== "all") metadata.splice(-1, 0, ["Academic class", report.criteria.className]);
   if (report.criteria.attendanceClass && report.criteria.attendanceClass !== "all") metadata.splice(-1, 0, ["Attendance class", report.criteria.attendanceClass]);
   if (report.criteria.comparison) metadata.splice(-1, 0, ["Comparison", report.criteria.comparison]);
@@ -301,5 +302,6 @@ export function reportCSV(report) {
   const operations = report.operations ? [[], ["School coordination snapshot"], ["Leave recommendations pending Principal decision", report.operations.recommendations],
     ["Follow-up", "Category", "Status", "Due"], ...report.operations.followups.map((item) => [item.title, item.category, item.status, item.due]), [],
     ["Cover class", "Subject", "Cover teacher", "Date"], ...report.operations.covers.map((item) => [item.className, item.title, item.teacherName, item.date])] : [];
-  return "\uFEFF" + [...metadata, columns.map(([, label]) => label), ...rows.map((row) => columns.map(([key]) => row[key])), ...operations].map((row) => row.map(safe).join(",")).join("\r\n");
+  const sectionFollowups = report.owner?.role === "section_head" && report.type === "brief" && report.followups?.length ? [[], ["Recorded attendance follow-ups"], ["Student", "Class", "Due", "Status"], ...report.followups.map((item) => [item.name, item.className, item.due, item.status])] : [];
+  return "\uFEFF" + [...metadata, columns.map(([, label]) => label), ...rows.map((row) => columns.map(([key]) => row[key])), ...operations, ...sectionFollowups].map((row) => row.map(safe).join(",")).join("\r\n");
 }

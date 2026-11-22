@@ -1,7 +1,7 @@
 import { badge, button, escapeHtml as e, emptyState } from "./ui.js";
 import { icon } from "./icons.js";
 import { demoDate, branchStaff } from "./chairman-data.js";
-import { schoolFollowups, followupAssignees, followupCategories, followupStatuses, schoolTemporaryCovers, coverTeachers, leaveRecommendations } from "./vice-data.js";
+import { schoolFollowups, followupAssignees, followupCategories, followupStatuses, schoolTemporaryCovers, coverTeachers, leaveRecommendations, incomingSectionCoverRequests } from "./vice-data.js";
 
 const choices = (values, selected) => values.map(([id, name]) => `<option value="${e(id)}" ${id === selected ? "selected" : ""}>${e(name)}</option>`).join("");
 const field = (label, content) => `<label class="field">${label}${content}</label>`;
@@ -32,13 +32,24 @@ export function temporaryCoverPanel(options, branch) {
   return panel("Temporary teaching cover", "One-day cover for 20 Nov · Permanent course assignments stay with the assigned teacher", `<div class="vice-cover-list">${rows || emptyState("book", "No temporary cover assigned", "Choose a course and an available teacher for today’s cover.")}</div>`, options.context.role === "vice_principal" ? button("Assign cover", "vice-cover", { value: "", variant: "secondary compact", iconName: "plus" }) : "");
 }
 
-export function temporaryCoverForm(options, branch, courseId = "") {
+export function temporaryCoverForm(options, branch, courseId = "", requestId = "") {
   const courses = options.state.courses.filter((course) => course.branch === branch.id);
   const teachers = coverTeachers(options.state, branch);
-  return `<form data-form="vice-cover"><div class="form-body"><p>Cover is for one school day. The course’s permanent teacher remains assigned.</p>${field("Course / class", `<select name="course" data-change="vice-cover-course">${choices(courses.map((course) => [course.id, course.title + " · Class " + course.className]), courseId || courses[0]?.id)}</select>`)}${field("Cover date", `<input name="date" type="date" value="${demoDate}" readonly>`)}${field("Available cover teacher", `<select name="teacher" id="vice-cover-teacher">${choices(teachers.filter((person) => person.id !== options.state.assignments[courseId || courses[0]?.id]?.teacher).map((person) => [person.id, person.name + (person.sample ? " · Sample teacher" : "")]), "")}</select>`)}${field("Cover reason", '<textarea name="reason" rows="3" maxlength="500" required placeholder="For example, assigned teacher on leave"></textarea>')}</div>${footer("Assign temporary cover")}</form>`;
+  return `<form data-form="vice-cover"><input type="hidden" name="requestId" value="${e(requestId)}"><div class="form-body"><p>Cover is for one school day. The course’s permanent teacher remains assigned.</p>${field("Course / class", `<select name="course" data-change="vice-cover-course">${choices(courses.map((course) => [course.id, course.title + " · Class " + course.className]), courseId || courses[0]?.id)}</select>`)}${field("Cover date", `<input name="date" type="date" value="${demoDate}" readonly>`)}${field("Available cover teacher", `<select name="teacher" id="vice-cover-teacher">${choices(teachers.filter((person) => person.id !== options.state.assignments[courseId || courses[0]?.id]?.teacher).map((person) => [person.id, person.name + (person.sample ? " · Sample teacher" : "")]), "")}</select>`)}${field("Cover reason", '<textarea name="reason" rows="3" maxlength="500" required placeholder="For example, assigned teacher on leave"></textarea>')}</div>${footer("Assign temporary cover")}</form>`;
 }
 
 export function leaveRecommendationForm(request) {
   const previous = request.recommendation;
   return `<form data-form="vice-leave"><div class="form-body"><input type="hidden" name="id" value="${e(request.id)}"><h3>${e(request.name)}</h3><p>${e(request.reason)} · ${e(request.date)}</p>${field("Recommendation", `<select name="recommendation">${choices(Object.entries(leaveRecommendations), previous?.recommendation || "support")}</select>`)}${field("Note for Principal", `<textarea name="note" rows="4" maxlength="1000" required>${e(previous?.note || "")}</textarea>`)}<p class="chairman-filter-note">The Principal makes the final leave decision.</p></div>${footer("Save recommendation")}</form>`;
+}
+
+
+export function incomingSectionCoverPanel(options) {
+  const items = incomingSectionCoverRequests(options.state, options.context);
+  if (!items.length) return "";
+  return panel("Cover requests from Section Heads", "Review requests within your school and assign available temporary cover", '<div class="vice-cover-list">' + items.map((item) => `<article class="vice-cover-card"><div><strong>${e(item.title)} · Class ${e(item.className)}</strong>${badge("Pending", "amber")}</div><p>${e(item.sectionName)} · ${e(item.by)} · ${e(item.date)}</p><small>${e(item.reason)}</small><div class="section-row-actions">${button("Assign requested cover", "vice-cover-request", { value: item.id, variant: "primary compact" })}${button("Decline request", "vice-decline-cover-request", { value: item.id, variant: "secondary compact" })}</div></article>`).join("") + '</div>');
+}
+
+export function declineCoverRequestForm(request) {
+  return `<form data-form="vice-decline-cover"><div class="form-body"><input type="hidden" name="id" value="${e(request.id)}">${field("Decision note for Section Head", '<textarea name="note" rows="3" required maxlength="500"></textarea>')}</div>${footer("Decline cover request")}</form>`;
 }

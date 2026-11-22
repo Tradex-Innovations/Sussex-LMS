@@ -4,7 +4,7 @@ export const roles = {
   chairman: { name: "Chairman", icon: "school", start: "overview", pages: ["overview", "transport", "courses", "people", "library", "access"] },
   principal: { name: "Principal", icon: "badge", start: "overview", pages: ["overview", "transport", "courses", "people", "library", "access"] },
   vice_principal: { name: "Vice Principal", icon: "badge", start: "overview", pages: ["overview", "transport", "courses", "people", "library"] },
-  section_head: { name: "Section Head", icon: "users", start: "courses", pages: ["courses", "people"] },
+  section_head: { name: "Section Head", icon: "users", start: "overview", pages: ["overview", "courses", "people"] },
   coordinator: { name: "Grade Coordinator", icon: "users", start: "courses", pages: ["courses", "people"] },
   class_teacher: { name: "Class Teacher", icon: "book", start: "courses", pages: ["courses", "people"] },
   teacher: { name: "Subject Teacher", icon: "book", start: "courses", pages: ["courses"] },
