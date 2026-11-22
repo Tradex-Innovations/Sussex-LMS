@@ -163,8 +163,8 @@ function driverTransport({ fleet, progress, paused }) {
 
 export function transportPage(role, options) {
   if (!options.fleet.length) return pageHeading(role === "parent" ? "Track my bus" : "Bus tracking", "School transport", role === "parent" && options.child ? childSelect(options.child, options.children) : "") + `<section class="surface">${emptyState("bus", "No bus assigned", role === "parent" ? "Your child’s bus assignment will appear here." : "No buses are available in your assigned scope.")}</section>`;
-  if (role === "parent") return parentTransport(options);
-  if (role === "driver") return driverTransport(options);
+  if (role === "parent") return `<a class="button secondary compact nfc-transport-link" href="#parent/boarding">${icon("badge",17)}View boarding status</a>` + parentTransport(options);
+  if (role === "driver") return `<a class="button secondary compact nfc-transport-link" href="#driver/boarding">${icon("badge",17)}Bus boarding & reader</a>` + driverTransport(options);
   return adminTransport(options);
 }
 

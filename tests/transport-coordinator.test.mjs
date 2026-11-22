@@ -13,7 +13,7 @@ const busInput=(state,id="01")=>{const bus=state.buses.find(bus=>bus.id===id);re
 const issue={busId:"01",title:"Review pickup delay",due:"2026-11-23",status:"open",note:"PRIVATE_TRANSPORT_NOTE"};
 
 test("Coordinator scope follows the real active school appointment and excludes synthetic vehicles",()=>{
- const {state,context}=setup();assert.equal(roles.transport.start,"overview");assert.deepEqual(roles.transport.pages,["overview","transport"]);
+ const {state,context}=setup();assert.equal(roles.transport.start,"overview");assert.deepEqual(roles.transport.pages,["overview","transport","boarding"]);
  assert.equal(coordinatorScope(state,{...context,branch:"lakeside"}).branch.id,"colombo");assert.equal(coordinatorScope(state,{...context,grant:{...context.grant,branch:"lakeside"}}),null);
  assert.equal(coordinatorBuses(state,context).length,6);assert.equal(coordinatorFleet(state,context).length,6);assert.ok(coordinatorFleet(state,context).every(bus=>bus.operational&&bus.branch==="colombo"));
  for(const role of ["principal","vice_principal","admin","teacher","driver","parent"])assert.equal(coordinatorScope(state,contextFor(state,role)),null);

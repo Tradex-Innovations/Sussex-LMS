@@ -32,6 +32,8 @@ import { saveStudentRecord, saveCourseAssignment } from "./records.js";
 import { coordinatorViews, coordinatorDefaults, coordinatorScope, coordinatorFilters, coordinatorBuses, coordinatorFleet, coordinatorDrivers, coordinatorStudents, coordinatorTasks, coordinatorReportTypes, allocationStatuses, driverStatuses, saveCoordinatorTask, saveCoordinatorAllocation, visibleCoordinatorReports, generateCoordinatorReport } from "./coordinator-data.js";
 import { transportCoordinatorPage, coordinatorTaskForm, coordinatorAllocationForm, coordinatorReportHTML, updateCoordinatorTelemetry } from "./transport-coordinator.js";
 import { assignDriver, saveBusAssignment } from "./transport-records.js";
+import { boardingDefaults, boardingScope, boardingFilters, boardingStudents, studentCards, visibleBoardingTrips, boardingRows, createBoardingTrip, issueBoardingCard, disableBoardingCard, simulateBoardingTap, syncBoardingReader, setBoardingReader, closeBoardingTrip, correctBoardingRecord, flagBoardingException, boardingManifest } from "./boarding-data.js";
+import { boardingPage, boardingTripForm, boardingCardForm, boardingDisableForm, boardingReviewForm, boardingCardHistory } from "./boarding.js";
 import { FleetMap } from "./map.js";
 import { mountMapSummary, transportPage, updateTripDetails } from "./transport.js";
 import { avatar, button, emptyState, escapeHtml as e, iconTile } from "./ui.js";
@@ -41,6 +43,7 @@ const app = document.querySelector("#app");
 const dialog = document.querySelector("#dialog");
 const toasts = document.querySelector("#toasts");
 const navigation = {
+  boarding: { label: "Bus boarding", icon: "badge" },
   overview: { label: "Overview", icon: "school" },
   transport: { label: "Bus tracking", icon: "bus" },
   courses: { label: "Courses", icon: "book" },
@@ -56,7 +59,7 @@ let schoolMapKey;
 let mapViewKey;
 let dialogMode;
 let view = getView();
-const ui = { transportCoordinator: coordinatorDefaults(), schoolAdmin: adminDefaults(), subjectTeacher: subjectDefaults(), classTeacher: classDefaults(), gradeCoordinator: gradeDefaults(), section: sectionDefaults(), accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", grade: "all", query: "", paused: false, runningSince: performance.now(), elapsed: 0, starts: {},
+const ui = { boarding: boardingDefaults(), nfcFeedback: null, transportCoordinator: coordinatorDefaults(), schoolAdmin: adminDefaults(), subjectTeacher: subjectDefaults(), classTeacher: classDefaults(), gradeCoordinator: gradeDefaults(), section: sectionDefaults(), accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", grade: "all", query: "", paused: false, runningSince: performance.now(), elapsed: 0, starts: {},
   network: { subject: "mathematics", grade: 8, term: 3, selected: "", mode: "", compare: null, category: "all", tab: "transport", status: "all", busId: "", busBranch: "all" }, chairman: { ...chairmanDefaults(), ...(["principal", "vice_principal"].includes(view.role) ? { attendanceFlag: "all" } : {}) } };
 
 function getView() {
@@ -81,7 +84,7 @@ function childFor(ctx) {
 function optionsFor(ctx = context()) {
   const children = linkedChildren(state, ctx);
   const child = childFor(ctx);
-  return { state, transportCoordinator: { ...(ctx?.role === "transport" && coordinatorScope(state, ctx) ? coordinatorFilters(state, ctx, ui.transportCoordinator) : ui.transportCoordinator), view: view.module }, schoolAdmin: { ...(ctx?.role === "admin" && adminScope(state, ctx) ? adminFilters(state, ctx, ui.schoolAdmin) : ui.schoolAdmin), view: view.module }, subjectTeacher: { ...(ctx?.role === "teacher" && subjectScope(state, ctx) ? subjectFilters(state, ctx, ui.subjectTeacher) : ui.subjectTeacher), view: view.module }, classTeacher: { ...(ctx?.role === "class_teacher" && classScope(state, ctx) ? classFilters(state, ctx, ui.classTeacher) : ui.classTeacher), view: view.module }, gradeCoordinator: { ...(ctx?.role === "coordinator" && gradeScope(state, ctx) ? gradeFilters(state, ctx, ui.gradeCoordinator) : ui.gradeCoordinator), view: view.module }, section: { ...(ctx?.role === "section_head" && sectionScope(state, ctx) ? sectionFilters(state, ctx, ui.section) : ui.section), view: view.module }, context: ctx, children, child, fleet: visibleBuses(state, ctx, child), filter: ui.filter, selected: ui.bus, paused: ui.paused, progress, courseId: ui.courseId, grade: ui.grade, query: ui.query, network: isSchoolOperator(ctx) ? { ...ui.network, className: ui.chairman.academicClass } : ui.network, chairman: { ...ui.chairman, view: view.module } };
+  return { state, boarding: { ...(boardingScope(state, ctx) ? boardingFilters(state, ctx, ui.boarding) : ui.boarding), feedback: ui.nfcFeedback }, transportCoordinator: { ...(ctx?.role === "transport" && coordinatorScope(state, ctx) ? coordinatorFilters(state, ctx, ui.transportCoordinator) : ui.transportCoordinator), view: view.module }, schoolAdmin: { ...(ctx?.role === "admin" && adminScope(state, ctx) ? adminFilters(state, ctx, ui.schoolAdmin) : ui.schoolAdmin), view: view.module }, subjectTeacher: { ...(ctx?.role === "teacher" && subjectScope(state, ctx) ? subjectFilters(state, ctx, ui.subjectTeacher) : ui.subjectTeacher), view: view.module }, classTeacher: { ...(ctx?.role === "class_teacher" && classScope(state, ctx) ? classFilters(state, ctx, ui.classTeacher) : ui.classTeacher), view: view.module }, gradeCoordinator: { ...(ctx?.role === "coordinator" && gradeScope(state, ctx) ? gradeFilters(state, ctx, ui.gradeCoordinator) : ui.gradeCoordinator), view: view.module }, section: { ...(ctx?.role === "section_head" && sectionScope(state, ctx) ? sectionFilters(state, ctx, ui.section) : ui.section), view: view.module }, context: ctx, children, child, fleet: visibleBuses(state, ctx, child), filter: ui.filter, selected: ui.bus, paused: ui.paused, progress, courseId: ui.courseId, grade: ui.grade, query: ui.query, network: isSchoolOperator(ctx) ? { ...ui.network, className: ui.chairman.academicClass } : ui.network, chairman: { ...ui.chairman, view: view.module } };
 }
 
 function elapsed() {
@@ -100,7 +103,7 @@ function brand() {
 }
 
 function navigationLinks(mobile = false) {
-  return roles[view.role].pages.map((page) => `<a href="#${view.role}/${page}" class="nav-link ${page === view.page ? "is-active" : ""}" ${page === view.page ? 'aria-current="page"' : ""}>${icon(navigation[page].icon, 20)}<span>${mobile && page === "people" ? "Students" : mobile && page === "access" ? "Access" : navigation[page].label}</span></a>`).join("");
+  return roles[view.role].pages.map((page) => `<a href="#${view.role}/${page}" class="nav-link ${page === view.page ? "is-active" : ""}" ${page === view.page ? 'aria-current="page"' : ""}>${icon(navigation[page].icon, 20)}<span>${mobile && page === "boarding" ? "Boarding" : mobile && page === "transport" ? "Buses" : mobile && page === "people" ? "Students" : mobile && page === "access" ? "Access" : navigation[page].label}</span></a>`).join("");
 }
 
 function sidebar(ctx) {
@@ -172,7 +175,7 @@ function render(focus, { scrollTop = false } = {}) {
     }
     if (!options.fleet.some((bus) => bus.id === ui.bus)) ui.bus = options.fleet[0]?.id;
     options.selected = ui.bus;
-    const pages = { overview: ctx.role === "transport" ? transportCoordinatorPage : ctx.role === "admin" ? schoolAdminPage : ctx.role === "teacher" ? subjectTeacherPage : ctx.role === "class_teacher" ? classTeacherPage : ctx.role === "coordinator" ? gradeCoordinatorPage : ctx.role === "section_head" ? sectionHeadPage : ctx.role === "chairman" ? chairmanOverviewPage : isSchoolOperator(ctx) ? principalOverviewPage : networkOverviewPage, courses: coursesPage, people: peoplePage, library: libraryPage, access: accessPage };
+    const pages = { boarding: boardingPage, overview: ctx.role === "transport" ? transportCoordinatorPage : ctx.role === "admin" ? schoolAdminPage : ctx.role === "teacher" ? subjectTeacherPage : ctx.role === "class_teacher" ? classTeacherPage : ctx.role === "coordinator" ? gradeCoordinatorPage : ctx.role === "section_head" ? sectionHeadPage : ctx.role === "chairman" ? chairmanOverviewPage : isSchoolOperator(ctx) ? principalOverviewPage : networkOverviewPage, courses: coursesPage, people: peoplePage, library: libraryPage, access: accessPage };
     body = view.page === "transport" ? transportPage(view.role, options) : pages[view.page](options);
   }
   document.title = `${view.role === "transport" && view.page === "overview" ? coordinatorViews.find((item) => item.id === view.module).name : view.role === "admin" && view.page === "overview" ? adminViews.find((item) => item.id === view.module).name : view.role === "teacher" && view.page === "overview" ? subjectViews.find((item) => item.id === view.module).name : view.role === "class_teacher" && view.page === "overview" ? classViews.find((item) => item.id === view.module).name : view.role === "coordinator" && view.page === "overview" ? gradeViews.find((item) => item.id === view.module).name : view.role === "section_head" && view.page === "overview" ? sectionViews.find((item) => item.id === view.module).name : ["chairman", "principal", "vice_principal"].includes(view.role) && view.page === "overview" ? chairmanViews.find((item) => item.id === view.module).name : navigation[view.page].label} · ${roles[view.role].name} · Sussex College Network`;
@@ -567,6 +570,21 @@ function authorizedAction(name, value, ctx) {
   if (name === "parent-logout") return view.role === "parent";
   if (!ctx) return false;
   const options = optionsFor(ctx);
+  if (name.startsWith("nfc-")) {
+    const scope = boardingScope(state, ctx);
+    if (!scope) return false;
+    const trips = visibleBoardingTrips(state, ctx), [tripId, studentId] = String(value || "").split("|"), trip = trips.find((trip) => trip.id === tripId);
+    if (name === "nfc-tab") return value === "cards" ? scope.canCards : value === "trips" && scope.canRoster;
+    if (["nfc-card-issue", "nfc-card-history"].includes(name)) return scope.canCards && boardingStudents(state, ctx).some((student) => student.id === value);
+    if (name === "nfc-card-disable") return scope.canCards && (state.nfcCards || []).some((card) => card.id === value && card.status === "active" && boardingStudents(state, ctx).some((student) => student.id === card.studentId));
+    if (name === "nfc-new-trip") return scope.canOperate && scope.buses.length > 0;
+    if (name === "nfc-quick-tap") return scope.canOperate && trip?.phase === "boarding" && /^[A-Z0-9][A-Z0-9-]{3,39}$/.test(studentId || "");
+    if (["nfc-reader-offline", "nfc-reader-sync"].includes(name)) return scope.canOperate && (state.nfcReaders || []).some((reader) => reader.id === value && scope.buses.some((bus) => bus.id === reader.busId && bus.branch === reader.branch));
+    if (["nfc-review", "nfc-flag"].includes(name)) return Boolean(trip?.expected.some((entry) => entry.studentId === studentId)) && (name === "nfc-review" ? scope.canReview : scope.canOperate);
+    if (["nfc-close-trip", "nfc-confirm-close"].includes(name)) return scope.canReview && trip?.phase === "boarding";
+    if (name === "nfc-manifest") return scope.canRoster && Boolean(trip);
+    return false;
+  }
   if (name.startsWith("coordinator-")) {
     const scope = coordinatorScope(state, ctx);
     if (!scope) return false;
@@ -754,6 +772,33 @@ function action(event) {
   const ctx = context();
   if (!authorizedAction(name, value, ctx)) return toast("This action is outside the current role’s assigned access.");
   switch (name) {
+    case "nfc-tab": ui.boarding.tab = value; ui.boarding.query = ""; ui.nfcFeedback = null; render(); break;
+    case "nfc-new-trip": showDialog("nfc-trip", "Open a boarding trip roster", "Simulated NFC transport", boardingTripForm(optionsFor(ctx))); break;
+    case "nfc-card-issue": {
+      const student = boardingStudents(state, ctx).find((student) => student.id === value);
+      showDialog("nfc-card", "Issue / replace transport card", "Demo card registration", boardingCardForm(optionsFor(ctx), student)); break;
+    }
+    case "nfc-card-disable": showDialog("nfc-card", "Record lost or inactive card", "Preserves past boarding events", boardingDisableForm(state.nfcCards.find((card) => card.id === value))); break;
+    case "nfc-card-history": showDialog("nfc-history", "Transport card history", "Current school student", boardingCardHistory(optionsFor(ctx), boardingStudents(state, ctx).find((student) => student.id === value))); break;
+    case "nfc-review":
+    case "nfc-flag": {
+      const [tripId, studentId] = value.split("|");
+      showDialog("nfc-review", name === "nfc-review" ? "Review transport boarding" : "Flag a boarding concern", "Transport status only", boardingReviewForm(optionsFor(ctx), tripId, studentId, name === "nfc-flag")); break;
+    }
+    case "nfc-close-trip": confirmDialog("nfc-close", "Close the pickup window?", "Untapped students will need review. This does not confirm absence or change classroom attendance. Queued reader events can still sync.", "Close pickup window", "nfc-confirm-close", value); break;
+    case "nfc-confirm-close":
+      try { if (update((next) => closeBoardingTrip(next, ctx, { tripId: value }), { branch: visibleBoardingTrips(state, ctx).find((trip) => trip.id === value).branch, category: "transport", message: "NFC demo pickup window closed for review." })) { closeDialog(); render(); toast("Pickup closed. Review untapped students before confirming not boarded."); } } catch (error) { toast(error.message); } break;
+    case "nfc-quick-tap": {
+      const [tripId, token] = value.split("|"); let result;
+      try { if (update((next) => { result = simulateBoardingTap(next, ctx, { tripId, token }); })) { ui.nfcFeedback = { ...result, tripId }; render(); } } catch (error) { toast(error.message); } break;
+    }
+    case "nfc-reader-offline":
+      try { if (update((next) => setBoardingReader(next, ctx, { readerId: value, online: false }))) { ui.nfcFeedback = null; render(); toast("Demo reader offline. Taps will queue locally."); } } catch (error) { toast(error.message); } break;
+    case "nfc-reader-sync": {
+      let results;
+      try { if (update((next) => { results = syncBoardingReader(next, ctx, { readerId: value }); })) { const tripId = optionsFor(ctx).boarding.tripId; ui.nfcFeedback = { tripId, code: "synced", message: "Reader online. " + results.length + " stored tap(s) reconciled; " + results.filter((item) => item.code === "boarded").length + " boarding(s) confirmed. Review the event history for exceptions." }; render(); } } catch (error) { toast(error.message); } break;
+    }
+    case "nfc-manifest": downloadExecutiveReport(boardingManifest(state, ctx, value)); break;
     case "coordinator-bus": selectCoordinatorBus(value); break;
     case "coordinator-map-reset": ui.transportCoordinator.resetMap = true; render(); break;
     case "coordinator-people-tab": ui.transportCoordinator.peopleTab = value; ui.transportCoordinator.query = ""; ui.transportCoordinator.page = 1; render(); break;
@@ -1134,6 +1179,15 @@ function change(event) {
     if (classScope(state, ctx) && can(ctx, "attendance.mark")) updateAttendanceDraft(element.form);
     return;
   }
+  if (name?.startsWith("nfc-")) {
+    const scope = boardingScope(state, ctx);
+    if (!scope) return;
+    if (name === "nfc-bus" && scope.buses.some((bus) => bus.id === element.value)) { ui.boarding.busId = element.value; ui.boarding.tripId = ""; }
+    else if (name === "nfc-trip" && visibleBoardingTrips(state, ctx).some((trip) => trip.id === element.value)) { const trip = visibleBoardingTrips(state, ctx).find((trip) => trip.id === element.value); ui.boarding.tripId = trip.id; ui.boarding.busId = trip.busId; }
+    else if (name === "nfc-status" && ["all", "pending", "boarded", "unverified", "not_boarded", "excused"].includes(element.value)) ui.boarding.status = element.value;
+    else return;
+    ui.nfcFeedback = null; render(); return;
+  }
   if (name?.startsWith("coordinator-")) {
     if (!coordinatorScope(state, ctx)) return;
     const rules = { "coordinator-status": ["status", ["all", "route", "school", "delayed"]], "coordinator-bus-filter": ["busFilter", ["all", ...coordinatorBuses(state, ctx).map((bus) => bus.id)]],
@@ -1293,12 +1347,13 @@ function change(event) {
       break;
     }
     case "account":
-      ui.transportCoordinator = coordinatorDefaults(); ui.schoolAdmin = adminDefaults(); ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults();
+      ui.boarding = boardingDefaults(); ui.nfcFeedback = null; ui.transportCoordinator = coordinatorDefaults(); ui.schoolAdmin = adminDefaults(); ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults();
       ui.accounts[view.role] = element.value; ui.courseId = ""; ui.filter = "all"; ui.chairman = chairmanDefaults();
       if (isSchoolOperator(ctx)) ui.chairman.attendanceFlag = "all";
       ui.network.selected = ""; ui.network.mode = ""; ui.network.busId = ""; ui.network.compare = null; ui.network.status = "all"; ui.network.busBranch = "all"; ui.network.mapFocus = null; schoolMapKey = null;
       closeDialog(); render(); break;
     case "branch":
+      ui.boarding = boardingDefaults(); ui.nfcFeedback = null;
       if (ctx.role !== "chairman") return;
       ui.branch = element.value; ui.courseId = ""; ui.filter = "all";
       ui.chairman.reportBranches = null; ui.chairman.staffPage = 1; ui.chairman.studentPage = 1; ui.chairman.branchId = "";
@@ -1375,6 +1430,20 @@ async function submit(event) {
   const allowedBranch = (branch) => state.branches.some((item) => item.id === branch) && (ctx.branch === "all" || ctx.branch === branch);
   const fail = (message = "This change is outside your assigned scope.") => showError(form, message);
 
+  if (["nfc-create-trip", "nfc-issue-card", "nfc-disable-card", "nfc-tap", "nfc-correct", "nfc-flag"].includes(mode)) {
+    if (!boardingScope(state, ctx)) return fail();
+    const saveAction = { "nfc-create-trip": createBoardingTrip, "nfc-issue-card": issueBoardingCard, "nfc-disable-card": disableBoardingCard, "nfc-tap": simulateBoardingTap, "nfc-correct": correctBoardingRecord, "nfc-flag": flagBoardingException }[mode];
+    let result;
+    try {
+      if (update((next) => { result = saveAction(next, ctx, Object.fromEntries(values)); })) {
+        if (mode === "nfc-create-trip") { ui.boarding.busId = result.busId; ui.boarding.tripId = result.id; ui.boarding.status = "all"; ui.boarding.query = ""; }
+        if (mode === "nfc-tap") ui.nfcFeedback = { ...result, tripId: values.get("tripId") };
+        else { closeDialog(); ui.nfcFeedback = null; }
+        render(); if (mode !== "nfc-tap") toast("NFC demo record saved.");
+      }
+    } catch (error) { fail(error.message); }
+    return;
+  }
   if (["coordinator-task", "coordinator-allocation"].includes(mode)) {
     const scope = coordinatorScope(state, ctx);
     if (!scope) return fail();
@@ -1539,6 +1608,7 @@ document.addEventListener("input", (event) => {
   if (key === "class-attendance-search" && dialogMode === "class-attendance" && classScope(state, context())) {
     filterAttendanceDraft(event.target); return;
   }
+  if (key === "nfc-query" && boardingScope(state, context())) { ui.boarding.query = event.target.value.slice(0, 80); render("nfc-search"); return; }
   if (context()?.role === "transport" && key === "coordinator-query") {
     ui.transportCoordinator.query = event.target.value.slice(0, 80); ui.transportCoordinator.page = 1; render("coordinator-search"); return;
   }
@@ -1582,7 +1652,7 @@ window.addEventListener("hashchange", () => {
   if (view.page === "overview" && (previous.role !== view.role || previous.page !== view.page || previous.module !== view.module)) {
     ui.network.selected = ""; ui.network.mode = ""; ui.network.compare = null; ui.network.busId = ""; ui.network.status = "all"; schoolMapKey = null;
   }
-  if (previous.role !== view.role) { ui.transportCoordinator = coordinatorDefaults(); ui.schoolAdmin = adminDefaults(); ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults(); ui.chairman = chairmanDefaults(); if (["principal", "vice_principal"].includes(view.role)) ui.chairman.attendanceFlag = "all"; }
+  if (previous.role !== view.role) { ui.boarding = boardingDefaults(); ui.nfcFeedback = null; ui.transportCoordinator = coordinatorDefaults(); ui.schoolAdmin = adminDefaults(); ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults(); ui.chairman = chairmanDefaults(); if (["principal", "vice_principal"].includes(view.role)) ui.chairman.attendanceFlag = "all"; }
   if (["section_head", "coordinator", "class_teacher", "teacher", "admin"].includes(view.role) && previous.module !== view.module) ui.courseId = "";
   if (view.role === "transport" && previous.module !== view.module) { ui.transportCoordinator.query = ""; ui.transportCoordinator.page = 1; }
   if (view.role === "admin" && previous.module !== view.module) { ui.schoolAdmin.query = ""; ui.schoolAdmin.page = 1; }

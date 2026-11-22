@@ -10,6 +10,8 @@ The user requires this file to remain the complete reference for every role. Upd
 - Browser persistence, report ownership, sample data and production limitations.
 - Relevant demo accounts, validation evidence and the dated change log.
 
+Capture every new user-requested feature idea in the reference’s **Proposed features and requirements** section, even when the request is documentation-only. Clearly label requested/proposed/implemented status, distinguish the user’s requirement from recommended additions, and do not imply that a documented idea is already built or grants permissions.
+
 Check the other roles participating in a changed workflow and update their entries too. Keep `README.md` walkthrough links consistent. Verify scope and workflow changes with appropriate tests; include cross-school and cross-section rejection where applicable. Do not describe UI-only restrictions as server-enforced security.
 
 Preserve the existing site's project identity and audience. Keep generated QA outputs and temporary credentials out of source control.

@@ -14,7 +14,7 @@ Open [the local demo](http://127.0.0.1:4183/). No install or build is required.
 
 ## Features and access reference
 
-[ROLE_FEATURES_ACCESS.md](ROLE_FEATURES_ACCESS.md) documents all 12 roles, their implemented views, read/write scope, approvals, cross-role workflows, demo accounts and prototype limits. Project instructions in [AGENTS.md](AGENTS.md) require this reference to be updated alongside future feature and permission changes.
+[ROLE_FEATURES_ACCESS.md](ROLE_FEATURES_ACCESS.md) documents all 12 roles, their implemented views, read/write scope, approvals, cross-role workflows, demo accounts and prototype limits. Project instructions in [AGENTS.md](AGENTS.md) require this reference to be updated alongside future feature and permission changes. New user feature ideas are also recorded as proposed requirements before implementation. The [NFC boarding prototype](ROLE_FEATURES_ACCESS.md#nfc-boarding-prototype) demonstrates cards, reader taps and boarding registers; physical NFC hardware and notifications remain future integration work.
 
 ## Parent demo login
 
@@ -138,6 +138,18 @@ Open [Transport Coordinator → Fleet Activity](http://127.0.0.1:4183/#transport
 - **Transport Reports:** coordination brief, fleet snapshot, stop register, student allocations and assigned issues; CSV/standalone HTML/print, with eight snapshots per coordinator/school and free-text notes excluded.
 
 Driver and Parent portals follow the same bus assignments and trip status. Trip start/end remains with Driver/Principal; recording an issue does not dispatch a bus or send a message. The existing [Bus tracking workspace](http://127.0.0.1:4183/#transport/transport) remains available. Full scope, persistence and prototype limits are in the maintained [role reference](ROLE_FEATURES_ACCESS.md#transport-coordinator).
+
+### NFC transport cards and boarding
+
+Open [Transport Coordinator → Bus boarding](http://127.0.0.1:4183/#transport/boarding). This workspace is separate from the five existing overview tabs and is also available to Driver, School Administrator, Parent and school/network leadership.
+
+1. Existing allocated sample students start with demo cards/readers. Use [School Administrator → Bus boarding](http://127.0.0.1:4183/#admin/boarding) to issue, replace, mark lost or deactivate a card. To demonstrate several passengers on one bus, allocate additional students through Drivers & Students, then issue their cards.
+2. As Transport Coordinator or assigned Driver, **Open trip roster**, select the bus/date/direction, then type a demo card code or expand **Choose an expected student’s active card**. Valid taps mark Boarded; repeated taps are ignored for counts.
+3. **Simulate offline**, record a tap, then **Reconnect & sync** to demonstrate queued events. Wrong-school/bus, unknown and inactive cards create exceptions. Lost/replaced-card history stays attached to the student.
+4. The Transport Coordinator **closes pickup** and reviews untapped students. Missing scans become Needs review. Confirmed not boarded requires an online, synchronised reader, a closed window and a reason; NFC does not mark classroom attendance.
+5. Sign in with `SCN-1001` / `1234` and open [Parent → Bus boarding](http://127.0.0.1:4183/#parent/boarding) to see only Amaya's status/history. Leadership sees scoped coverage/rosters, while Driver access is restricted to the assigned bus’s latest roster. Manifest CSV omits card codes and private staff reasons.
+
+All taps, readers and synchronisation are simulated in this browser. Physical reader integration, alighting and notifications are not connected. See the complete [NFC feature/access reference](ROLE_FEATURES_ACCESS.md#nfc-boarding-prototype).
 
 ### School portal
 

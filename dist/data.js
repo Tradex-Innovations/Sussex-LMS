@@ -1,18 +1,19 @@
+import { boardingSeed } from "./boarding-seed.js";
 import { branchDirectory } from "./network-data.js";
 
 export const roles = {
-  chairman: { name: "Chairman", icon: "school", start: "overview", pages: ["overview", "transport", "courses", "people", "library", "access"] },
-  principal: { name: "Principal", icon: "badge", start: "overview", pages: ["overview", "transport", "courses", "people", "library", "access"] },
-  vice_principal: { name: "Vice Principal", icon: "badge", start: "overview", pages: ["overview", "transport", "courses", "people", "library"] },
+  chairman: { name: "Chairman", icon: "school", start: "overview", pages: ["overview", "transport", "courses", "people", "library", "access", "boarding"] },
+  principal: { name: "Principal", icon: "badge", start: "overview", pages: ["overview", "transport", "courses", "people", "library", "access", "boarding"] },
+  vice_principal: { name: "Vice Principal", icon: "badge", start: "overview", pages: ["overview", "transport", "courses", "people", "library", "boarding"] },
   section_head: { name: "Section Head", icon: "users", start: "overview", pages: ["overview", "courses", "people"] },
   coordinator: { name: "Grade Coordinator", icon: "users", start: "overview", pages: ["overview", "courses", "people"] },
   class_teacher: { name: "Class Teacher", icon: "book", start: "overview", pages: ["overview", "courses", "people"] },
   teacher: { name: "Subject Teacher", icon: "book", start: "overview", pages: ["overview", "courses"] },
-  admin: { name: "School Administrator", icon: "settings", start: "overview", pages: ["overview", "people", "courses"] },
-  transport: { name: "Transport Coordinator", icon: "route", start: "overview", pages: ["overview", "transport"] },
-  driver: { name: "Driver", icon: "bus", start: "transport", pages: ["transport"] },
+  admin: { name: "School Administrator", icon: "settings", start: "overview", pages: ["overview", "people", "courses", "boarding"] },
+  transport: { name: "Transport Coordinator", icon: "route", start: "overview", pages: ["overview", "transport", "boarding"] },
+  driver: { name: "Driver", icon: "bus", start: "transport", pages: ["transport", "boarding"] },
   librarian: { name: "Librarian", icon: "library", start: "library", pages: ["library"] },
-  parent: { name: "Parent", icon: "user", start: "transport", pages: ["transport", "courses", "library"] },
+  parent: { name: "Parent", icon: "user", start: "transport", pages: ["transport", "courses", "library", "boarding"] },
 };
 
 export const sections = [
@@ -159,6 +160,7 @@ export function freshState() {
     networkVersion: 1,
     gradeCoordinatorVersion: 1,
     classTeacherVersion: 1,
+    ...boardingSeed(withAdmissionNumbers(scopedStudents), buses.map((bus) => ({ ...bus, branch: "colombo" })).concat([{ id: "07", branch: "lakeside" }, { id: "08", branch: "lakeside" }])),
     activity: [],
     branches: structuredClone(branches),
     accounts: seedAccounts(),
@@ -208,6 +210,7 @@ export function loadState() {
       return {
         ...defaults,
         ...saved,
+        ...(!saved.nfcVersion ? boardingSeed(saved.students || defaults.students, saved.buses || defaults.buses) : {}),
         networkVersion: 1,
         gradeCoordinatorVersion: 1,
         classTeacherVersion: 1,
