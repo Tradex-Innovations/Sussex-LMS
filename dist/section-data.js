@@ -1,4 +1,4 @@
-import { sections, sectionFor } from "./data.js";
+import { academicScope } from "./academic-scope.js";
 import { visibleCourses, visibleStudents } from "./access.js";
 import { assessmentResult, subjects, networkSummary } from "./network-analytics.js";
 import { demoDate, studentRoster, studentStatus, attendanceResult, attendanceSummary, schoolDays, branchStaff } from "./chairman-data.js";
@@ -18,15 +18,14 @@ export function sectionDefaults() {
     flag: "all", query: "", page: 1, teacherQuery: "", reportType: "brief", reportFormat: "csv", reportId: "" };
 }
 
-export function sectionScope(state, context) {
-  if (context?.role !== "section_head" || context.grant?.role !== "section_head") return null;
-  const grant = state.accounts.find((person) => person.id === context.account?.id)?.grants.find((grant) => grant.role === "section_head" && grant.branch === context.grant.branch && grant.section === context.grant.section);
-  const branch = state.branches.find((branch) => branch.id === grant?.branch), section = sections.find((section) => section.id === grant?.section);
-  return branch && section ? { branch, section, grades: [...section.grades], key: "section_head:" + branch.id + ":" + section.id,
-    context: { ...context, grant, branch: grant.branch } } : null;
-}
+export function sectionScope(state, context) { return context?.role === "section_head" ? academicScope(state, context) : null; }
 
 function requireScope(state, context) {
+  const scope = academicScope(state, context);
+  if (!scope) throw new Error("An appointed academic school and scope are required.");
+  return scope;
+}
+function requireSectionScope(state, context) {
   const scope = sectionScope(state, context);
   if (!scope) throw new Error("An assigned Section Head school and section are required.");
   return scope;
@@ -110,12 +109,12 @@ export function sectionAttendance(state, context, filters = {}) {
 }
 
 export function sectionFollowups(state, context) {
-  const scope = requireScope(state, context);
+  const scope = requireSectionScope(state, context);
   return (state.sectionFollowups || []).filter((item) => item.branch === scope.branch.id && item.section === scope.section.id);
 }
 
 export function saveSectionFollowup(state, context, input) {
-  const scope = requireScope(state, context);
+  const scope = requireSectionScope(state, context);
   const previous = input.id ? sectionFollowups(state, context).find((item) => item.id === input.id) : null;
   if (input.id && !previous) throw new Error("This follow-up is outside your section.");
   const student = sectionAttendance(state, context).roster.find((item) => item.id === (previous?.student || input.student));
@@ -134,7 +133,7 @@ export function saveSectionFollowup(state, context, input) {
 }
 
 export function saveSectionCourseReview(state, context, input) {
-  const scope = requireScope(state, context), course = sectionCourses(state, context).find((item) => item.id === input.course);
+  const scope = requireSectionScope(state, context), course = sectionCourses(state, context).find((item) => item.id === input.course);
   if (!course) throw new Error("Choose a course within your section.");
   if (!["ready", "changes_requested"].includes(input.status)) throw new Error("Choose a review outcome.");
   const note = String(input.note || "").trim();
@@ -145,12 +144,12 @@ export function saveSectionCourseReview(state, context, input) {
 }
 
 export function sectionCoverRequests(state, context) {
-  const scope = requireScope(state, context);
+  const scope = requireSectionScope(state, context);
   return (state.sectionCoverRequests || []).filter((item) => item.branch === scope.branch.id && item.section === scope.section.id);
 }
 
 export function requestSectionCover(state, context, input) {
-  const scope = requireScope(state, context), course = sectionCourses(state, context).find((item) => item.id === input.course);
+  const scope = requireSectionScope(state, context), course = sectionCourses(state, context).find((item) => item.id === input.course);
   if (!course) throw new Error("Choose a course within your section.");
   if (input.date !== demoDate) throw new Error("The cover demonstration uses 20 Nov 2026.");
   if (sectionCoverRequests(state, context).some((item) => item.course === course.id && item.date === input.date && item.status === "pending")) throw new Error("A pending cover request already exists for this course.");
@@ -163,7 +162,7 @@ export function requestSectionCover(state, context, input) {
 }
 
 export function sectionOverview(state, context) {
-  const scope = requireScope(state, context), courses = sectionCourses(state, context), progress = courses.map((course) => sectionCourseProgress(state, course));
+  const scope = requireSectionScope(state, context), courses = sectionCourses(state, context), progress = courses.map((course) => sectionCourseProgress(state, course));
   const teachers = sectionTeachers(state, context), academic = sectionAcademic(state, context), attendance = sectionAttendance(state, context);
   return { scope, courses, progress, teachers, academic, attendance, registered: visibleStudents(state, scope.context).length,
     materials: progress.reduce((sum, row) => sum + row.materials, 0), missing: progress.filter((row) => !row.materials).length,
@@ -178,7 +177,7 @@ export function visibleSectionReports(state, context) {
 }
 
 export function generateSectionReport(state, context, filters) {
-  const scope = requireScope(state, context), f = sectionFilters(state, context, filters);
+  const scope = requireSectionScope(state, context), f = sectionFilters(state, context, filters);
   if (!Object.hasOwn(sectionReportTypes, f.reportType)) throw new Error("Choose a section report type.");
   if (filters.grade !== "all" && !scope.grades.includes(Number(filters.grade))) throw new Error("Report grades must stay within your section.");
   const grades = f.grade === "all" ? scope.grades : [Number(f.grade)], academic = sectionAcademic(state, context, f), attendance = sectionAttendance(state, context, f), courses = sectionCourses(state, context, f);

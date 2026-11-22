@@ -1836,3 +1836,26 @@ form[data-form^="section-"] .form-error { margin: 0 18px 12px; }
   .section-view-bar a { padding-inline: 8px; }
   .section-view-bar .chairman-view-short { font-size: 11px; }
 }
+
+/* Grade Coordinator: one appointed grade, with local Section Head requests */
+.grade-fixed-scope { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 3px 12px 3px 0; color: #356047; }
+.grade-fixed-scope small { display: block; color: var(--muted); font-size: 12px; margin-bottom: 5px; }
+.grade-fixed-scope strong { display: block; font-size: 16px; }
+.grade-support-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 15px; padding: 0 20px 20px; }
+.grade-support-grid > .empty-state { grid-column: 1 / -1; }
+.grade-support-card { border: 1px solid var(--line); border-radius: 12px; padding: 18px; min-width: 0; }
+.grade-support-card > div:first-child { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 9px; }
+.grade-support-card h3 { font-size: 17px; line-height: 1.5; margin: 15px 0 10px; }
+.grade-support-card p { font-size: 14px; line-height: 1.7; margin-top: 8px; overflow-wrap: anywhere; }
+.grade-support-card small { display: block; font-size: 12px; color: var(--muted); line-height: 1.6; margin-top: 8px; }
+.grade-support-card .section-row-actions { margin-top: 17px; }
+.grade-response { border: 1px solid #dae6d5; background: #f1f7ec; padding: 14px; border-radius: 9px; margin-top: 17px; }
+.grade-response > strong { font-size: 14px; }
+.grade-support-inbox { margin-bottom: 23px; }
+form[data-form^="grade-"] .form-body > h3 { font-size: 17px; line-height: 1.6; margin-bottom: 18px; }
+form[data-form^="grade-"] .chairman-filter-note { margin-top: 16px; }
+form[data-form^="grade-"] .form-error { margin: 0 18px 12px; }
+@media (max-width: 750px) {
+  .grade-fixed-scope { padding-top: 5px; }
+  .grade-support-grid { grid-template-columns: minmax(0,1fr); padding-inline: 15px; }
+}

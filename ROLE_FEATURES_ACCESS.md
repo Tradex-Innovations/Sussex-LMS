@@ -38,7 +38,7 @@ This is the maintained reference for the **current implementation**, covering al
 - Map movement, GPS signals, occupancy, arrival estimates and routes are demonstrations. Street tiles require internet access and retain OpenStreetMap attribution.
 - School registers, assessment marks, staffing complements, vacancies and leave requests are illustrative. The default sample school day is **20 November 2026**, even when the real calendar date is later. Register/report date controls support 12 October–20 November; follow-up due dates support 20–27 November. Temporary cover uses 20 November.
 - **Actual prototype records** mean the editable sample student accounts, courses, teacher assignments, materials and parent completion data saved in the browser. They are distinct from generated assessment cohorts and attendance registers. A generated student attendance profile is not an editable admission record.
-- Section academic/attendance samples cover Grades 1–13, with two illustrative classes (A/B) per grade. Preschool appointments are supported by access configuration, but no Preschool assessment/register fixtures are provided; those views show empty data.
+- Section and Grade Coordinator academic/attendance samples cover Grades 1–13, with two illustrative classes (A/B) per grade. Preschool appointments are supported by access configuration, but no Preschool assessment/register fixtures are provided; those views show empty data.
 - Courses can be assigned and enrolments changed, but no create/delete-course screen, exam mark entry, timetable engine, payroll, discipline case system or real parent-notification workflow is implemented.
 
 ## Organisation and access model
@@ -83,7 +83,7 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 | Principal / `principal` | Overview → Transport | Assigned school | Lower-role appointments, student/course/material/bus/library management, leave decisions, trip controls, vacancy review, reports. |
 | Vice Principal / `vice_principal` | Overview → Transport | Assigned school | Daily follow-ups, temporary cover, leave recommendations, cover-request decisions, student/course/material/bus/library coordination, reports. |
 | Section Head / `section_head` | Overview → Section Overview | Appointed school and section | Section course assignments/enrolment, material reviews, attendance follow-ups, cover requests, section reports. |
-| Grade Coordinator / `coordinator` | Courses | Appointed school and grade | Enrolment in existing grade courses; assigned course teacher is retained. |
+| Grade Coordinator / `coordinator` | Overview → Grade Overview | Appointed school and grade | Course enrolment, attendance follow-ups, class coordination reviews, Section Head support requests, grade reports; assigned course teacher is retained. |
 | Class Teacher / `class_teacher` | Courses | Appointed school, grade and class | Publish/edit materials only on courses assigned to the same account; review class progress. |
 | Subject Teacher / `teacher` | Courses | Assigned teaching courses in school | Publish/edit/download course materials; review enrolled-student completion. |
 | School Administrator / `admin` | Students & guardians | Assigned school | Student/admission/guardian records, course teacher assignments and enrolment. |
@@ -179,6 +179,7 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 - Show teachers assigned section courses and relevant grade coordinators/class teachers. Shared teachers' out-of-section courses are excluded from workload and material counts.
 - Grade/class/date filters; teacher search; available/unavailable counts; in-section teaching profile and course progress.
 - Identify courses without lecture materials and record material review feedback.
+- Review requests from Grade Coordinators in the appointed school/section. Record an in-progress or resolved response with note history; the coordinator can read it in their Class Coordination view. Material requests link to the existing material-review form; cover requests link to the existing Vice Principal cover-request form. Recording a response does not itself allocate cover or approve lecture materials.
 - Request one-day cover against an existing section course, with a reason. View pending, cover-assigned or declined outcomes and the Vice Principal's note/cover teacher.
 - Duplicate pending requests for the same course/day are rejected. A request does not assign a teacher or alter a permanent assignment.
 
@@ -194,13 +195,51 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 
 ## Grade Coordinator
 
-**Entry:** `#coordinator/courses`. **Scope:** appointed school and grade. **Views:** Courses; Students & guardians.
+**Entry:** `#coordinator/overview/summary`. **Scope:** the actual appointed school and a single grade. **Navigation:** Overview, Courses, Students & guardians. The overview contains five views:
 
-- Read existing grade courses, teacher assignment, enrolment, lecture materials and parent completion.
-- Download materials; review the grade’s actual prototype student directory and linked guardians.
-- Update matching-class student enrolment on an existing grade course.
+### Grade Overview
 
-**Limits:** cannot change the assigned course teacher, publish/edit materials through this role, edit admission records, appoint staff, view other grades/schools, or access advanced reports/attendance/transport/library/leave management. No dedicated Grade Coordinator dashboard has been implemented yet.
+- Fixed school/grade identity, section context and presenter-only demo account selector. No school, section or grade scope selector is available.
+- Daily sample student attendance, actual prototype admission count, existing grade courses and pending attendance follow-ups.
+- Published-material counts, parent-recorded completion, open Section Head support requests and class reviews marked as needing support.
+- Class summary with appointed class teachers where present, Term 3 Mathematics sample averages, daily sample attendance, course counts and latest class review; a five-school-day attendance trend; links into learning and class coordination.
+- Integrated grade attendance follow-up list, with owner, due date, status and update action.
+
+### Academic & Courses
+
+- Classes A/B in the appointed grade, four assessment subjects and three terms. Compare classes, subjects and actual assigned teachers; no other-grade comparison is exposed.
+- Sample average/pass-rate/assessed-student metrics. Classes without a prototype course/teacher remain labelled as sample/unassigned; the teacher comparison is empty if the selected subject has no assigned course in this grade.
+- Read existing grade courses, lecture materials, assigned teacher, actual course enrolment and parent completion. Course rows follow the class filter, independently of the assessment subject.
+- Edit enrolment using matching-class students. The teacher selector is disabled and submission retains the current teacher even if a presenter changes the form field in browser tools.
+- Open/download published materials and review student completion. Read existing Section Head review feedback in staff course details.
+- Export the selected academic comparison as a grade-scoped CSV snapshot.
+
+### Attendance
+
+- Illustrative grade/class registers, class summaries, date/period filters, trend, search and pagination; one/five/twenty-school-day totals.
+- All grade students, repeated absence (3+ absences in trailing 20 school days), latest-day absent and latest-day late watchlists.
+- Open a student's 20-day attendance calendar. Record a follow-up owned by the coordinator or a staff member serving the grade, with a due date, note and open/in progress/resolved status. Updates retain note history.
+- Export attendance snapshots. No actual attendance-mark entry, admission edits or other-grade students are available.
+
+### Class Coordination
+
+- Class teacher context, prototype course counts, sample averages/attendance and latest coordination review for each selected grade class.
+- Record an on-track, needs-support or review-completed class review and note. Repeated reviews retain history. These records do not change assessment marks, attendance or teacher appointments.
+- Read teachers serving the grade, availability and workload profiles. Shared teachers' other-grade courses are excluded.
+- Read missing/published-material counts and the Section Head's review outcome for grade courses.
+- Record a course-related **lecture materials, teaching cover or learning support** request for the Section Head. One open request per course/topic is allowed; an unresolved duplicate is rejected.
+- View open/in-progress/resolved request status and the Section Head's response history. This is a local browser queue, not a notification, teacher instruction or automatic cover assignment.
+
+### Grade Reports
+
+- Grade management brief, academic comparison, attendance and learning-progress report types.
+- Assigned grade is fixed; class, subject/term, attendance date/period and academic comparison controls apply within it. Class review status is included in the brief; learning-progress reports use actual course/material/completion records.
+- Snapshot preview, CSV, branded standalone HTML and Print / Save PDF. Briefs include recorded follow-ups in the selected class scope.
+- Eight snapshots retained per school/grade, separately from Section Head and senior-leadership reports. Changing the demo account clears view filters and opens that appointment's history; saved values do not change after later edits.
+
+**Other workspaces:** Courses retains the existing grade-scoped course/enrolment workflow. Students & guardians is a read-only directory of actual grade students and linked guardians.
+
+**Limits:** cannot change a course teacher, publish/edit/approve lecture materials through this role, respond as a Section Head, assign or approve temporary cover, make leave decisions, edit admission records, appoint staff, access another grade/school, or manage transport/library/payments. Support responses and task owners do not trigger real messages. The Grade Coordinator, Section Head and Vice Principal attendance follow-up lists are separate local collections.
 
 ## Class Teacher
 
@@ -297,11 +336,19 @@ The Vice Principal may also create cover directly without a request. Cover teach
 2. Vice Principal records a recommendation and note while the request is pending; availability remains unchanged.
 3. Principal reviews and approves/declines; the sample staff register/pulse and newly captured reports update. Section Heads do not see or approve leave requests.
 
+### Grade Coordinator support and class reviews
+
+1. The Grade Coordinator records a grade-course support request (materials, cover or learning) in Class Coordination.
+2. It appears only for Section Heads appointed to the same school and containing section. The Section Head records an in-progress/resolved response; the coordinator sees the note history.
+3. Material requests can open the Section Head material review form. Cover requests can open the existing Section Head → Vice Principal cover-request form. These are separate actions; responding to a support request does not itself publish materials, appoint teachers or allocate cover.
+4. Grade class review notes are owned by school/grade/class. They track coordination and retain history without modifying sample marks or registers.
+
 ### Attendance follow-ups
 
+- Grade Coordinators record grade-owned student follow-ups in their own Overview/Attendance views.
 - Section Heads record section-owned student follow-ups in their own Overview/Attendance views.
 - Vice Principals maintain a separate school operational follow-up board, including named transport/student issues.
-- These are distinct local task collections. Owners, dates and notes are recorded; no SMS, email, WhatsApp or automatic cross-board task delivery occurs.
+- These are three distinct local task collections. Owners, dates and notes are recorded; no SMS, email, WhatsApp or automatic cross-board task delivery occurs.
 
 ### Transport and books
 
@@ -314,6 +361,8 @@ The Vice Principal may also create cover directly without a request. Cover teach
 - Course assignments, materials, completion, carts/orders, bus status/assignment, staff appointments, leave decisions/recommendations, reviews, follow-ups, cover and snapshots persist in the same browser. Other devices/browsers do not share these changes.
 - **Reset demo** restores sample state. Storage failures show an error/toast instead of claiming success. Browser storage and the 2 MB individual attachment limit constrain uploads; this is not durable document storage.
 - School executive report history is owned by role/school (Principal/Vice Principal), or Chairman account; the latest eight are retained per workspace. Section report history is separately owned by school + section under the Section Head role, eight per workspace.
+- Grade Coordinator report history is independently owned by school + grade under the `coordinator` role, with eight snapshots per workspace; it does not share Section Head or executive report history.
+- New coordination state includes grade attendance follow-ups, class review histories and Section Head support requests/responses. A one-time `gradeCoordinatorVersion` migration adds two new demo coordinator accounts to existing v2 browser data while retaining user assignments, materials and appointments; later removed demo appointments are not restored.
 - Report snapshots capture values at generation time. Filters/data edits do not rewrite older reports. Scope checks apply to opening, downloading and printing saved reports.
 - CSV values are quoted and dangerous leading spreadsheet formula characters are neutralised. Exports carry sample provenance and relevant scope/filter metadata.
 - HTML downloads embed the existing logo when it can be read. Print / Save PDF uses the browser's print dialogue; no automatic PDF service is integrated.
@@ -327,7 +376,7 @@ The Vice Principal may also create cover directly without a request. Cover teach
 | Principal | Malini Senanayake — Nugegoda; Suresh Jayawardena — Malabe. |
 | Vice Principal | Roshani Fernando — Nugegoda; Dilan Mendis — Malabe. |
 | Section Head | Dilini Silva — Nugegoda/Middle School; Asha Wickramasinghe — Nugegoda/Primary; Lakshmi Fernando — Malabe/Middle School. |
-| Grade Coordinator | Nuwan Gamage — Nugegoda/Grade 8. |
+| Grade Coordinator | Nuwan Gamage (`nuwan`) — Nugegoda/Grade 8; Tharushi Jayasekara (`coordinator6_c`) — Nugegoda/Grade 6; Kasun Perera (`coordinator8_l`) — Malabe/Grade 8. |
 | Class Teacher | Dilini Silva — Nugegoda/Grade 8/Class 8A. |
 | Subject Teacher | Dilini Silva, Nuwan Gamage, Rihana Farook, Asha Wickramasinghe — Nugegoda; Lakshmi Fernando — Malabe. Actual course assignments control teaching visibility. |
 | Administrator | Anjali Fernando — Nugegoda; Shanika Dias — Malabe. |
@@ -344,7 +393,7 @@ Role assignments may be changed in the demo, so these are seeded examples rather
 node --test tests/*.test.mjs
 ```
 
-The suite covers access, migration, parent admission selection, network/directory/fleet data, academic/attendance reconciliation, report isolation, Principal leave decisions, Vice Principal coordination, Section Head scope/reviews/follow-ups and the cover-request handoff. Browser verification should cover all five Section Head views, all three seeded Section Head accounts, 390px/320px layouts, course/material interactions, persistent follow-up/review/request outcomes, role switching and report CSV/HTML/print handling. Keep passing test counts/evidence in the change log when updated.
+The suite covers access, migration, parent admission selection, network/directory/fleet data, academic/attendance reconciliation, report isolation, Principal leave decisions, Vice Principal coordination, Section Head scope/reviews/follow-ups and the cover-request handoff, Grade Coordinator scope/class reviews/follow-ups/reports, Section Head support responses and new-account migration. Browser verification should cover all five Section Head views, all three seeded Section Head accounts, 390px/320px layouts, course/material interactions, persistent follow-up/review/request outcomes, role switching and report CSV/HTML/print handling. Grade Coordinator browser checks should cover all five views, all three seeded grade accounts, enrolment teacher protection, material downloads, class/follow-up note persistence, Section Head queue isolation/responses, report exports and 390px/320px layouts. Keep passing test counts/evidence in the change log when updated.
 
 ## Maintenance checklist
 
@@ -367,3 +416,12 @@ For **every future implementation**:
 - Connected Section Head cover requests with Vice Principal assignment/decline and reopening after cancellation; temporary cover preserves permanent course assignments.
 - Retained Chairman, Principal, Vice Principal, teacher, parent and operational role workflows. Numeric Preschool views intentionally show empty sample data.
 - Validation: **53 Node tests passed**, including nine new Section Head/cover-handoff tests. Browser checks passed for all five views, three Section Head accounts, 390px/320px layouts, material review/teacher visibility/parent privacy, follow-up persistence, cover assignment/cancellation/reopening/decline, four report types, CSV/HTML downloads and the print iframe source. Chairman/Principal/Vice Principal views also passed browser smoke checks. The operating system print dialogue and an exported PDF file were not automated.
+
+
+### 22 November 2026 — Grade Coordinator
+
+- Implemented Grade Overview, Academic & Courses, Attendance, Class Coordination and Grade Reports for the appointed school/grade.
+- Preserved enrolment-only course changes; teacher assignment, publication, Section Head review, cover allocation, leave and staff appointments remain outside this role.
+- Added persistent grade follow-ups and class reviews, with a scoped Grade Coordinator → Section Head support queue and response history. Support responses are separate from operational approval/allocation actions.
+- Added Nugegoda Grade 6 and Malabe Grade 8 demo coordinator accounts, with a one-time migration that preserves existing browser edits and removed appointments on later loads.
+- Updated this reference and the README walkthrough. Validation: **62 Node tests passed**, including nine new grade-scope/workflow/migration tests. Browser checks passed for the five views, three accounts, 1500px/390px/320px layouts, protected teacher assignment, downloads, follow-up/class-review persistence, Section Head response privacy, four report types and CSV/HTML/print iframe source. Section Head/parent/senior-leadership regression workflows also passed. The operating-system print dialogue and an exported PDF file were not automated.

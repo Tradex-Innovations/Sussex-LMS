@@ -79,6 +79,18 @@ Open [Section Head → Section Overview](http://127.0.0.1:4183/#section_head/ove
 
 A Section Head requests cover; the school's Vice Principal assigns or declines it from Staffing Overview. Linked cover cancellation reopens the request. Course material review notes appear in staff course details and are hidden from parents. Active Section Head access does not grant material publication, staff appointments, leave decisions or school-wide data. See the full [role reference](ROLE_FEATURES_ACCESS.md#section-head) for boundaries and sample-data details.
 
+### Grade Coordinator workspace
+
+Open [Grade Coordinator → Grade Overview](http://127.0.0.1:4183/#coordinator/overview/summary). **Demo Grade Coordinator** previews Nuwan Gamage (Nugegoda/Grade 8), Tharushi Jayasekara (Nugegoda/Grade 6), or Kasun Perera (Malabe/Grade 8). School and grade come from the actual appointment. The five views are:
+
+- **Grade Overview:** sample daily attendance, actual prototype students/courses/materials, class reviews, learning progress, support priorities and grade follow-ups.
+- **Academic & Courses:** class/subject/assigned-teacher comparisons; lecture downloads/completion; matching-class student enrolment edits while retaining the assigned teacher; comparison CSV.
+- **Attendance:** class registers, reporting periods, search/watchlists, 20-day student calendars and persistent grade follow-ups with owned notes and outcomes.
+- **Class Coordination:** class review status/history, staff serving the grade and their grade-only workloads, lecture readiness and course-related support requests/responses with the Section Head.
+- **Grade Reports:** management/academic/attendance/learning-progress snapshots, CSV/HTML and Print / Save PDF; eight reports per school/grade, separate from other roles/grades.
+
+The Section Head sees coordinator requests in **Teaching Coordination → Requests from Grade Coordinators** and can respond, review materials or start the existing cover-request workflow. A response records coordination; it does not allocate a teacher or approve leave. The two extra demo coordinator accounts are added once to older browser state, preserving existing edits and later removed appointments. Full scope, workflow and prototype limits are in the maintained [role reference](ROLE_FEATURES_ACCESS.md#grade-coordinator).
+
 ### School portal
 
 1. Start in **Chairman → Overview**. An interactive OpenStreetMap street map shows Sri Lanka and a simulated network fleet of 44 buses across all 20 branches. Nearby vehicles form bus-count groups; click a group to zoom in and see individual buses. Branch-name bubbles appear near their geographic positions where space permits. Use **View all buses** to find every branch's vehicles, or filter by On route, At school and Signal delayed. Pan, zoom, pause or resume the simulation, or choose **View whole island** to reset. Street tiles require an internet connection; a notice appears if they cannot load.

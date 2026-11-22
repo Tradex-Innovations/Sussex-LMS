@@ -5,7 +5,7 @@ export const roles = {
   principal: { name: "Principal", icon: "badge", start: "overview", pages: ["overview", "transport", "courses", "people", "library", "access"] },
   vice_principal: { name: "Vice Principal", icon: "badge", start: "overview", pages: ["overview", "transport", "courses", "people", "library"] },
   section_head: { name: "Section Head", icon: "users", start: "overview", pages: ["overview", "courses", "people"] },
-  coordinator: { name: "Grade Coordinator", icon: "users", start: "courses", pages: ["courses", "people"] },
+  coordinator: { name: "Grade Coordinator", icon: "users", start: "overview", pages: ["overview", "courses", "people"] },
   class_teacher: { name: "Class Teacher", icon: "book", start: "courses", pages: ["courses", "people"] },
   teacher: { name: "Subject Teacher", icon: "book", start: "courses", pages: ["courses"] },
   admin: { name: "School Administrator", icon: "settings", start: "people", pages: ["people", "courses"] },
@@ -101,6 +101,8 @@ function seedAccounts() {
     account("vice_l", "Dilan Mendis", [grant("vice_principal", "lakeside")]),
     account("dilini", "Dilini Silva", [grant("section_head", "colombo", { section: "middle" }), grant("teacher"), grant("class_teacher", "colombo", { grade: 8, className: "8A" })]),
     account("nuwan", "Nuwan Gamage", [grant("coordinator", "colombo", { grade: 8 }), grant("teacher")]),
+    account("coordinator6_c", "Tharushi Jayasekara", [grant("coordinator", "colombo", { grade: 6 })]),
+    account("coordinator8_l", "Kasun Perera", [grant("coordinator", "lakeside", { grade: 8 })]),
     account("rihana", "Rihana Farook", [grant("teacher")]),
     account("asha", "Asha Wickramasinghe", [grant("section_head", "colombo", { section: "primary" }), grant("teacher")]),
     account("lakshmi", "Lakshmi Fernando", [grant("section_head", "lakeside", { section: "middle" }), grant("teacher", "lakeside")]),
@@ -153,6 +155,7 @@ export function freshState() {
   return {
     version: 2,
     networkVersion: 1,
+    gradeCoordinatorVersion: 1,
     activity: [],
     branches: structuredClone(branches),
     accounts: seedAccounts(),
@@ -196,6 +199,8 @@ export function loadState() {
         ...defaults,
         ...saved,
         networkVersion: 1,
+        gradeCoordinatorVersion: 1,
+        accounts: [...(saved.accounts || defaults.accounts), ...(!saved.gradeCoordinatorVersion ? defaults.accounts.filter((person) => ["coordinator6_c", "coordinator8_l"].includes(person.id) && !(saved.accounts || defaults.accounts).some((existing) => existing.id === person.id)) : [])],
         students: withAdmissionNumbers(saved.students || defaults.students),
         branches: defaults.branches.map((branch) => {
           const existing = saved.branches.find((item) => item.id === branch.id);
