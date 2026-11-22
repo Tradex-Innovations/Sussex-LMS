@@ -11,7 +11,7 @@ export const roles = {
   teacher: { name: "Subject Teacher", icon: "book", start: "overview", pages: ["overview", "courses"] },
   admin: { name: "School Administrator", icon: "settings", start: "overview", pages: ["overview", "people", "courses", "boarding"] },
   transport: { name: "Transport Coordinator", icon: "route", start: "overview", pages: ["overview", "transport", "boarding"] },
-  driver: { name: "Driver", icon: "bus", start: "transport", pages: ["transport", "boarding"] },
+  driver: { name: "Driver", icon: "bus", start: "overview", pages: ["overview", "transport", "boarding"] },
   librarian: { name: "Librarian", icon: "library", start: "library", pages: ["library"] },
   parent: { name: "Parent", icon: "user", start: "transport", pages: ["transport", "courses", "library", "boarding"] },
 };
@@ -157,6 +157,8 @@ export function freshState() {
   for (const course of courses) scopedAssignments["lake-" + course.id] = { teacher: "lakshmi", students: [course.grade === 8 ? "meera" : "thevin"] };
   return {
     version: 2,
+    driverRuns: [],
+    driverIncidents: [],
     networkVersion: 1,
     gradeCoordinatorVersion: 1,
     classTeacherVersion: 1,

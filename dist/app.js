@@ -34,6 +34,8 @@ import { transportCoordinatorPage, coordinatorTaskForm, coordinatorAllocationFor
 import { assignDriver, saveBusAssignment } from "./transport-records.js";
 import { boardingDefaults, boardingScope, boardingFilters, boardingStudents, studentCards, visibleBoardingTrips, boardingRows, createBoardingTrip, issueBoardingCard, disableBoardingCard, simulateBoardingTap, syncBoardingReader, setBoardingReader, closeBoardingTrip, correctBoardingRecord, flagBoardingException, boardingManifest } from "./boarding-data.js";
 import { boardingPage, boardingTripForm, boardingCardForm, boardingDisableForm, boardingReviewForm, boardingCardHistory } from "./boarding.js";
+import { driverViews, driverDefaults, driverScope, driverRuns, saveDriverReadiness, startDriverRun, confirmDriverStop, finishDriverRun, saveDriverIncident, driverTripCSV } from "./driver-data.js";
+import { driverPage, driverReadinessForm, driverIssueForm } from "./driver.js";
 import { FleetMap } from "./map.js";
 import { mountMapSummary, transportPage, updateTripDetails } from "./transport.js";
 import { avatar, button, emptyState, escapeHtml as e, iconTile } from "./ui.js";
@@ -59,14 +61,14 @@ let schoolMapKey;
 let mapViewKey;
 let dialogMode;
 let view = getView();
-const ui = { boarding: boardingDefaults(), nfcFeedback: null, transportCoordinator: coordinatorDefaults(), schoolAdmin: adminDefaults(), subjectTeacher: subjectDefaults(), classTeacher: classDefaults(), gradeCoordinator: gradeDefaults(), section: sectionDefaults(), accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", grade: "all", query: "", paused: false, runningSince: performance.now(), elapsed: 0, starts: {},
+const ui = { driver: driverDefaults(), boarding: boardingDefaults(), nfcFeedback: null, transportCoordinator: coordinatorDefaults(), schoolAdmin: adminDefaults(), subjectTeacher: subjectDefaults(), classTeacher: classDefaults(), gradeCoordinator: gradeDefaults(), section: sectionDefaults(), accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", grade: "all", query: "", paused: false, runningSince: performance.now(), elapsed: 0, starts: {},
   network: { subject: "mathematics", grade: 8, term: 3, selected: "", mode: "", compare: null, category: "all", tab: "transport", status: "all", busId: "", busBranch: "all" }, chairman: { ...chairmanDefaults(), ...(["principal", "vice_principal"].includes(view.role) ? { attendanceFlag: "all" } : {}) } };
 
 function getView() {
   const [requestedRole, requestedPage, requestedModule] = location.hash.slice(1).split("/");
   const role = Object.hasOwn(roles, requestedRole) ? requestedRole : "chairman";
   const page = roles[role].pages.includes(requestedPage) ? requestedPage : roles[role].start;
-  const module = role === "transport" && page === "overview" ? (coordinatorViews.some((item) => item.id === requestedModule) ? requestedModule : "fleet") : role === "admin" && page === "overview" ? (adminViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "teacher" && page === "overview" ? (subjectViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "class_teacher" && page === "overview" ? (classViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "coordinator" && page === "overview" ? (gradeViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "section_head" && page === "overview" ? (sectionViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : ["chairman", "principal", "vice_principal"].includes(role) && page === "overview" && chairmanViews.some((item) => item.id === requestedModule) ? requestedModule : "transport";
+  const module = role === "driver" && page === "overview" ? (driverViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "transport" && page === "overview" ? (coordinatorViews.some((item) => item.id === requestedModule) ? requestedModule : "fleet") : role === "admin" && page === "overview" ? (adminViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "teacher" && page === "overview" ? (subjectViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "class_teacher" && page === "overview" ? (classViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "coordinator" && page === "overview" ? (gradeViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "section_head" && page === "overview" ? (sectionViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : ["chairman", "principal", "vice_principal"].includes(role) && page === "overview" && chairmanViews.some((item) => item.id === requestedModule) ? requestedModule : "transport";
   return { role, page, module };
 }
 
@@ -84,7 +86,7 @@ function childFor(ctx) {
 function optionsFor(ctx = context()) {
   const children = linkedChildren(state, ctx);
   const child = childFor(ctx);
-  return { state, boarding: { ...(boardingScope(state, ctx) ? boardingFilters(state, ctx, ui.boarding) : ui.boarding), feedback: ui.nfcFeedback }, transportCoordinator: { ...(ctx?.role === "transport" && coordinatorScope(state, ctx) ? coordinatorFilters(state, ctx, ui.transportCoordinator) : ui.transportCoordinator), view: view.module }, schoolAdmin: { ...(ctx?.role === "admin" && adminScope(state, ctx) ? adminFilters(state, ctx, ui.schoolAdmin) : ui.schoolAdmin), view: view.module }, subjectTeacher: { ...(ctx?.role === "teacher" && subjectScope(state, ctx) ? subjectFilters(state, ctx, ui.subjectTeacher) : ui.subjectTeacher), view: view.module }, classTeacher: { ...(ctx?.role === "class_teacher" && classScope(state, ctx) ? classFilters(state, ctx, ui.classTeacher) : ui.classTeacher), view: view.module }, gradeCoordinator: { ...(ctx?.role === "coordinator" && gradeScope(state, ctx) ? gradeFilters(state, ctx, ui.gradeCoordinator) : ui.gradeCoordinator), view: view.module }, section: { ...(ctx?.role === "section_head" && sectionScope(state, ctx) ? sectionFilters(state, ctx, ui.section) : ui.section), view: view.module }, context: ctx, children, child, fleet: visibleBuses(state, ctx, child), filter: ui.filter, selected: ui.bus, paused: ui.paused, progress, courseId: ui.courseId, grade: ui.grade, query: ui.query, network: isSchoolOperator(ctx) ? { ...ui.network, className: ui.chairman.academicClass } : ui.network, chairman: { ...ui.chairman, view: view.module } };
+  return { state, driver: { ...ui.driver, view: view.module }, boarding: { ...(boardingScope(state, ctx) ? boardingFilters(state, ctx, ui.boarding) : ui.boarding), feedback: ui.nfcFeedback }, transportCoordinator: { ...(ctx?.role === "transport" && coordinatorScope(state, ctx) ? coordinatorFilters(state, ctx, ui.transportCoordinator) : ui.transportCoordinator), view: view.module }, schoolAdmin: { ...(ctx?.role === "admin" && adminScope(state, ctx) ? adminFilters(state, ctx, ui.schoolAdmin) : ui.schoolAdmin), view: view.module }, subjectTeacher: { ...(ctx?.role === "teacher" && subjectScope(state, ctx) ? subjectFilters(state, ctx, ui.subjectTeacher) : ui.subjectTeacher), view: view.module }, classTeacher: { ...(ctx?.role === "class_teacher" && classScope(state, ctx) ? classFilters(state, ctx, ui.classTeacher) : ui.classTeacher), view: view.module }, gradeCoordinator: { ...(ctx?.role === "coordinator" && gradeScope(state, ctx) ? gradeFilters(state, ctx, ui.gradeCoordinator) : ui.gradeCoordinator), view: view.module }, section: { ...(ctx?.role === "section_head" && sectionScope(state, ctx) ? sectionFilters(state, ctx, ui.section) : ui.section), view: view.module }, context: ctx, children, child, fleet: visibleBuses(state, ctx, child), filter: ui.filter, selected: ui.bus, paused: ui.paused, progress, courseId: ui.courseId, grade: ui.grade, query: ui.query, network: isSchoolOperator(ctx) ? { ...ui.network, className: ui.chairman.academicClass } : ui.network, chairman: { ...ui.chairman, view: view.module } };
 }
 
 function elapsed() {
@@ -175,10 +177,10 @@ function render(focus, { scrollTop = false } = {}) {
     }
     if (!options.fleet.some((bus) => bus.id === ui.bus)) ui.bus = options.fleet[0]?.id;
     options.selected = ui.bus;
-    const pages = { boarding: boardingPage, overview: ctx.role === "transport" ? transportCoordinatorPage : ctx.role === "admin" ? schoolAdminPage : ctx.role === "teacher" ? subjectTeacherPage : ctx.role === "class_teacher" ? classTeacherPage : ctx.role === "coordinator" ? gradeCoordinatorPage : ctx.role === "section_head" ? sectionHeadPage : ctx.role === "chairman" ? chairmanOverviewPage : isSchoolOperator(ctx) ? principalOverviewPage : networkOverviewPage, courses: coursesPage, people: peoplePage, library: libraryPage, access: accessPage };
+    const pages = { boarding: boardingPage, overview: ctx.role === "driver" ? driverPage : ctx.role === "transport" ? transportCoordinatorPage : ctx.role === "admin" ? schoolAdminPage : ctx.role === "teacher" ? subjectTeacherPage : ctx.role === "class_teacher" ? classTeacherPage : ctx.role === "coordinator" ? gradeCoordinatorPage : ctx.role === "section_head" ? sectionHeadPage : ctx.role === "chairman" ? chairmanOverviewPage : isSchoolOperator(ctx) ? principalOverviewPage : networkOverviewPage, courses: coursesPage, people: peoplePage, library: libraryPage, access: accessPage };
     body = view.page === "transport" ? transportPage(view.role, options) : pages[view.page](options);
   }
-  document.title = `${view.role === "transport" && view.page === "overview" ? coordinatorViews.find((item) => item.id === view.module).name : view.role === "admin" && view.page === "overview" ? adminViews.find((item) => item.id === view.module).name : view.role === "teacher" && view.page === "overview" ? subjectViews.find((item) => item.id === view.module).name : view.role === "class_teacher" && view.page === "overview" ? classViews.find((item) => item.id === view.module).name : view.role === "coordinator" && view.page === "overview" ? gradeViews.find((item) => item.id === view.module).name : view.role === "section_head" && view.page === "overview" ? sectionViews.find((item) => item.id === view.module).name : ["chairman", "principal", "vice_principal"].includes(view.role) && view.page === "overview" ? chairmanViews.find((item) => item.id === view.module).name : navigation[view.page].label} · ${roles[view.role].name} · Sussex College Network`;
+  document.title = `${view.role === "driver" && view.page === "overview" ? driverViews.find((item) => item.id === view.module).name : view.role === "transport" && view.page === "overview" ? coordinatorViews.find((item) => item.id === view.module).name : view.role === "admin" && view.page === "overview" ? adminViews.find((item) => item.id === view.module).name : view.role === "teacher" && view.page === "overview" ? subjectViews.find((item) => item.id === view.module).name : view.role === "class_teacher" && view.page === "overview" ? classViews.find((item) => item.id === view.module).name : view.role === "coordinator" && view.page === "overview" ? gradeViews.find((item) => item.id === view.module).name : view.role === "section_head" && view.page === "overview" ? sectionViews.find((item) => item.id === view.module).name : ["chairman", "principal", "vice_principal"].includes(view.role) && view.page === "overview" ? chairmanViews.find((item) => item.id === view.module).name : navigation[view.page].label} · ${roles[view.role].name} · Sussex College Network`;
   const mobileNavigation = roles[view.role].pages.length > 1;
   app.innerHTML = `<div class="app-shell role-${view.role} ${mobileNavigation ? "has-mobile-nav" : ""}">
     ${sidebar(ctx)}<div class="desktop-content">${topbar(ctx)}<main id="main" class="page page-${view.page}">${view.page === "overview" ? "" : scopeBar(ctx)}${body}</main></div>
@@ -570,6 +572,17 @@ function authorizedAction(name, value, ctx) {
   if (name === "parent-logout") return view.role === "parent";
   if (!ctx) return false;
   const options = optionsFor(ctx);
+  if (name.startsWith("driver-")) {
+    if (!driverScope(state, ctx)) return false;
+    const runs = driverRuns(state, ctx), run = runs.find((run) => run.id === String(value || "").split("|")[0]);
+    if (name === "driver-issue") return true;
+    if (name === "driver-readiness") return !runs.some((run) => run.status === "active") && (!value || run?.status === "draft");
+    if (name === "driver-start") return run?.status === "draft";
+    if (["driver-finish", "driver-confirm-finish"].includes(name)) return run?.status === "active";
+    if (name === "driver-stop") return run?.status === "active";
+    if (name === "driver-export") return Boolean(run);
+    return false;
+  }
   if (name.startsWith("nfc-")) {
     const scope = boardingScope(state, ctx);
     if (!scope) return false;
@@ -741,7 +754,7 @@ function authorizedAction(name, value, ctx) {
 
 function updateTrip(status) {
   const bus = optionsFor().fleet[0];
-  if (!update((next) => { next.buses.find((item) => item.id === bus.id).status = status; }, { branch: bus.branch, category: "transport", message: `BUS ${bus.id} ${status === "route" ? "started a trip." : "completed its trip."}` })) return;
+  if (!update((next) => { if (context().role === "driver") finishDriverRun(next, context()); else next.buses.find((item) => item.id === bus.id).status = status; }, { branch: bus.branch, category: "transport", message: `BUS ${bus.id} ${status === "route" ? "started a trip." : "completed its trip."}` })) return;
   if (status === "route") ui.starts[bus.id] = elapsed();
   closeDialog();
   render();
@@ -772,6 +785,28 @@ function action(event) {
   const ctx = context();
   if (!authorizedAction(name, value, ctx)) return toast("This action is outside the current role’s assigned access.");
   switch (name) {
+    case "driver-readiness": showDialog("driver-readiness", "Pre-trip safety checklist", "Assigned school bus", driverReadinessForm(state, ctx, value)); break;
+    case "driver-issue": showDialog("driver-issue", "Report a transport issue", "School coordination", driverIssueForm(state, ctx)); break;
+    case "driver-start":
+    case "driver-stop":
+    case "driver-confirm-finish": {
+      try {
+        const [id, index] = String(value).split("|"), save = name === "driver-start" ? startDriverRun : name === "driver-stop" ? confirmDriverStop : finishDriverRun;
+        if (update((next) => save(next, ctx, { id, index }), { branch: ctx.branch, category: "transport", message: name === "driver-start" ? "Driver started a checked demo trip." : name === "driver-stop" ? "Driver confirmed a route stop." : "Driver completed a recorded demo trip." })) {
+          if (name === "driver-start") ui.starts[driverScope(state, ctx).bus.id] = elapsed();
+          closeDialog(); render(); toast(name === "driver-stop" ? "Stop confirmed in your trip log." : name === "driver-start" ? "Trip started." : "Trip completed.");
+        }
+      } catch (error) { toast(error.message); }
+      break;
+    }
+    case "driver-finish": confirmDialog("driver-finish", "Complete this school trip?", "The bus will appear as At school. The NFC pickup roster remains a separate record for coordinator review.", "Complete trip", "driver-confirm-finish", value); break;
+    case "driver-export": {
+      try {
+        const csv = driverTripCSV(state, ctx, value), url = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }));
+        const a = document.createElement("a"); a.href = url; a.download = "sussex-driver-trip-" + value + ".csv"; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+      } catch (error) { toast(error.message); }
+      break;
+    }
     case "nfc-tab": ui.boarding.tab = value; ui.boarding.query = ""; ui.nfcFeedback = null; render(); break;
     case "nfc-new-trip": showDialog("nfc-trip", "Open a boarding trip roster", "Simulated NFC transport", boardingTripForm(optionsFor(ctx))); break;
     case "nfc-card-issue": {
@@ -1135,8 +1170,8 @@ function action(event) {
     case "collect-order":
       if (update((next) => { next.orders.find((order) => order.number === value).status = "collected"; }, { branch: state.orders.find((order) => order.number === value).branch, category: "library", message: "A library order was collected." })) { render(); toast("Order marked as collected."); } break;
     case "end-trip": confirmDialog("trip", "End this trip?", "The bus will appear as At school for the branch and assigned parents.", "End trip", "confirm-end-trip"); break;
-    case "confirm-end-trip": updateTrip("school"); break;
-    case "start-trip": updateTrip("route"); break;
+    case "confirm-end-trip": try { updateTrip("school"); } catch (error) { closeDialog(); toast(error.message); } break;
+    case "start-trip": if (ctx.role === "driver") showDialog("driver-readiness", "Pre-trip safety checklist", "Assigned school bus", driverReadinessForm(state, ctx)); else updateTrip("route"); break;
     case "edit-bus": showDialog("bus", "Manage bus assignment", "Route, driver, and student assignments.", busForm(state.buses.find((bus) => bus.id === value), state)); break;
     case "edit-student": showDialog("student", value ? "Edit student" : "Add student", "Manage the student record and linked guardians.", studentForm(state, ctx, state.students.find((student) => student.id === value))); break;
     case "assign-role": showDialog("role", "Assign role", "Appoint an existing person or create a demo account.", roleForm(state, ctx)); break;
@@ -1177,6 +1212,10 @@ function change(event) {
   if (!ctx) return;
   if (element.matches("[data-attendance-status]") && element.closest('[data-form="class-attendance"]')) {
     if (classScope(state, ctx) && can(ctx, "attendance.mark")) updateAttendanceDraft(element.form);
+    return;
+  }
+  if (name === "driver-issue-status" && driverScope(state, ctx)) {
+    if (["all", "open", "in_progress", "resolved", "unavailable"].includes(element.value)) { ui.driver.issueStatus = element.value; render(); }
     return;
   }
   if (name?.startsWith("nfc-")) {
@@ -1347,7 +1386,7 @@ function change(event) {
       break;
     }
     case "account":
-      ui.boarding = boardingDefaults(); ui.nfcFeedback = null; ui.transportCoordinator = coordinatorDefaults(); ui.schoolAdmin = adminDefaults(); ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults();
+      ui.driver = driverDefaults(); ui.boarding = boardingDefaults(); ui.nfcFeedback = null; ui.transportCoordinator = coordinatorDefaults(); ui.schoolAdmin = adminDefaults(); ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults();
       ui.accounts[view.role] = element.value; ui.courseId = ""; ui.filter = "all"; ui.chairman = chairmanDefaults();
       if (isSchoolOperator(ctx)) ui.chairman.attendanceFlag = "all";
       ui.network.selected = ""; ui.network.mode = ""; ui.network.busId = ""; ui.network.compare = null; ui.network.status = "all"; ui.network.busBranch = "all"; ui.network.mapFocus = null; schoolMapKey = null;
@@ -1430,6 +1469,17 @@ async function submit(event) {
   const allowedBranch = (branch) => state.branches.some((item) => item.id === branch) && (ctx.branch === "all" || ctx.branch === branch);
   const fail = (message = "This change is outside your assigned scope.") => showError(form, message);
 
+  if (["driver-readiness", "driver-issue"].includes(mode)) {
+    if (!driverScope(state, ctx)) return fail();
+    const save = mode === "driver-readiness" ? saveDriverReadiness : saveDriverIncident;
+    const input = { ...Object.fromEntries(values), checks: values.getAll("checks") };
+    try {
+      if (update((next) => save(next, ctx, input), { branch: ctx.branch, category: "transport", message: mode === "driver-readiness" ? "Driver saved pre-trip safety checks." : "Driver recorded an issue for school transport coordination." })) {
+        closeDialog(); render(); toast(mode === "driver-readiness" ? "Safety checklist saved." : "Issue recorded for the school Transport Coordinator.");
+      }
+    } catch (error) { fail(error.message); }
+    return;
+  }
   if (["nfc-create-trip", "nfc-issue-card", "nfc-disable-card", "nfc-tap", "nfc-correct", "nfc-flag"].includes(mode)) {
     if (!boardingScope(state, ctx)) return fail();
     const saveAction = { "nfc-create-trip": createBoardingTrip, "nfc-issue-card": issueBoardingCard, "nfc-disable-card": disableBoardingCard, "nfc-tap": simulateBoardingTap, "nfc-correct": correctBoardingRecord, "nfc-flag": flagBoardingException }[mode];
@@ -1608,6 +1658,7 @@ document.addEventListener("input", (event) => {
   if (key === "class-attendance-search" && dialogMode === "class-attendance" && classScope(state, context())) {
     filterAttendanceDraft(event.target); return;
   }
+  if (key === "driver-query" && driverScope(state, context())) { ui.driver.query = event.target.value.slice(0, 80); render("driver-search"); return; }
   if (key === "nfc-query" && boardingScope(state, context())) { ui.boarding.query = event.target.value.slice(0, 80); render("nfc-search"); return; }
   if (context()?.role === "transport" && key === "coordinator-query") {
     ui.transportCoordinator.query = event.target.value.slice(0, 80); ui.transportCoordinator.page = 1; render("coordinator-search"); return;
@@ -1652,7 +1703,7 @@ window.addEventListener("hashchange", () => {
   if (view.page === "overview" && (previous.role !== view.role || previous.page !== view.page || previous.module !== view.module)) {
     ui.network.selected = ""; ui.network.mode = ""; ui.network.compare = null; ui.network.busId = ""; ui.network.status = "all"; schoolMapKey = null;
   }
-  if (previous.role !== view.role) { ui.boarding = boardingDefaults(); ui.nfcFeedback = null; ui.transportCoordinator = coordinatorDefaults(); ui.schoolAdmin = adminDefaults(); ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults(); ui.chairman = chairmanDefaults(); if (["principal", "vice_principal"].includes(view.role)) ui.chairman.attendanceFlag = "all"; }
+  if (previous.role !== view.role) { ui.driver = driverDefaults(); ui.boarding = boardingDefaults(); ui.nfcFeedback = null; ui.transportCoordinator = coordinatorDefaults(); ui.schoolAdmin = adminDefaults(); ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults(); ui.chairman = chairmanDefaults(); if (["principal", "vice_principal"].includes(view.role)) ui.chairman.attendanceFlag = "all"; }
   if (["section_head", "coordinator", "class_teacher", "teacher", "admin"].includes(view.role) && previous.module !== view.module) ui.courseId = "";
   if (view.role === "transport" && previous.module !== view.module) { ui.transportCoordinator.query = ""; ui.transportCoordinator.page = 1; }
   if (view.role === "admin" && previous.module !== view.module) { ui.schoolAdmin.query = ""; ui.schoolAdmin.page = 1; }

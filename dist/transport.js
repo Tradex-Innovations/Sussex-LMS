@@ -2,6 +2,7 @@ import { statuses } from "./data.js";
 import { icon } from "./icons.js";
 import { can } from "./access.js";
 import { routeProgress } from "./map.js";
+import { currentDriverRun } from "./driver-data.js";
 import { badge, button, childSelect, emptyState, escapeHtml as e, iconTile, pageHeading, statusBadge } from "./ui.js";
 
 export function nextStop(bus, progress) {
@@ -139,12 +140,13 @@ function parentTransport({ fleet, child, children, progress, paused }) {
     </div>`;
 }
 
-function driverTransport({ fleet, progress, paused }) {
+function driverTransport({ fleet, progress, paused, state, context }) {
   const bus = fleet[0];
-  const onRoute = bus.status === "route";
+  const run = currentDriverRun(state, context);
+  const onRoute = bus.status !== "school";
   const arrived = bus.status === "school";
   return `
-    ${pageHeading("My trip", "Check your route and manage the morning trip.")}
+    ${pageHeading("My trip map", "Follow your assigned simulated route. Record safety checks and stops in Daily Overview.", `<a class="button secondary" href="#driver/overview/route">${icon("route",17)}Trip & stop controls</a>`)}
     <section class="driver-trip">
       <div class="driver-trip-text">
         <div class="driver-trip-icon">${icon("bus", 24)}</div>
@@ -152,7 +154,7 @@ function driverTransport({ fleet, progress, paused }) {
       </div>
       <div class="driver-trip-action">
         ${badge(arrived ? "Trip complete" : statuses[bus.status].label, arrived ? "neutral" : "green", true)}
-        ${button(onRoute ? "End trip" : "Start trip", onRoute ? "end-trip" : "start-trip", { variant: "light", iconName: onRoute ? "stop" : "play", focus: "driver-trip" })}
+        ${run?.status === "active" ? `<a class="button light" href="#driver/overview/route">${icon("route",17)}Manage trip stops</a>` : button(onRoute ? "End trip" : "Prepare next trip", onRoute ? "end-trip" : "start-trip", { variant: "light", iconName: onRoute ? "stop" : "checkCircle", focus: "driver-trip" })}
       </div>
     </section>
     <div class="tracking-grid individual-tracking">

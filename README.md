@@ -139,6 +139,18 @@ Open [Transport Coordinator → Fleet Activity](http://127.0.0.1:4183/#transport
 
 Driver and Parent portals follow the same bus assignments and trip status. Trip start/end remains with Driver/Principal; recording an issue does not dispatch a bus or send a message. The existing [Bus tracking workspace](http://127.0.0.1:4183/#transport/transport) remains available. Full scope, persistence and prototype limits are in the maintained [role reference](ROLE_FEATURES_ACCESS.md#transport-coordinator).
 
+### Driver workspace
+
+Open [Driver → Daily Overview](http://127.0.0.1:4183/#driver/overview/summary). Kasun Dias (`driver_01`) previews Nugegoda Bus 01; Nalin De Silva (`driver_07`) previews Malabe Bus 07. The role has **Daily Overview, Route & Stops, Assigned Students, Safety & Issues and Trip History**, plus the existing map and NFC reader.
+
+1. Choose **Prepare a trip**, select a demo date (20–27 November), check the five safety items and save. Incomplete drafts are allowed; all five checks are required to **Start trip**. A route or assigned-student change before start requires another review.
+2. In **Route & Stops**, confirm each stop in sequence and the final school arrival, then **Complete trip**. Parent and school fleet screens reflect the bus's status. Stop confirmations do not scan cards or mark student attendance.
+3. **Assigned Students** searches the current bus's actual allocation and shows active-card readiness/latest NFC status. **Bus boarding** retains the reader simulation, latest-roster manifest and concern flags.
+4. In **Safety & Issues**, report a concern to a same-school Transport Coordinator. Switch to that coordinator's **Issues & Coordination** to update it, then return to Driver to see its status. Internal staff notes stay private; no message/dispatch is sent.
+5. **Trip History** shows your current-bus run snapshots and UTC CSV downloads. Reassignment removes former-bus access. The initial seeded map simulation can still end without fabricating a recorded trip.
+
+These are browser-local morning-trip demonstrations. Full access, persistence and scope are in the [Driver reference](ROLE_FEATURES_ACCESS.md#driver).
+
 ### NFC transport cards and boarding
 
 Open [Transport Coordinator → Bus boarding](http://127.0.0.1:4183/#transport/boarding). This workspace is separate from the five existing overview tabs and is also available to Driver, School Administrator, Parent and school/network leadership.
@@ -159,7 +171,7 @@ All taps, readers and synchronisation are simulated in this browser. Physical re
 4. Use **Section Head**, **Grade Coordinator**, **Class Teacher**, and **Subject Teacher** views to demonstrate the different academic scopes. Course assignments support teachers from the same branch and students from the matching class. Grade Coordinators can update enrollment.
 5. In an assigned Teacher view, publish or edit a handout. Open the enrolled child's course in **Parent → Courses**, download the handout, and mark it done. Teaching staff and leadership can review completion.
 6. In **School Administrator → Students & guardians**, create a student or update a record and link a guardian. Parent accounts are appointed through **Roles & access**.
-7. Open **Transport Coordinator → Bus tracking**, select a bus, and choose **Manage bus** to update its driver, stop names, and assigned students. In **Driver** view, start or end the assigned trip. The linked Parent view reflects the assignment and trip status.
+7. Open **Transport Coordinator → Bus tracking**, select a bus, and choose **Manage bus** to update its driver, stop names, and assigned students. In **Driver** view, use Daily Overview to prepare/start a checked trip and Route & Stops to confirm school arrival and complete it. The linked Parent view reflects the assignment and trip status.
 8. Open **Parent → Library**, place an order, then use **Librarian → Library** to edit price or availability and mark the order collected. Each branch manages its catalogue and orders, and each parent sees their own orders.
 9. Select **Reset demo** in the role menu before a fresh walkthrough.
 
