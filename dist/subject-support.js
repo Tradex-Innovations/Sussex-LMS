@@ -1,0 +1,17 @@
+import { button, badge, escapeHtml as e } from "./ui.js";
+import { subjectCourses, subjectSupportTypes, gradeSubjectRequests } from "./subject-data.js";
+
+const choices = (values, current) => values.map(([id, name]) => `<option value="${e(id)}" ${id === current ? "selected" : ""}>${e(name)}</option>`).join("");
+const footer = (label) => `<p class="form-error" role="alert" hidden></p><footer class="dialog-actions">${button("Cancel", "close-dialog", { variant: "secondary" })}<button class="button primary" type="submit">${label}</button></footer>`;
+export function subjectSupportRequestForm(options, courseId = "") {
+  const courses = subjectCourses(options.state, options.context);
+  return `<form data-form="subject-support"><div class="form-body"><label class="field">Assigned course<select name="course" required>${choices(courses.map((course) => [course.id, course.title + " · Class " + course.className]), courseId)}</select></label><label class="field">Support topic<select name="type">${choices(Object.entries(subjectSupportTypes), "learning")}</select></label><label class="field">Note for Grade Coordinator<textarea name="note" rows="4" maxlength="1000" required></textarea></label><p class="chairman-filter-note">Recorded for the Grade Coordinator of this course’s school and grade. Responses appear in Teaching Support.</p></div>${footer("Record teaching request")}</form>`;
+}
+export function subjectRequestInbox(options) {
+  const items = gradeSubjectRequests(options.state, options.context);
+  if (!items.length) return "";
+  return `<section class="surface chairman-panel grade-support-inbox subject-request-inbox"><header class="chairman-panel-heading"><div><h2>Requests from Subject Teachers</h2><p>Your appointed school and grade · Teaching coordination</p></div>${badge(items.filter((item) => item.status !== "resolved").length + " open", "amber")}</header><div class="grade-support-grid">${items.map((item) => `<article class="grade-support-card"><div>${badge(subjectSupportTypes[item.type], "blue")}${badge(item.status.replaceAll("_", " "), item.status === "resolved" ? "green" : "amber")}</div><h3>${e(item.title)} · Class ${e(item.className)}</h3><p>${e(item.note)}</p><small>${e(item.by)}</small>${item.responses?.[0] ? `<div class="grade-response"><strong>Latest response</strong><p>${e(item.responses[0].text)}</p></div>` : ""}<div class="section-row-actions">${button("Respond to Subject Teacher", "grade-subject-response", { value: item.id, variant: "secondary compact" })}${button("Request Section Head support", "grade-support", { value: item.course, variant: "secondary compact" })}</div></article>`).join("")}</div></section>`;
+}
+export function subjectSupportResponseForm(request) {
+  return `<form data-form="grade-subject-response"><div class="form-body"><input type="hidden" name="id" value="${e(request.id)}"><h3>${e(request.title)} · Class ${e(request.className)}</h3><p>${e(request.note)}</p><label class="field">Request progress<select name="status">${choices([["in_progress", "In progress"], ["resolved", "Resolved"]], request.status === "resolved" ? "resolved" : "in_progress")}</select></label><label class="field">Response for Subject Teacher<textarea name="note" rows="4" maxlength="1000" required></textarea></label><p class="chairman-filter-note">Record a response for the teacher. Cover allocation and course assignments remain separate leadership actions.</p></div>${footer("Save teaching response")}</form>`;
+}

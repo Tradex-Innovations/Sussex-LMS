@@ -1878,3 +1878,13 @@ form[data-form^="class-"] .form-error { margin: 0 18px 12px; }
   .class-attendance-inputs .field { grid-template-columns: minmax(0,1fr) 110px; gap: 8px; padding: 10px; }
   .class-attendance-inputs .field > span { font-size: 13px; }
 }
+
+/* Subject Teacher workspace */
+.subject-review-note { display: block; max-width: 300px; white-space: normal; overflow-wrap: anywhere; margin-top: 8px; }
+.subject-course-review { grid-column: 2 / -1; padding: 10px 14px; background: #f2f6f3; border-radius: 9px; font-size: 12px; overflow-wrap: anywhere; }
+.subject-course-review p { margin: 6px 0 0; color: var(--muted); }
+.subject-teacher-portal td progress { display: block; width: 100px; height: 5px; margin-top: 9px; }
+.subject-filters .chairman-search { align-self: end; min-width: 180px; flex: 1; }
+.subject-report-preview .section-report-brand { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+@media (max-width: 640px) { .subject-filters .chairman-search { width: 100%; min-width: 0; } .subject-course-review { grid-column: 1 / -1; } }
+@media (max-width: 640px) { .subject-filters .chairman-search { grid-column: 1 / -1; } }

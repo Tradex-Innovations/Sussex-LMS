@@ -7,7 +7,7 @@ export const roles = {
   section_head: { name: "Section Head", icon: "users", start: "overview", pages: ["overview", "courses", "people"] },
   coordinator: { name: "Grade Coordinator", icon: "users", start: "overview", pages: ["overview", "courses", "people"] },
   class_teacher: { name: "Class Teacher", icon: "book", start: "overview", pages: ["overview", "courses", "people"] },
-  teacher: { name: "Subject Teacher", icon: "book", start: "courses", pages: ["courses"] },
+  teacher: { name: "Subject Teacher", icon: "book", start: "overview", pages: ["overview", "courses"] },
   admin: { name: "School Administrator", icon: "settings", start: "people", pages: ["people", "courses"] },
   transport: { name: "Transport Coordinator", icon: "route", start: "transport", pages: ["transport"] },
   driver: { name: "Driver", icon: "bus", start: "transport", pages: ["transport"] },

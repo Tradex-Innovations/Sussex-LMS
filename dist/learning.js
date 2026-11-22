@@ -1,4 +1,5 @@
 import { can, canPublish, branchTeachers, visibleCourses } from "./access.js";
+import { courseLearningReview, subjectReviewStatuses } from "./subject-data.js";
 import { icon } from "./icons.js";
 import { avatar, badge, button, childSelect, courseIcon, emptyState, escapeHtml as e, pageHeading } from "./ui.js";
 
@@ -46,12 +47,12 @@ function materialRow(item, { state, context, child }, course) {
 
 function progressTable(course, state) {
   const items = courseMaterials(state, course.id);
-  const roster = state.students.filter((person) => state.assignments[course.id].students.includes(person.id));
+  const roster = state.students.filter((person) => state.assignments[course.id].students.includes(person.id) && person.branch === course.branch && person.grade === course.grade && person.className === course.className);
   return `<section class="surface section-gap">
     <header class="panel-heading"><div><h2>Student progress</h2><p>Completion recorded through the parent portal</p></div></header>
     <div class="progress-roster">${roster.map((student) => {
-      const done = items.filter((item) => state.completed[student.id]?.includes(item.id)).length;
-      return `<div class="progress-student">${avatar(student, "small")}<strong>${e(student.name)}</strong><span>${done} / ${items.length} done</span><progress value="${done}" max="${items.length || 1}" aria-label="${e(student.name)} progress"></progress></div>`;
+      const done = items.filter((item) => state.completed[student.id]?.includes(item.id)).length, review = courseLearningReview(state, course.id, student.id);
+      return `<div class="progress-student">${avatar(student, "small")}<strong>${e(student.name)}</strong><span>${done} / ${items.length} done</span><progress value="${done}" max="${items.length || 1}" aria-label="${e(student.name)} progress"></progress>${review ? `<div class="subject-course-review"><strong>Staff learning review: ${e(subjectReviewStatuses[review.status])}</strong><p>${e(review.notes[0]?.text)}</p></div>` : ""}</div>`;
     }).join("") || emptyState("users", "No students enrolled", "Assign students to this course to review their progress.")}</div>
   </section>`;
 }

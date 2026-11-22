@@ -23,6 +23,9 @@ import { gradeSupportRequestForm, gradeSupportResponseForm } from "./grade-suppo
 import { classViews, classDefaults, classScope, classFilters, classReportTypes, classAttendance, classStudents, classFollowups, classDiscussionNotes, gradeClassRequests, visibleClassReports, generateClassReport, saveClassAttendance, resetClassAttendance, saveClassFollowup, saveClassDiscussion, requestClassSupport, respondClassSupport } from "./class-data.js";
 import { classTeacherPage, classAttendanceForm, classFollowupForm, classDiscussionForm } from "./class-teacher.js";
 import { classSupportRequestForm, classSupportResponseForm } from "./class-support.js";
+import { subjectViews, subjectDefaults, subjectScope, subjectFilters, subjectEnrolments, subjectPlans, subjectReportTypes, subjectPlanStatuses, subjectReviewStatuses, gradeSubjectRequests, visibleSubjectReports, generateSubjectReport, saveSubjectPlan, saveSubjectReview, requestSubjectSupport, respondSubjectSupport } from "./subject-data.js";
+import { subjectTeacherPage, subjectPlanForm, subjectReviewForm, subjectReportHTML } from "./subject-teacher.js";
+import { subjectSupportRequestForm, subjectSupportResponseForm } from "./subject-support.js";
 import { FleetMap } from "./map.js";
 import { mountMapSummary, transportPage, updateTripDetails } from "./transport.js";
 import { avatar, button, emptyState, escapeHtml as e, iconTile } from "./ui.js";
@@ -47,14 +50,14 @@ let schoolMapKey;
 let mapViewKey;
 let dialogMode;
 let view = getView();
-const ui = { classTeacher: classDefaults(), gradeCoordinator: gradeDefaults(), section: sectionDefaults(), accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", grade: "all", query: "", paused: false, runningSince: performance.now(), elapsed: 0, starts: {},
+const ui = { subjectTeacher: subjectDefaults(), classTeacher: classDefaults(), gradeCoordinator: gradeDefaults(), section: sectionDefaults(), accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", grade: "all", query: "", paused: false, runningSince: performance.now(), elapsed: 0, starts: {},
   network: { subject: "mathematics", grade: 8, term: 3, selected: "", mode: "", compare: null, category: "all", tab: "transport", status: "all", busId: "", busBranch: "all" }, chairman: { ...chairmanDefaults(), ...(["principal", "vice_principal"].includes(view.role) ? { attendanceFlag: "all" } : {}) } };
 
 function getView() {
   const [requestedRole, requestedPage, requestedModule] = location.hash.slice(1).split("/");
   const role = Object.hasOwn(roles, requestedRole) ? requestedRole : "chairman";
   const page = roles[role].pages.includes(requestedPage) ? requestedPage : roles[role].start;
-  const module = role === "class_teacher" && page === "overview" ? (classViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "coordinator" && page === "overview" ? (gradeViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "section_head" && page === "overview" ? (sectionViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : ["chairman", "principal", "vice_principal"].includes(role) && page === "overview" && chairmanViews.some((item) => item.id === requestedModule) ? requestedModule : "transport";
+  const module = role === "teacher" && page === "overview" ? (subjectViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "class_teacher" && page === "overview" ? (classViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "coordinator" && page === "overview" ? (gradeViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "section_head" && page === "overview" ? (sectionViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : ["chairman", "principal", "vice_principal"].includes(role) && page === "overview" && chairmanViews.some((item) => item.id === requestedModule) ? requestedModule : "transport";
   return { role, page, module };
 }
 
@@ -72,7 +75,7 @@ function childFor(ctx) {
 function optionsFor(ctx = context()) {
   const children = linkedChildren(state, ctx);
   const child = childFor(ctx);
-  return { state, classTeacher: { ...(ctx?.role === "class_teacher" && classScope(state, ctx) ? classFilters(state, ctx, ui.classTeacher) : ui.classTeacher), view: view.module }, gradeCoordinator: { ...(ctx?.role === "coordinator" && gradeScope(state, ctx) ? gradeFilters(state, ctx, ui.gradeCoordinator) : ui.gradeCoordinator), view: view.module }, section: { ...(ctx?.role === "section_head" && sectionScope(state, ctx) ? sectionFilters(state, ctx, ui.section) : ui.section), view: view.module }, context: ctx, children, child, fleet: visibleBuses(state, ctx, child), filter: ui.filter, selected: ui.bus, paused: ui.paused, progress, courseId: ui.courseId, grade: ui.grade, query: ui.query, network: isSchoolOperator(ctx) ? { ...ui.network, className: ui.chairman.academicClass } : ui.network, chairman: { ...ui.chairman, view: view.module } };
+  return { state, subjectTeacher: { ...(ctx?.role === "teacher" && subjectScope(state, ctx) ? subjectFilters(state, ctx, ui.subjectTeacher) : ui.subjectTeacher), view: view.module }, classTeacher: { ...(ctx?.role === "class_teacher" && classScope(state, ctx) ? classFilters(state, ctx, ui.classTeacher) : ui.classTeacher), view: view.module }, gradeCoordinator: { ...(ctx?.role === "coordinator" && gradeScope(state, ctx) ? gradeFilters(state, ctx, ui.gradeCoordinator) : ui.gradeCoordinator), view: view.module }, section: { ...(ctx?.role === "section_head" && sectionScope(state, ctx) ? sectionFilters(state, ctx, ui.section) : ui.section), view: view.module }, context: ctx, children, child, fleet: visibleBuses(state, ctx, child), filter: ui.filter, selected: ui.bus, paused: ui.paused, progress, courseId: ui.courseId, grade: ui.grade, query: ui.query, network: isSchoolOperator(ctx) ? { ...ui.network, className: ui.chairman.academicClass } : ui.network, chairman: { ...ui.chairman, view: view.module } };
 }
 
 function elapsed() {
@@ -163,10 +166,10 @@ function render(focus, { scrollTop = false } = {}) {
     }
     if (!options.fleet.some((bus) => bus.id === ui.bus)) ui.bus = options.fleet[0]?.id;
     options.selected = ui.bus;
-    const pages = { overview: ctx.role === "class_teacher" ? classTeacherPage : ctx.role === "coordinator" ? gradeCoordinatorPage : ctx.role === "section_head" ? sectionHeadPage : ctx.role === "chairman" ? chairmanOverviewPage : isSchoolOperator(ctx) ? principalOverviewPage : networkOverviewPage, courses: coursesPage, people: peoplePage, library: libraryPage, access: accessPage };
+    const pages = { overview: ctx.role === "teacher" ? subjectTeacherPage : ctx.role === "class_teacher" ? classTeacherPage : ctx.role === "coordinator" ? gradeCoordinatorPage : ctx.role === "section_head" ? sectionHeadPage : ctx.role === "chairman" ? chairmanOverviewPage : isSchoolOperator(ctx) ? principalOverviewPage : networkOverviewPage, courses: coursesPage, people: peoplePage, library: libraryPage, access: accessPage };
     body = view.page === "transport" ? transportPage(view.role, options) : pages[view.page](options);
   }
-  document.title = `${view.role === "class_teacher" && view.page === "overview" ? classViews.find((item) => item.id === view.module).name : view.role === "coordinator" && view.page === "overview" ? gradeViews.find((item) => item.id === view.module).name : view.role === "section_head" && view.page === "overview" ? sectionViews.find((item) => item.id === view.module).name : ["chairman", "principal", "vice_principal"].includes(view.role) && view.page === "overview" ? chairmanViews.find((item) => item.id === view.module).name : navigation[view.page].label} · ${roles[view.role].name} · Sussex College Network`;
+  document.title = `${view.role === "teacher" && view.page === "overview" ? subjectViews.find((item) => item.id === view.module).name : view.role === "class_teacher" && view.page === "overview" ? classViews.find((item) => item.id === view.module).name : view.role === "coordinator" && view.page === "overview" ? gradeViews.find((item) => item.id === view.module).name : view.role === "section_head" && view.page === "overview" ? sectionViews.find((item) => item.id === view.module).name : ["chairman", "principal", "vice_principal"].includes(view.role) && view.page === "overview" ? chairmanViews.find((item) => item.id === view.module).name : navigation[view.page].label} · ${roles[view.role].name} · Sussex College Network`;
   const mobileNavigation = roles[view.role].pages.length > 1;
   app.innerHTML = `<div class="app-shell role-${view.role} ${mobileNavigation ? "has-mobile-nav" : ""}">
     ${sidebar(ctx)}<div class="desktop-content">${topbar(ctx)}<main id="main" class="page page-${view.page}">${view.page === "overview" ? "" : scopeBar(ctx)}${body}</main></div>
@@ -262,6 +265,7 @@ function chairmanPerson(kind, id, ctx = context()) {
 }
 
 function permittedReport(id, ctx = context()) {
+  if (ctx?.role === "teacher") return visibleSubjectReports(state, ctx).find((report) => report.id === id);
   if (ctx?.role === "class_teacher") return visibleClassReports(state, ctx).find((report) => report.id === id);
   if (ctx?.role === "coordinator") return visibleGradeReports(state, ctx).find((report) => report.id === id);
   if (ctx?.role === "section_head") return visibleSectionReports(state, ctx).find((report) => report.id === id);
@@ -333,6 +337,16 @@ function captureClassReport(type = ui.classTeacher.reportType) {
   return report;
 }
 
+function captureSubjectReport() {
+  const ctx = context(), report = generateSubjectReport(state, ctx, subjectFilters(state, ctx, ui.subjectTeacher));
+  if (!update((next) => {
+    const existing = next.subjectReports || [], key = report.owner.key;
+    next.subjectReports = [report, ...existing.filter((item) => item.owner?.key === key)].slice(0, 8).concat(existing.filter((item) => item.owner?.key !== key));
+  })) return null;
+  ui.subjectTeacher.reportId = report.id;
+  return report;
+}
+
 async function downloadExecutiveReport(report, format = "csv", print = false) {
   try {
     let content;
@@ -348,7 +362,7 @@ async function downloadExecutiveReport(report, format = "csv", print = false) {
           });
         }
       } catch {}
-      content = ["section_head", "coordinator", "class_teacher"].includes(report.owner?.role) ? sectionReportHTML(report, logo) : executiveReportHTML(report, logo);
+      content = report.owner?.role === "teacher" ? subjectReportHTML(report, logo) : ["section_head", "coordinator", "class_teacher"].includes(report.owner?.role) ? sectionReportHTML(report, logo) : executiveReportHTML(report, logo);
     } else content = reportCSV(report);
     if (print) {
       const frame = document.createElement("iframe");
@@ -477,6 +491,16 @@ function authorizedAction(name, value, ctx) {
   if (name === "parent-logout") return view.role === "parent";
   if (!ctx) return false;
   const options = optionsFor(ctx);
+  if (name.startsWith("subject-")) {
+    const scope = subjectScope(state, ctx);
+    if (!scope) return false;
+    if (name === "subject-plan-new" || name === "subject-support") return scope.courses.length > 0 && (!value || scope.courses.some((course) => course.id === value));
+    if (name === "subject-plan-edit") return subjectPlans(state, ctx).some((item) => item.id === value);
+    if (name === "subject-review") return subjectEnrolments(state, ctx).some((row) => row.course.id + "|" + row.student.id === value);
+    if (name === "subject-generate-report") return true;
+    if (["subject-open-report", "subject-download-report", "subject-print-report"].includes(name)) return Boolean(permittedReport(value, ctx));
+    return false;
+  }
   if (name.startsWith("class-")) {
     const scope = classScope(state, ctx);
     if (!scope) return false;
@@ -498,6 +522,7 @@ function authorizedAction(name, value, ctx) {
     if (!scope) return false;
     if (["grade-student", "grade-followup-new"].includes(name)) return gradeAttendance(state, ctx).roster.some((student) => student.id === value);
     if (name === "grade-followup-edit") return gradeFollowups(state, ctx).some((item) => item.id === value);
+    if (name === "grade-subject-response") return gradeSubjectRequests(state, ctx).some((item) => item.id === value);
     if (name === "grade-class-response") return gradeClassRequests(state, ctx).some((item) => item.id === value);
     if (name === "grade-teacher") return gradeTeachers(state, ctx).some((person) => person.id === value);
     if (name === "grade-support") return visibleCourses(state, scope.context).some((course) => course.id === value);
@@ -627,6 +652,25 @@ function action(event) {
   const ctx = context();
   if (!authorizedAction(name, value, ctx)) return toast("This action is outside the current role’s assigned access.");
   switch (name) {
+    case "subject-plan-new":
+    case "subject-plan-edit": {
+      const previous = name === "subject-plan-edit" ? subjectPlans(state, ctx).find((item) => item.id === value) : null;
+      showDialog("subject-plan", previous ? "Update lesson plan" : "New lesson plan", "Assigned teaching courses", subjectPlanForm(optionsFor(ctx), previous, value)); break;
+    }
+    case "subject-review": {
+      const row = subjectEnrolments(state, ctx).find((row) => row.course.id + "|" + row.student.id === value);
+      showDialog("subject-review", "Review student learning", "Internal staff learning record", subjectReviewForm(row)); break;
+    }
+    case "subject-support": showDialog("subject-support", "Request Grade Coordinator support", "Your course’s school and grade", subjectSupportRequestForm(optionsFor(ctx), value)); break;
+    case "subject-generate-report":
+      try { if (captureSubjectReport()) { render(); app.querySelector(".chairman-report-result")?.scrollIntoView({ block: "start", behavior: "smooth" }); toast("Subject report saved."); } } catch (error) { toast(error.message); } break;
+    case "subject-open-report": ui.subjectTeacher.reportId = value; render(); app.querySelector(".chairman-report-result")?.scrollIntoView({ block: "start", behavior: "smooth" }); break;
+    case "subject-download-report": downloadExecutiveReport(permittedReport(value, ctx), ui.subjectTeacher.reportFormat); break;
+    case "subject-print-report": downloadExecutiveReport(permittedReport(value, ctx), "html", true); break;
+    case "grade-subject-response": {
+      const request = gradeSubjectRequests(state, ctx).find((item) => item.id === value);
+      showDialog("grade-subject-response", "Respond to Subject Teacher", "Class " + request.className, subjectSupportResponseForm(request)); break;
+    }
     case "class-student": {
       const student = classAttendance(state, ctx).roster.find((item) => item.id === value), options = optionsFor(ctx);
       showDialog("chairman-class-student", "Class student attendance", "Illustrative register · Class " + classScope(state, ctx).className, sectionStudentPanel({ ...options, section: options.classTeacher }, student, "class-followup-new")); break;
@@ -949,6 +993,16 @@ function change(event) {
   const name = element.dataset.change;
   const ctx = context();
   if (!ctx) return;
+  if (name?.startsWith("subject-")) {
+    if (!subjectScope(state, ctx)) return;
+    const rules = { "subject-course": ["course", ["all", ...subjectScope(state, ctx).courses.map((course) => course.id)]],
+      "subject-review-filter": ["review", ["all", "unreviewed", ...Object.keys(subjectReviewStatuses)]],
+      "subject-plan-filter": ["planStatus", ["all", ...Object.keys(subjectPlanStatuses)]],
+      "subject-report-type": ["reportType", Object.keys(subjectReportTypes)], "subject-report-format": ["reportFormat", ["csv", "html"]] };
+    if (!rules[name]?.[1].includes(element.value)) return;
+    ui.subjectTeacher[rules[name][0]] = element.value;
+    ui.subjectTeacher = subjectFilters(state, ctx, ui.subjectTeacher); ui.courseId = ""; render(); return;
+  }
   if (name?.startsWith("class-")) {
     if (!classScope(state, ctx)) return;
     const rules = { "class-term": ["term", ["1", "2", "3"]], "class-subject": ["subject", subjects.map((subject) => subject.id)],
@@ -1077,7 +1131,7 @@ function change(event) {
       break;
     }
     case "account":
-      ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults();
+      ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults();
       ui.accounts[view.role] = element.value; ui.courseId = ""; ui.filter = "all"; ui.chairman = chairmanDefaults();
       if (isSchoolOperator(ctx)) ui.chairman.attendanceFlag = "all";
       ui.network.selected = ""; ui.network.mode = ""; ui.network.busId = ""; ui.network.compare = null; ui.network.status = "all"; ui.network.busBranch = "all"; ui.network.mapFocus = null; schoolMapKey = null;
@@ -1173,6 +1227,14 @@ async function submit(event) {
   const allowedBranch = (branch) => state.branches.some((item) => item.id === branch) && (ctx.branch === "all" || ctx.branch === branch);
   const fail = (message = "This change is outside your assigned scope.") => showError(form, message);
 
+  if (["subject-plan", "subject-review", "subject-support"].includes(mode)) {
+    const scope = subjectScope(state, ctx);
+    if (!scope) return fail();
+    const saveAction = { "subject-plan": saveSubjectPlan, "subject-review": saveSubjectReview, "subject-support": requestSubjectSupport }[mode];
+    const message = mode === "subject-plan" ? "Lesson plan saved." : mode === "subject-review" ? "Internal learning review saved." : "Teaching request recorded for the Grade Coordinator.";
+    try { if (update((next) => saveAction(next, ctx, Object.fromEntries(values)), { branch: scope.branch.id, category: "academic", message })) { closeDialog(); render(); toast(message); } } catch (error) { fail(error.message); }
+    return;
+  }
   if (["class-attendance", "class-followup", "class-discussion", "class-support"].includes(mode)) {
     const scope = classScope(state, ctx);
     if (!scope) return fail();
@@ -1183,11 +1245,11 @@ async function submit(event) {
     try { if (update((next) => saveAction(next, ctx, input), { branch: scope.branch.id, grade: scope.grade, className: scope.className, category: mode === "class-support" ? "academic" : "people", message })) { closeDialog(); render(); toast(message); } } catch (error) { fail(error.message); }
     return;
   }
-  if (["grade-followup", "grade-class-review", "grade-support", "grade-class-response"].includes(mode)) {
+  if (["grade-followup", "grade-class-review", "grade-support", "grade-class-response", "grade-subject-response"].includes(mode)) {
     const scope = gradeScope(state, ctx);
     if (!scope) return fail();
-    const saveAction = { "grade-followup": saveGradeFollowup, "grade-class-review": saveGradeClassUpdate, "grade-support": requestGradeSupport, "grade-class-response": respondClassSupport }[mode];
-    const message = mode === "grade-class-response" ? "Response saved for the Class Teacher." : mode === "grade-followup" ? "Grade attendance follow-up saved." : mode === "grade-class-review" ? "Class coordination review saved." : "Support request recorded for the Section Head.";
+    const saveAction = { "grade-followup": saveGradeFollowup, "grade-class-review": saveGradeClassUpdate, "grade-support": requestGradeSupport, "grade-class-response": respondClassSupport, "grade-subject-response": respondSubjectSupport }[mode];
+    const message = mode === "grade-subject-response" ? "Response saved for the Subject Teacher." : mode === "grade-class-response" ? "Response saved for the Class Teacher." : mode === "grade-followup" ? "Grade attendance follow-up saved." : mode === "grade-class-review" ? "Class coordination review saved." : "Support request recorded for the Section Head.";
     try { if (update((next) => saveAction(next, ctx, Object.fromEntries(values)), { branch: scope.branch.id, grade: scope.grade, category: mode === "grade-followup" ? "people" : "academic", message })) { closeDialog(); render(); toast(message); } } catch (error) { fail(error.message); }
     return;
   }
@@ -1351,6 +1413,9 @@ document.addEventListener("submit", submit);
 document.addEventListener("input", (event) => {
   if (event.target.dataset.change === "book-search") { ui.query = event.target.value; updateCatalog(); }
   const key = event.target.dataset.change;
+  if (context()?.role === "teacher" && key === "subject-query") {
+    ui.subjectTeacher.query = event.target.value.slice(0, 80); render("subject-search"); return;
+  }
   if (context()?.role === "class_teacher" && key === "class-query") {
     ui.classTeacher.query = event.target.value.slice(0, 80); ui.classTeacher.page = 1; render("class-search"); return;
   }
@@ -1384,8 +1449,8 @@ window.addEventListener("hashchange", () => {
   if (view.page === "overview" && (previous.role !== view.role || previous.page !== view.page || previous.module !== view.module)) {
     ui.network.selected = ""; ui.network.mode = ""; ui.network.compare = null; ui.network.busId = ""; ui.network.status = "all"; schoolMapKey = null;
   }
-  if (previous.role !== view.role) { ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults(); ui.chairman = chairmanDefaults(); if (["principal", "vice_principal"].includes(view.role)) ui.chairman.attendanceFlag = "all"; }
-  if (["section_head", "coordinator", "class_teacher"].includes(view.role) && previous.module !== view.module) ui.courseId = "";
+  if (previous.role !== view.role) { ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults(); ui.chairman = chairmanDefaults(); if (["principal", "vice_principal"].includes(view.role)) ui.chairman.attendanceFlag = "all"; }
+  if (["section_head", "coordinator", "class_teacher", "teacher"].includes(view.role) && previous.module !== view.module) ui.courseId = "";
   if (ui.pendingPulseTransport && view.module === "transport") { ui.network.status = "delayed"; }
   ui.pendingPulseTransport = false;
   if (ui.pendingCourse && view.page === "courses") {

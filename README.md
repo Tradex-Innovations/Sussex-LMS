@@ -103,6 +103,18 @@ Open [Class Teacher → Class Overview](http://127.0.0.1:4183/#class_teacher/ove
 
 The Grade Coordinator sees requests in **Class Coordination → Requests from Class Teachers** and records a response; course-linked matters can separately use the existing Section Head support workflow. Responding does not allocate cover or approve materials. The two extra demo Class Teacher accounts migrate once without replacing earlier edits or removed appointments. See the maintained [role reference](ROLE_FEATURES_ACCESS.md#class-teacher) for scope and prototype limits.
 
+### Subject Teacher workspace
+
+Open [Subject Teacher → Subject Overview](http://127.0.0.1:4183/#teacher/overview/summary). **Demo Subject Teacher** previews Dilini Silva (Mathematics 8A and ICT 6A), Nuwan Gamage (Science 8A), Rihana Farook (English 6A), Asha Wickramasinghe (Mathematics 4A) in Nugegoda, or Lakshmi Fernando in Malabe. Current teacher assignments and matching-class enrolments control visibility.
+
+- **Subject Overview:** current courses, distinct enrolled students, materials/completion, lesson plans and teaching priorities.
+- **Teaching & Materials:** own-course publication/edit/download, parent-completion progress and internal lesson plans with status and note history.
+- **Student Progress:** enrolled student/admission search, course/review filters and internal on-track/needs-practice/reviewed learning records. Notes are available to current course staff and hidden from parents; they do not change completion or assessment marks.
+- **Teaching Support:** course-specific coordinator requests and responses, plus Section Head material feedback. Coordinators respond through **Class Coordination → Requests from Subject Teachers** in the course’s school/grade.
+- **Subject Reports:** teaching summary, materials, student progress and lesson plans; scoped CSV/standalone HTML/print, with eight snapshots per teacher/school. Internal free-text notes are excluded, and snapshots losing current course/student access are hidden.
+
+Class Teachers mark attendance only for their appointed class while that role is active. The Subject Teacher workspace records attendance concerns through coordinator requests. Course plans/reviews/requests follow teaching reassignment; the former teacher loses access. All changes remain in this browser. Full boundaries are in the maintained [role reference](ROLE_FEATURES_ACCESS.md#subject-teacher).
+
 ### School portal
 
 1. Start in **Chairman → Overview**. An interactive OpenStreetMap street map shows Sri Lanka and a simulated network fleet of 44 buses across all 20 branches. Nearby vehicles form bus-count groups; click a group to zoom in and see individual buses. Branch-name bubbles appear near their geographic positions where space permits. Use **View all buses** to find every branch's vehicles, or filter by On route, At school and Signal delayed. Pan, zoom, pause or resume the simulation, or choose **View whole island** to reset. Street tiles require an internet connection; a notice appears if they cannot load.

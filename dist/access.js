@@ -47,8 +47,8 @@ export function visibleStudents(state, context) {
   if (context.role === "parent") return linkedChildren(state, context);
   const visible = state.students.filter((student) => withinScope(context, student));
   if (context.role !== "teacher") return visible;
-  const assignedIds = Object.entries(state.assignments).filter(([, assignment]) => assignment.teacher === context.account.id).flatMap(([, assignment]) => assignment.students);
-  return visible.filter((student) => assignedIds.includes(student.id));
+  const courses = visibleCourses(state, context);
+  return visible.filter((student) => courses.some((course) => course.branch === student.branch && course.grade === student.grade && course.className === student.className && state.assignments[course.id].students.includes(student.id)));
 }
 
 export function visibleCourses(state, context, child) {

@@ -294,13 +294,16 @@ export function reportCSV(report) {
     if (/^[=+\-@]/.test(text)) text = "'" + text;
     return '"' + text.replaceAll('"', '""') + '"';
   };
-  const metadata = [["Sussex College Network", report.title], ["Data", "SAMPLE DATA - PROTOTYPE"], ["Reporting period", report.criteria.from + " to " + report.criteria.to],
-    ...(["brief", "attendance"].includes(report.type) ? [["Attendance period", report.criteria.from + " to " + report.criteria.to], ["Attendance for", report.criteria.audience]] : []),
-    ...(["brief", "academic"].includes(report.type) ? [["Academic assessment", report.criteria.subject + " / Grade " + report.criteria.grade + " / Term " + report.criteria.term]] : []), ["Generated UTC", report.generatedAt], []];
+  const metadata = [["Sussex College Network", report.title], ["Data", "SAMPLE DATA - PROTOTYPE"], [report.owner?.role === "teacher" ? "Snapshot date" : "Reporting period", report.criteria.from + " to " + report.criteria.to],
+    ...(report.owner?.role !== "teacher" && ["brief", "attendance"].includes(report.type) ? [["Attendance period", report.criteria.from + " to " + report.criteria.to], ["Attendance for", report.criteria.audience]] : []),
+    ...(report.owner?.role !== "teacher" && ["brief", "academic"].includes(report.type) ? [["Academic assessment", report.criteria.subject + " / Grade " + report.criteria.grade + " / Term " + report.criteria.term]] : []), ["Generated UTC", report.generatedAt], []];
   if (["section_head", "coordinator", "class_teacher"].includes(report.owner?.role)) metadata.splice(-1, 0, ["School", report.owner.school], ["Section", report.owner.sectionName], [report.owner.role === "class_teacher" ? "Assigned class grade" : report.owner.role === "coordinator" ? "Assigned grade" : "Section grades", report.criteria.grades.join(", ")]);
   if (report.criteria.className && report.criteria.className !== "all") metadata.splice(-1, 0, ["Academic class", report.criteria.className]);
   if (report.criteria.attendanceClass && report.criteria.attendanceClass !== "all") metadata.splice(-1, 0, ["Attendance class", report.criteria.attendanceClass]);
   if (report.criteria.comparison) metadata.splice(-1, 0, ["Comparison", report.criteria.comparison]);
+  if (report.owner?.role === "teacher") metadata.splice(-1, 0, ["School", report.owner.school], ["Subject Teacher", report.owner.teacher], ["Assigned courses", report.criteria.courseLabels.join("; ")],
+    ...(report.type === "progress" ? [["Learning review filter", report.criteria.review], ["Student search", report.criteria.query || "All enrolled students"]] : []),
+    ...(report.type === "plans" ? [["Plan status filter", report.criteria.planStatus], ["Planning window", "20 to 27 Nov 2026"]] : []));
   const rows = report.customRows || (report.type === "transport" ? report.buses : report.rows);
   const operations = report.operations ? [[], ["School coordination snapshot"], ["Leave recommendations pending Principal decision", report.operations.recommendations],
     ["Follow-up", "Category", "Status", "Due"], ...report.operations.followups.map((item) => [item.title, item.category, item.status, item.due]), [],
