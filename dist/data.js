@@ -9,7 +9,7 @@ export const roles = {
   class_teacher: { name: "Class Teacher", icon: "book", start: "overview", pages: ["overview", "courses", "people"] },
   teacher: { name: "Subject Teacher", icon: "book", start: "overview", pages: ["overview", "courses"] },
   admin: { name: "School Administrator", icon: "settings", start: "overview", pages: ["overview", "people", "courses"] },
-  transport: { name: "Transport Coordinator", icon: "route", start: "transport", pages: ["transport"] },
+  transport: { name: "Transport Coordinator", icon: "route", start: "overview", pages: ["overview", "transport"] },
   driver: { name: "Driver", icon: "bus", start: "transport", pages: ["transport"] },
   librarian: { name: "Librarian", icon: "library", start: "library", pages: ["library"] },
   parent: { name: "Parent", icon: "user", start: "transport", pages: ["transport", "courses", "library"] },

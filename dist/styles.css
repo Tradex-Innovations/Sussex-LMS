@@ -1959,3 +1959,71 @@ form[data-form="class-attendance"] { display: flex; flex-direction: column; min-
 .admin-guardian-links article { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
 .admin-guardian-links .button { flex: none; }
 @media (max-width: 640px) { .admin-filters .chairman-search { width: 100%; min-width: 0; grid-column: 1 / -1; } .admin-access-note { padding: 16px; } .admin-guardian-links article { align-items: flex-start; flex-direction: column; } }
+
+/* Transport Coordinator school operations */
+.coordinator-filters .chairman-search { min-width: 220px; flex: 1; align-self: end; }
+.coordinator-fleet-filters { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; margin: 18px 0; }
+.coordinator-fleet-filters > span { margin-left: auto; color: var(--muted); font-size: 13px; }
+.coordinator-map-card { overflow: hidden; isolation: isolate; }
+.coordinator-map-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 20px; }
+.coordinator-map-heading h2 { font-size: 19px; }
+.coordinator-map-heading p { font-size: 13px; line-height: 1.6; margin-top: 5px; color: var(--muted); }
+#coordinator-fleet-map { height: 450px; width: 100%; font-family: inherit; }
+.coordinator-fleet-lower { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.2fr); gap: 22px; margin-top: 22px; align-items: start; }
+.coordinator-fleet-list { overflow: hidden; }
+.coordinator-bus-row { width: 100%; display: grid; grid-template-columns: 38px minmax(0,1fr) auto; align-items: center; gap: 12px; padding: 16px; text-align: left; border-top: 1px solid var(--line); background: #fff; cursor: pointer; }
+.coordinator-bus-row:hover { background: #f6f9f4; }
+.coordinator-bus-row.is-selected { background: #edf5ef; box-shadow: inset 4px 0 var(--accent); }
+.coordinator-bus-row strong { font-size: 14px; line-height: 1.5; }
+.coordinator-bus-row small { display: block; color: var(--muted); font-size: 12px; margin-top: 4px; }
+.coordinator-bus-detail { padding: 22px; }
+.coordinator-bus-detail > header { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.coordinator-bus-detail h2 { font-size: 21px; line-height: 1.4; margin-top: 6px; }
+.coordinator-bus-detail header p { font-size: 14px; color: var(--muted); margin-top: 7px; }
+.coordinator-telemetry { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; padding: 22px 0; margin-top: 10px; }
+.coordinator-telemetry span, .coordinator-next-stop > span { display: block; color: var(--muted); font-size: 12px; margin-bottom: 7px; }
+.coordinator-telemetry strong { display: block; font-size: 20px; line-height: 1.4; }
+.coordinator-telemetry strong > span { display: inline; color: inherit; font: inherit; }
+.coordinator-telemetry strong small { font-size: 12px; font-weight: 500; }
+.coordinator-next-stop { padding: 18px; border-radius: 11px; background: #edf4ee; margin-bottom: 18px; }
+.coordinator-next-stop strong { display: block; font-size: 16px; line-height: 1.5; }
+.coordinator-next-stop progress { width: 100%; margin-top: 14px; height: 6px; }
+.coordinator-bus-detail .chairman-filter-note { font-size: 12px; line-height: 1.7; margin-top: 16px; }
+.coordinator-route-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 22px; margin: 22px 0; }
+.coordinator-route-card { padding: 22px; }
+.coordinator-route-card > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.coordinator-route-card h2 { font-size: 21px; margin: 7px 0; line-height: 1.4; }
+.coordinator-route-card p { font-size: 14px; line-height: 1.5; color: var(--muted); }
+.coordinator-route-card ol { list-style: none; padding: 0; margin: 20px 0; }
+.coordinator-route-card li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; }
+.coordinator-route-card li > span { display: grid; place-items: center; width: 31px; height: 31px; flex: none; border-radius: 50%; color: var(--accent); background: #edf4ee; }
+.coordinator-route-card li strong { font-size: 14px; line-height: 1.5; }
+.coordinator-route-card li small { display: block; margin-top: 4px; font-size: 12px; color: var(--muted); }
+.coordinator-route-card footer { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 18px; }
+.coordinator-route-card footer > span { font-size: 12px; color: var(--muted); }
+.coordinator-people-tabs { display: flex; gap: 8px; margin: 20px 0; }
+.coordinator-report-brand { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
+form[data-form^="coordinator-"] .form-body > h3 { font-size: 18px; line-height: 1.6; margin-bottom: 12px; }
+form[data-form^="coordinator-"] .chairman-filter-note { font-size: 13px; line-height: 1.7; margin-top: 16px; }
+form[data-form^="coordinator-"] .form-error { margin: 0 18px 12px; }
+@media (max-width: 1100px) { .coordinator-fleet-lower { grid-template-columns: minmax(0,1fr); } }
+@media (max-width: 750px) { .coordinator-route-grid { grid-template-columns: minmax(0,1fr); } .coordinator-fleet-filters > span { width: 100%; margin-left: 0; line-height: 1.6; } }
+@media (max-width: 640px) {
+  .coordinator-filters .chairman-search { width: 100%; min-width: 0; grid-column: 1 / -1; }
+  .coordinator-fleet-filters .chairman-filter { flex: 1; min-width: 0; }
+  #coordinator-fleet-map { height: 390px; }
+  .coordinator-map-heading { padding: 15px; flex-wrap: wrap; }
+  .coordinator-map-heading h2 { font-size: 18px; }
+  .coordinator-bus-detail, .coordinator-route-card { padding: 16px; }
+  .coordinator-bus-detail > header, .coordinator-route-card > header { flex-wrap: wrap; }
+  .coordinator-bus-row { grid-template-columns: 30px minmax(0,1fr); gap: 10px; padding: 14px; }
+  .coordinator-bus-row > .badge { grid-column: 2; justify-self: start; }
+  .coordinator-people-tabs .button { flex: 1; padding-inline: 9px; font-size: 12px; }
+}
+
+.coordinator-map-card .coordinator-fleet-filters { margin: 0; padding: 0 20px 16px; }
+.coordinator-map-card + .chairman-metrics { margin-top: 22px; }
+.coordinator-readiness { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 18px 0; }
+@media (max-width:640px) { .coordinator-map-card .coordinator-fleet-filters { padding: 0 14px 14px; gap: 10px; } .coordinator-map-card .coordinator-fleet-filters > .badge { display: none; } }
+.coordinator-map-heading > div { flex: 1; min-width: 0; }
+.coordinator-map-heading .button { flex: none; }

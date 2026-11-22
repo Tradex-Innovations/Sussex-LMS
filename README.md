@@ -127,6 +127,18 @@ Open [School Administrator → Administration Overview](http://127.0.0.1:4183/#a
 
 Changing a student's grade/class removes incompatible course enrolments; matching-course enrolment is then assigned separately. Staff appointments, lecture publication, attendance marking and transport/library operations stay with their authorised roles. All changes remain in the browser. See the maintained [role reference](ROLE_FEATURES_ACCESS.md#school-administrator) for complete access, workflow and report rules.
 
+### Transport Coordinator workspace
+
+Open [Transport Coordinator → Fleet Activity](http://127.0.0.1:4183/#transport/overview/fleet). **Demo Transport Coordinator** previews Nimal Rathnayake (Nugegoda’s six operational buses) or Chamara Silva (Malabe’s two). Access stays within the appointed school.
+
+- **Fleet Activity:** the school fleet on an OpenStreetMap street map, vehicle/status selection, pause/resume, route progress and clearly labelled simulated telemetry. Assigned-student counts use saved records.
+- **Routes & Stops:** review ordered pickups; edit existing route/stop labels, drivers and students; retain the school destination and illustrative map paths.
+- **Drivers & Students:** separate searchable allocation views, quick student/driver allocation and full bus management. Driver moves leave the former bus unassigned; replaced drivers remain available for a later bus allocation.
+- **Issues & Coordination:** create bus issues and update transport follow-ups assigned to you. They share the Vice Principal’s **Follow-up board**, including status/note history; reassignment removes former-coordinator access.
+- **Transport Reports:** coordination brief, fleet snapshot, stop register, student allocations and assigned issues; CSV/standalone HTML/print, with eight snapshots per coordinator/school and free-text notes excluded.
+
+Driver and Parent portals follow the same bus assignments and trip status. Trip start/end remains with Driver/Principal; recording an issue does not dispatch a bus or send a message. The existing [Bus tracking workspace](http://127.0.0.1:4183/#transport/transport) remains available. Full scope, persistence and prototype limits are in the maintained [role reference](ROLE_FEATURES_ACCESS.md#transport-coordinator).
+
 ### School portal
 
 1. Start in **Chairman → Overview**. An interactive OpenStreetMap street map shows Sri Lanka and a simulated network fleet of 44 buses across all 20 branches. Nearby vehicles form bus-count groups; click a group to zoom in and see individual buses. Branch-name bubbles appear near their geographic positions where space permits. Use **View all buses** to find every branch's vehicles, or filter by On route, At school and Signal delayed. Pan, zoom, pause or resume the simulation, or choose **View whole island** to reset. Street tiles require an internet connection; a notice appears if they cannot load.

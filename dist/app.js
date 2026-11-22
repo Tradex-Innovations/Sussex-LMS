@@ -29,6 +29,9 @@ import { subjectSupportRequestForm, subjectSupportResponseForm } from "./subject
 import { adminViews, adminDefaults, adminScope, adminFilters, adminClasses, adminGuardianAccounts, adminReportTypes, adminStudentStatuses, adminGuardianStatuses, adminCourseStatuses, visibleAdminReports, generateAdminReport } from "./admin-data.js";
 import { schoolAdminPage, adminStudentPanel, adminGuardianPanel, adminReportHTML } from "./school-admin.js";
 import { saveStudentRecord, saveCourseAssignment } from "./records.js";
+import { coordinatorViews, coordinatorDefaults, coordinatorScope, coordinatorFilters, coordinatorBuses, coordinatorFleet, coordinatorDrivers, coordinatorStudents, coordinatorTasks, coordinatorReportTypes, allocationStatuses, driverStatuses, saveCoordinatorTask, saveCoordinatorAllocation, visibleCoordinatorReports, generateCoordinatorReport } from "./coordinator-data.js";
+import { transportCoordinatorPage, coordinatorTaskForm, coordinatorAllocationForm, coordinatorReportHTML, updateCoordinatorTelemetry } from "./transport-coordinator.js";
+import { assignDriver, saveBusAssignment } from "./transport-records.js";
 import { FleetMap } from "./map.js";
 import { mountMapSummary, transportPage, updateTripDetails } from "./transport.js";
 import { avatar, button, emptyState, escapeHtml as e, iconTile } from "./ui.js";
@@ -53,14 +56,14 @@ let schoolMapKey;
 let mapViewKey;
 let dialogMode;
 let view = getView();
-const ui = { schoolAdmin: adminDefaults(), subjectTeacher: subjectDefaults(), classTeacher: classDefaults(), gradeCoordinator: gradeDefaults(), section: sectionDefaults(), accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", grade: "all", query: "", paused: false, runningSince: performance.now(), elapsed: 0, starts: {},
+const ui = { transportCoordinator: coordinatorDefaults(), schoolAdmin: adminDefaults(), subjectTeacher: subjectDefaults(), classTeacher: classDefaults(), gradeCoordinator: gradeDefaults(), section: sectionDefaults(), accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", grade: "all", query: "", paused: false, runningSince: performance.now(), elapsed: 0, starts: {},
   network: { subject: "mathematics", grade: 8, term: 3, selected: "", mode: "", compare: null, category: "all", tab: "transport", status: "all", busId: "", busBranch: "all" }, chairman: { ...chairmanDefaults(), ...(["principal", "vice_principal"].includes(view.role) ? { attendanceFlag: "all" } : {}) } };
 
 function getView() {
   const [requestedRole, requestedPage, requestedModule] = location.hash.slice(1).split("/");
   const role = Object.hasOwn(roles, requestedRole) ? requestedRole : "chairman";
   const page = roles[role].pages.includes(requestedPage) ? requestedPage : roles[role].start;
-  const module = role === "admin" && page === "overview" ? (adminViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "teacher" && page === "overview" ? (subjectViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "class_teacher" && page === "overview" ? (classViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "coordinator" && page === "overview" ? (gradeViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "section_head" && page === "overview" ? (sectionViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : ["chairman", "principal", "vice_principal"].includes(role) && page === "overview" && chairmanViews.some((item) => item.id === requestedModule) ? requestedModule : "transport";
+  const module = role === "transport" && page === "overview" ? (coordinatorViews.some((item) => item.id === requestedModule) ? requestedModule : "fleet") : role === "admin" && page === "overview" ? (adminViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "teacher" && page === "overview" ? (subjectViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "class_teacher" && page === "overview" ? (classViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "coordinator" && page === "overview" ? (gradeViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "section_head" && page === "overview" ? (sectionViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : ["chairman", "principal", "vice_principal"].includes(role) && page === "overview" && chairmanViews.some((item) => item.id === requestedModule) ? requestedModule : "transport";
   return { role, page, module };
 }
 
@@ -78,7 +81,7 @@ function childFor(ctx) {
 function optionsFor(ctx = context()) {
   const children = linkedChildren(state, ctx);
   const child = childFor(ctx);
-  return { state, schoolAdmin: { ...(ctx?.role === "admin" && adminScope(state, ctx) ? adminFilters(state, ctx, ui.schoolAdmin) : ui.schoolAdmin), view: view.module }, subjectTeacher: { ...(ctx?.role === "teacher" && subjectScope(state, ctx) ? subjectFilters(state, ctx, ui.subjectTeacher) : ui.subjectTeacher), view: view.module }, classTeacher: { ...(ctx?.role === "class_teacher" && classScope(state, ctx) ? classFilters(state, ctx, ui.classTeacher) : ui.classTeacher), view: view.module }, gradeCoordinator: { ...(ctx?.role === "coordinator" && gradeScope(state, ctx) ? gradeFilters(state, ctx, ui.gradeCoordinator) : ui.gradeCoordinator), view: view.module }, section: { ...(ctx?.role === "section_head" && sectionScope(state, ctx) ? sectionFilters(state, ctx, ui.section) : ui.section), view: view.module }, context: ctx, children, child, fleet: visibleBuses(state, ctx, child), filter: ui.filter, selected: ui.bus, paused: ui.paused, progress, courseId: ui.courseId, grade: ui.grade, query: ui.query, network: isSchoolOperator(ctx) ? { ...ui.network, className: ui.chairman.academicClass } : ui.network, chairman: { ...ui.chairman, view: view.module } };
+  return { state, transportCoordinator: { ...(ctx?.role === "transport" && coordinatorScope(state, ctx) ? coordinatorFilters(state, ctx, ui.transportCoordinator) : ui.transportCoordinator), view: view.module }, schoolAdmin: { ...(ctx?.role === "admin" && adminScope(state, ctx) ? adminFilters(state, ctx, ui.schoolAdmin) : ui.schoolAdmin), view: view.module }, subjectTeacher: { ...(ctx?.role === "teacher" && subjectScope(state, ctx) ? subjectFilters(state, ctx, ui.subjectTeacher) : ui.subjectTeacher), view: view.module }, classTeacher: { ...(ctx?.role === "class_teacher" && classScope(state, ctx) ? classFilters(state, ctx, ui.classTeacher) : ui.classTeacher), view: view.module }, gradeCoordinator: { ...(ctx?.role === "coordinator" && gradeScope(state, ctx) ? gradeFilters(state, ctx, ui.gradeCoordinator) : ui.gradeCoordinator), view: view.module }, section: { ...(ctx?.role === "section_head" && sectionScope(state, ctx) ? sectionFilters(state, ctx, ui.section) : ui.section), view: view.module }, context: ctx, children, child, fleet: visibleBuses(state, ctx, child), filter: ui.filter, selected: ui.bus, paused: ui.paused, progress, courseId: ui.courseId, grade: ui.grade, query: ui.query, network: isSchoolOperator(ctx) ? { ...ui.network, className: ui.chairman.academicClass } : ui.network, chairman: { ...ui.chairman, view: view.module } };
 }
 
 function elapsed() {
@@ -169,15 +172,27 @@ function render(focus, { scrollTop = false } = {}) {
     }
     if (!options.fleet.some((bus) => bus.id === ui.bus)) ui.bus = options.fleet[0]?.id;
     options.selected = ui.bus;
-    const pages = { overview: ctx.role === "admin" ? schoolAdminPage : ctx.role === "teacher" ? subjectTeacherPage : ctx.role === "class_teacher" ? classTeacherPage : ctx.role === "coordinator" ? gradeCoordinatorPage : ctx.role === "section_head" ? sectionHeadPage : ctx.role === "chairman" ? chairmanOverviewPage : isSchoolOperator(ctx) ? principalOverviewPage : networkOverviewPage, courses: coursesPage, people: peoplePage, library: libraryPage, access: accessPage };
+    const pages = { overview: ctx.role === "transport" ? transportCoordinatorPage : ctx.role === "admin" ? schoolAdminPage : ctx.role === "teacher" ? subjectTeacherPage : ctx.role === "class_teacher" ? classTeacherPage : ctx.role === "coordinator" ? gradeCoordinatorPage : ctx.role === "section_head" ? sectionHeadPage : ctx.role === "chairman" ? chairmanOverviewPage : isSchoolOperator(ctx) ? principalOverviewPage : networkOverviewPage, courses: coursesPage, people: peoplePage, library: libraryPage, access: accessPage };
     body = view.page === "transport" ? transportPage(view.role, options) : pages[view.page](options);
   }
-  document.title = `${view.role === "admin" && view.page === "overview" ? adminViews.find((item) => item.id === view.module).name : view.role === "teacher" && view.page === "overview" ? subjectViews.find((item) => item.id === view.module).name : view.role === "class_teacher" && view.page === "overview" ? classViews.find((item) => item.id === view.module).name : view.role === "coordinator" && view.page === "overview" ? gradeViews.find((item) => item.id === view.module).name : view.role === "section_head" && view.page === "overview" ? sectionViews.find((item) => item.id === view.module).name : ["chairman", "principal", "vice_principal"].includes(view.role) && view.page === "overview" ? chairmanViews.find((item) => item.id === view.module).name : navigation[view.page].label} · ${roles[view.role].name} · Sussex College Network`;
+  document.title = `${view.role === "transport" && view.page === "overview" ? coordinatorViews.find((item) => item.id === view.module).name : view.role === "admin" && view.page === "overview" ? adminViews.find((item) => item.id === view.module).name : view.role === "teacher" && view.page === "overview" ? subjectViews.find((item) => item.id === view.module).name : view.role === "class_teacher" && view.page === "overview" ? classViews.find((item) => item.id === view.module).name : view.role === "coordinator" && view.page === "overview" ? gradeViews.find((item) => item.id === view.module).name : view.role === "section_head" && view.page === "overview" ? sectionViews.find((item) => item.id === view.module).name : ["chairman", "principal", "vice_principal"].includes(view.role) && view.page === "overview" ? chairmanViews.find((item) => item.id === view.module).name : navigation[view.page].label} · ${roles[view.role].name} · Sussex College Network`;
   const mobileNavigation = roles[view.role].pages.length > 1;
   app.innerHTML = `<div class="app-shell role-${view.role} ${mobileNavigation ? "has-mobile-nav" : ""}">
     ${sidebar(ctx)}<div class="desktop-content">${topbar(ctx)}<main id="main" class="page page-${view.page}">${view.page === "overview" ? "" : scopeBar(ctx)}${body}</main></div>
     ${mobileNavigation ? `<nav class="mobile-nav" aria-label="Workspace">${navigationLinks(true)}</nav>` : ""}
   </div>`;
+  const coordinatorStage = app.querySelector("#coordinator-fleet-map");
+  if (coordinatorStage && coordinatorScope(state, ctx)) {
+    const scope = coordinatorScope(state, ctx), fleet = coordinatorFleet(state, ctx), f = options.transportCoordinator;
+    const key = "coordinator:" + scope.key;
+    schoolMap = new SchoolNetworkMap(coordinatorStage, { branches: [scope.branch], fleet, selected: scope.branch.id, homeBranch: scope.branch.id, metricLabel: "school routes",
+      selectedBus: f.busId, status: f.status, paused: ui.paused, progress, elapsed,
+      onSelect: () => schoolMap?.fitHome(), onBusSelect: selectCoordinatorBus,
+      onTick: () => updateCoordinatorTelemetry(app, fleet, progress, ui.paused, elapsed()), viewport: schoolMapKey === key ? previousSchoolViewport : null });
+    if (ui.transportCoordinator.mapFocus) schoolMap.focusBus(ui.transportCoordinator.mapFocus);
+    else if (ui.transportCoordinator.resetMap) schoolMap.fitHome();
+    ui.transportCoordinator.mapFocus = ""; ui.transportCoordinator.resetMap = false; schoolMapKey = key;
+  }
   const networkStage = app.querySelector("#school-network-map");
   if (networkStage) {
     const metricView = ctx.role === "chairman" && view.module !== "transport";
@@ -296,6 +311,7 @@ function chairmanPerson(kind, id, ctx = context()) {
 }
 
 function permittedReport(id, ctx = context()) {
+  if (ctx?.role === "transport") return visibleCoordinatorReports(state, ctx).find((report) => report.id === id);
   if (ctx?.role === "admin") return visibleAdminReports(state, ctx).find((report) => report.id === id);
   if (ctx?.role === "teacher") return visibleSubjectReports(state, ctx).find((report) => report.id === id);
   if (ctx?.role === "class_teacher") return visibleClassReports(state, ctx).find((report) => report.id === id);
@@ -389,6 +405,16 @@ function captureAdminReport() {
   return report;
 }
 
+function captureCoordinatorReport() {
+  const ctx = context(), report = generateCoordinatorReport(state, ctx, coordinatorFilters(state, ctx, ui.transportCoordinator), { progress, paused: ui.paused, elapsed: elapsed() });
+  if (!update((next) => {
+    const existing = next.coordinatorReports || [], key = report.owner.key;
+    next.coordinatorReports = [report, ...existing.filter((item) => item.owner?.key === key)].slice(0, 8).concat(existing.filter((item) => item.owner?.key !== key));
+  })) return null;
+  ui.transportCoordinator.reportId = report.id;
+  return report;
+}
+
 async function downloadExecutiveReport(report, format = "csv", print = false) {
   try {
     let content;
@@ -404,7 +430,7 @@ async function downloadExecutiveReport(report, format = "csv", print = false) {
           });
         }
       } catch {}
-      content = report.owner?.role === "admin" ? adminReportHTML(report, logo) : report.owner?.role === "teacher" ? subjectReportHTML(report, logo) : ["section_head", "coordinator", "class_teacher"].includes(report.owner?.role) ? sectionReportHTML(report, logo) : executiveReportHTML(report, logo);
+      content = report.owner?.role === "transport" ? coordinatorReportHTML(report, logo) : report.owner?.role === "admin" ? adminReportHTML(report, logo) : report.owner?.role === "teacher" ? subjectReportHTML(report, logo) : ["section_head", "coordinator", "class_teacher"].includes(report.owner?.role) ? sectionReportHTML(report, logo) : executiveReportHTML(report, logo);
     } else content = reportCSV(report);
     if (print) {
       const frame = document.createElement("iframe");
@@ -436,6 +462,14 @@ function selectBus(id, focus) {
   ui.bus = id;
   if (ui.filter !== "all" && ui.filter !== bus.status) ui.filter = "all";
   render(focus);
+}
+
+function selectCoordinatorBus(id) {
+  const ctx = context();
+  if (!coordinatorScope(state, ctx) || !coordinatorBuses(state, ctx).some((bus) => bus.id === id)) return;
+  ui.transportCoordinator.busId = id;
+  if (ui.transportCoordinator.status !== "all" && !coordinatorBuses(state, ctx).some((bus) => bus.id === id && bus.status === ui.transportCoordinator.status)) ui.transportCoordinator.status = "all";
+  ui.transportCoordinator.mapFocus = id; render();
 }
 
 function selectNetworkBranch(id, focus) {
@@ -533,6 +567,21 @@ function authorizedAction(name, value, ctx) {
   if (name === "parent-logout") return view.role === "parent";
   if (!ctx) return false;
   const options = optionsFor(ctx);
+  if (name.startsWith("coordinator-")) {
+    const scope = coordinatorScope(state, ctx);
+    if (!scope) return false;
+    if (name === "coordinator-bus") return coordinatorBuses(state, ctx).some((bus) => bus.id === value);
+    if (name === "coordinator-map-reset") return true;
+    if (name === "coordinator-people-tab") return ["students", "drivers"].includes(value);
+    if (name === "coordinator-page") return /^[1-9]\d*$/.test(value);
+    if (name === "coordinator-task-new") return coordinatorBuses(state, ctx).length > 0 && (!value || coordinatorBuses(state, ctx).some((bus) => bus.id === value));
+    if (name === "coordinator-task-edit") return coordinatorTasks(state, ctx).some((task) => task.id === value);
+    if (name === "coordinator-allocate") return coordinatorBuses(state, ctx).length > 0 && coordinatorStudents(state, ctx).some((row) => row.student.id === value);
+    if (name === "coordinator-driver-allocate") return coordinatorBuses(state, ctx).length > 0 && coordinatorDrivers(state, ctx).some((row) => row.person.id === value);
+    if (name === "coordinator-generate-report") return true;
+    if (["coordinator-open-report", "coordinator-download-report", "coordinator-print-report"].includes(name)) return Boolean(permittedReport(value, ctx));
+    return false;
+  }
   if (name.startsWith("admin-")) {
     const scope = adminScope(state, ctx);
     if (!scope) return false;
@@ -705,6 +754,22 @@ function action(event) {
   const ctx = context();
   if (!authorizedAction(name, value, ctx)) return toast("This action is outside the current role’s assigned access.");
   switch (name) {
+    case "coordinator-bus": selectCoordinatorBus(value); break;
+    case "coordinator-map-reset": ui.transportCoordinator.resetMap = true; render(); break;
+    case "coordinator-people-tab": ui.transportCoordinator.peopleTab = value; ui.transportCoordinator.query = ""; ui.transportCoordinator.page = 1; render(); break;
+    case "coordinator-page": ui.transportCoordinator.page = Number(value); render(); break;
+    case "coordinator-task-new":
+    case "coordinator-task-edit": {
+      const previous = name === "coordinator-task-edit" ? coordinatorTasks(state, ctx).find((task) => task.id === value) : null;
+      showDialog("coordinator-task", previous ? "Update transport issue" : "Record transport issue", "Shared school Follow-up board", coordinatorTaskForm(optionsFor(ctx), previous, value)); break;
+    }
+    case "coordinator-allocate":
+    case "coordinator-driver-allocate": showDialog("coordinator-allocation", "Assign to a school bus", "School transport records", coordinatorAllocationForm(optionsFor(ctx), value, name === "coordinator-allocate" ? "student" : "driver")); break;
+    case "coordinator-generate-report":
+      try { if (captureCoordinatorReport()) { render(); app.querySelector(".chairman-report-result")?.scrollIntoView({ block: "start", behavior: "smooth" }); toast("Transport report saved."); } } catch (error) { toast(error.message); } break;
+    case "coordinator-open-report": ui.transportCoordinator.reportId = value; render(); app.querySelector(".chairman-report-result")?.scrollIntoView({ block: "start", behavior: "smooth" }); break;
+    case "coordinator-download-report": downloadExecutiveReport(permittedReport(value, ctx), ui.transportCoordinator.reportFormat); break;
+    case "coordinator-print-report": downloadExecutiveReport(permittedReport(value, ctx), "html", true); break;
     case "admin-student": {
       const student = state.students.find((student) => student.id === value);
       showDialog("admin-student", "Student admission record", adminScope(state, ctx).branch.school, adminStudentPanel(optionsFor(ctx), student)); break;
@@ -1069,6 +1134,16 @@ function change(event) {
     if (classScope(state, ctx) && can(ctx, "attendance.mark")) updateAttendanceDraft(element.form);
     return;
   }
+  if (name?.startsWith("coordinator-")) {
+    if (!coordinatorScope(state, ctx)) return;
+    const rules = { "coordinator-status": ["status", ["all", "route", "school", "delayed"]], "coordinator-bus-filter": ["busFilter", ["all", ...coordinatorBuses(state, ctx).map((bus) => bus.id)]],
+      "coordinator-allocation": ["allocation", Object.keys(allocationStatuses)], "coordinator-driver-status": ["driverStatus", Object.keys(driverStatuses)], "coordinator-task-status": ["taskStatus", ["all", "open", "in_progress", "resolved"]],
+      "coordinator-report-type": ["reportType", Object.keys(coordinatorReportTypes)], "coordinator-report-format": ["reportFormat", ["csv", "html"]] };
+    if (!rules[name]?.[1].includes(element.value)) return;
+    ui.transportCoordinator[rules[name][0]] = element.value;
+    if (name === "coordinator-report-type") ui.transportCoordinator.query = "";
+    ui.transportCoordinator = coordinatorFilters(state, ctx, ui.transportCoordinator); ui.transportCoordinator.page = 1; render(); return;
+  }
   if (name?.startsWith("admin-")) {
     if (!adminScope(state, ctx)) return;
     const rules = { "admin-grade": ["grade", ["all", ...Array.from({ length: 14 }, (_, grade) => String(grade))]], "admin-class": ["className", ["all", ...adminClasses(state, ctx, ui.schoolAdmin.grade)]],
@@ -1218,7 +1293,7 @@ function change(event) {
       break;
     }
     case "account":
-      ui.schoolAdmin = adminDefaults(); ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults();
+      ui.transportCoordinator = coordinatorDefaults(); ui.schoolAdmin = adminDefaults(); ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults();
       ui.accounts[view.role] = element.value; ui.courseId = ""; ui.filter = "all"; ui.chairman = chairmanDefaults();
       if (isSchoolOperator(ctx)) ui.chairman.attendanceFlag = "all";
       ui.network.selected = ""; ui.network.mode = ""; ui.network.busId = ""; ui.network.compare = null; ui.network.status = "all"; ui.network.busBranch = "all"; ui.network.mapFocus = null; schoolMapKey = null;
@@ -1271,20 +1346,6 @@ function fileData(file) {
   });
 }
 
-function assignDriver(next, busId, personId) {
-  const target = next.buses.find((bus) => bus.id === busId);
-  const previous = next.accounts.find((person) => person.id === target.driverId);
-  if (previous) previous.grants = previous.grants.filter((grant) => !(grant.role === "driver" && grant.bus === busId));
-  const person = next.accounts.find((person) => person.id === personId);
-  for (const bus of next.buses) {
-    if (bus.driverId === personId && bus.id !== busId) { bus.driverId = ""; bus.driver = "Unassigned"; }
-  }
-  person.grants = person.grants.filter((grant) => grant.role !== "driver");
-  person.grants.push({ role: "driver", branch: target.branch, bus: busId });
-  target.driverId = personId;
-  target.driver = person.name;
-}
-
 async function submit(event) {
   const form = event.target;
   const mode = form.dataset.form;
@@ -1314,6 +1375,14 @@ async function submit(event) {
   const allowedBranch = (branch) => state.branches.some((item) => item.id === branch) && (ctx.branch === "all" || ctx.branch === branch);
   const fail = (message = "This change is outside your assigned scope.") => showError(form, message);
 
+  if (["coordinator-task", "coordinator-allocation"].includes(mode)) {
+    const scope = coordinatorScope(state, ctx);
+    if (!scope) return fail();
+    const saveAction = mode === "coordinator-task" ? saveCoordinatorTask : saveCoordinatorAllocation;
+    const message = mode === "coordinator-task" ? "Transport follow-up updated for school coordination." : "School bus allocation updated.";
+    try { if (update((next) => saveAction(next, ctx, Object.fromEntries(values)), { branch: scope.branch.id, category: "transport", message })) { closeDialog(); render(); toast(message); } } catch (error) { fail(error.message); }
+    return;
+  }
   if (["subject-plan", "subject-review", "subject-support"].includes(mode)) {
     const scope = subjectScope(state, ctx);
     if (!scope) return fail();
@@ -1397,22 +1466,8 @@ async function submit(event) {
     try { if (!save((next) => saveStudentRecord(next, ctx, { ...Object.fromEntries(values), guardians: values.getAll("guardians") }))) return; }
     catch (error) { return fail(error.message); }
   } else if (mode === "bus") {
-    const bus = options.fleet.find((item) => item.id === id);
-    if (!can(ctx, "transport.manage") || !bus) return fail();
-    const driver = state.accounts.find((person) => person.id === values.get("driver") && person.grants.some((grant) => grant.role === "driver" && grant.branch === bus.branch));
-    const students = values.getAll("students");
-    const stops = values.getAll("stops").map((stop) => stop.trim());
-    if (!driver || !values.get("name").trim() || stops.length !== bus.stops.length || stops.some((stop) => !stop)) return fail("Complete the route name, driver, and stop names.");
-    if (!students.every((id) => state.students.some((student) => student.id === id && student.branch === bus.branch))) return fail();
-    if (!save((next) => {
-      const target = next.buses.find((item) => item.id === id);
-      target.name = values.get("name").trim(); target.stops = stops;
-      assignDriver(next, id, driver.id);
-      for (const student of next.students.filter((student) => student.branch === bus.branch)) {
-        if (students.includes(student.id)) student.bus = id;
-        else if (student.bus === id) delete student.bus;
-      }
-    })) return;
+    try { if (!save((next) => saveBusAssignment(next, ctx, { ...Object.fromEntries(values), stops: values.getAll("stops"), students: values.getAll("students") }))) return; }
+    catch (error) { return fail(error.message); }
   } else if (mode === "book") {
     const book = branchBooks(state, ctx).find((book) => book.id === id);
     if (!can(ctx, "library.manage") || !book) return fail();
@@ -1452,6 +1507,7 @@ async function submit(event) {
     if (role === "driver") {
       if (!state.buses.some((bus) => bus.id === values.get("bus") && bus.branch === branch)) return fail("Choose a bus in this branch.");
       grant.bus = values.get("bus");
+      if (person && ctx.role !== "chairman" && state.buses.some((bus) => bus.driverId === person.id && bus.branch !== branch)) return fail("A driver assigned in another school must be reassigned by the Chairman.");
     }
     if (person?.grants.some((item) => Object.entries(grant).every(([key, value]) => item[key] === value))) return fail("This person already has that role and scope.");
     if (!save((next) => {
@@ -1459,7 +1515,7 @@ async function submit(event) {
       if (newPerson) next.accounts.push({ id: personId, name, initials: name.split(" ").map((word) => word[0]).slice(0, 2).join(""), grants: [], tone: "green" });
       const account = next.accounts.find((item) => item.id === personId);
       if (role === "principal") for (const item of next.accounts) item.grants = item.grants.filter((entry) => !(entry.role === "principal" && entry.branch === branch));
-      if (role === "driver") assignDriver(next, grant.bus, personId);
+      if (role === "driver") assignDriver(next, grant.bus, personId, ctx);
       else account.grants.push(grant);
     })) return;
   } else return;
@@ -1482,6 +1538,9 @@ document.addEventListener("input", (event) => {
   const key = event.target.dataset.change;
   if (key === "class-attendance-search" && dialogMode === "class-attendance" && classScope(state, context())) {
     filterAttendanceDraft(event.target); return;
+  }
+  if (context()?.role === "transport" && key === "coordinator-query") {
+    ui.transportCoordinator.query = event.target.value.slice(0, 80); ui.transportCoordinator.page = 1; render("coordinator-search"); return;
   }
   if (context()?.role === "admin" && key === "admin-query") {
     ui.schoolAdmin.query = event.target.value.slice(0, 80); ui.schoolAdmin.page = 1; render("admin-search"); return;
@@ -1523,8 +1582,9 @@ window.addEventListener("hashchange", () => {
   if (view.page === "overview" && (previous.role !== view.role || previous.page !== view.page || previous.module !== view.module)) {
     ui.network.selected = ""; ui.network.mode = ""; ui.network.compare = null; ui.network.busId = ""; ui.network.status = "all"; schoolMapKey = null;
   }
-  if (previous.role !== view.role) { ui.schoolAdmin = adminDefaults(); ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults(); ui.chairman = chairmanDefaults(); if (["principal", "vice_principal"].includes(view.role)) ui.chairman.attendanceFlag = "all"; }
+  if (previous.role !== view.role) { ui.transportCoordinator = coordinatorDefaults(); ui.schoolAdmin = adminDefaults(); ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults(); ui.chairman = chairmanDefaults(); if (["principal", "vice_principal"].includes(view.role)) ui.chairman.attendanceFlag = "all"; }
   if (["section_head", "coordinator", "class_teacher", "teacher", "admin"].includes(view.role) && previous.module !== view.module) ui.courseId = "";
+  if (view.role === "transport" && previous.module !== view.module) { ui.transportCoordinator.query = ""; ui.transportCoordinator.page = 1; }
   if (view.role === "admin" && previous.module !== view.module) { ui.schoolAdmin.query = ""; ui.schoolAdmin.page = 1; }
   if (ui.pendingPulseTransport && view.module === "transport") { ui.network.status = "delayed"; }
   ui.pendingPulseTransport = false;

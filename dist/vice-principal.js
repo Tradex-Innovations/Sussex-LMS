@@ -17,7 +17,7 @@ export function viceFollowupBoard(options, branch) {
   const people = followupAssignees(options.state, branch);
   const items = schoolFollowups(options.state, branch);
   return `<div class="vice-board-intro"><p>${e(branch.school)} · Sample school coordination</p>${button("Add follow-up", "vice-new-followup", { value: "attendance", variant: "primary compact", iconName: "plus" })}</div><div class="vice-followup-list">` + items.map((item) =>
-    `<article class="vice-followup-card"><div>${badge(followupCategories[item.category], "blue")}${badge(followupStatuses[item.status], item.status === "resolved" ? "green" : "amber")}</div><h3>${e(item.title)}</h3><p>${e(people.find((person) => person.id === item.assignee)?.name || "School office")} · Due ${e(item.due)}</p><blockquote>${e(item.notes[0]?.text)}</blockquote>${button("Review follow-up", "vice-edit-followup", { value: item.id, variant: "secondary compact" })}</article>`).join("") + '</div>';
+    `<article class="vice-followup-card"><div>${badge(followupCategories[item.category], "blue")}${item.busId && options.state.buses.some((bus) => bus.id === item.busId && bus.branch === branch.id) ? badge("Bus " + item.busId, "neutral") : ""}${badge(followupStatuses[item.status], item.status === "resolved" ? "green" : "amber")}</div><h3>${e(item.title)}</h3><p>${e(people.find((person) => person.id === item.assignee)?.name || "School office")} · Due ${e(item.due)}</p><blockquote>${e(item.notes[0]?.text)}</blockquote>${button("Review follow-up", "vice-edit-followup", { value: item.id, variant: "secondary compact" })}</article>`).join("") + '</div>';
 }
 
 export function viceFollowupForm(options, branch, item = null, category = "attendance", title = "") {

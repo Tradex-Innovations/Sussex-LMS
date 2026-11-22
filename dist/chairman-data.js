@@ -294,9 +294,9 @@ export function reportCSV(report) {
     if (/^[=+\-@]/.test(text)) text = "'" + text;
     return '"' + text.replaceAll('"', '""') + '"';
   };
-  const metadata = [["Sussex College Network", report.title], ["Data", "SAMPLE DATA - PROTOTYPE"], [["teacher", "admin"].includes(report.owner?.role) ? "Snapshot date" : "Reporting period", report.criteria.from + " to " + report.criteria.to],
-    ...(!["teacher", "admin"].includes(report.owner?.role) && ["brief", "attendance"].includes(report.type) ? [["Attendance period", report.criteria.from + " to " + report.criteria.to], ["Attendance for", report.criteria.audience]] : []),
-    ...(!["teacher", "admin"].includes(report.owner?.role) && ["brief", "academic"].includes(report.type) ? [["Academic assessment", report.criteria.subject + " / Grade " + report.criteria.grade + " / Term " + report.criteria.term]] : []), ["Generated UTC", report.generatedAt], []];
+  const metadata = [["Sussex College Network", report.title], ["Data", "SAMPLE DATA - PROTOTYPE"], [["teacher", "admin", "transport"].includes(report.owner?.role) ? "Snapshot date" : "Reporting period", report.criteria.from + " to " + report.criteria.to],
+    ...(!["teacher", "admin", "transport"].includes(report.owner?.role) && ["brief", "attendance"].includes(report.type) ? [["Attendance period", report.criteria.from + " to " + report.criteria.to], ["Attendance for", report.criteria.audience]] : []),
+    ...(!["teacher", "admin", "transport"].includes(report.owner?.role) && ["brief", "academic"].includes(report.type) ? [["Academic assessment", report.criteria.subject + " / Grade " + report.criteria.grade + " / Term " + report.criteria.term]] : []), ["Generated UTC", report.generatedAt], []];
   if (["section_head", "coordinator", "class_teacher"].includes(report.owner?.role)) metadata.splice(-1, 0, ["School", report.owner.school], ["Section", report.owner.sectionName], [report.owner.role === "class_teacher" ? "Assigned class grade" : report.owner.role === "coordinator" ? "Assigned grade" : "Section grades", report.criteria.grades.join(", ")]);
   if (report.criteria.className && report.criteria.className !== "all") metadata.splice(-1, 0, ["Academic class", report.criteria.className]);
   if (report.criteria.attendanceClass && report.criteria.attendanceClass !== "all") metadata.splice(-1, 0, ["Attendance class", report.criteria.attendanceClass]);
@@ -306,6 +306,8 @@ export function reportCSV(report) {
     ...(report.type === "plans" ? [["Plan status filter", report.criteria.planStatus], ["Planning window", "20 to 27 Nov 2026"]] : []));
   if (report.owner?.role === "admin") metadata.splice(-1, 0, ["School", report.owner.school], ["School Administrator", report.owner.by], ["Grade selection", report.criteria.grade], ["Class selection", report.criteria.className],
     ["Record search", report.criteria.query || "All records"], ["Student record filter", report.criteria.studentStatus], ["Guardian link filter", report.criteria.guardianStatus], ["Course filter", report.criteria.courseStatus]);
+  if (report.owner?.role === "transport") metadata.splice(-1, 0, ["School", report.owner.school], ["Transport Coordinator", report.owner.by], ["Operational bus filter", report.criteria.busFilter], ["Vehicle status filter", report.criteria.status],
+    ["Record search", report.criteria.query || "All records"], ["Student allocation filter", report.criteria.allocation], ["Assigned issue status", report.criteria.taskStatus], ["Telemetry", "SIMULATED GPS / progress / arrival estimates"]);
   const rows = report.customRows || (report.type === "transport" ? report.buses : report.rows);
   const operations = report.operations ? [[], ["School coordination snapshot"], ["Leave recommendations pending Principal decision", report.operations.recommendations],
     ["Follow-up", "Category", "Status", "Due"], ...report.operations.followups.map((item) => [item.title, item.category, item.status, item.due]), [],

@@ -87,7 +87,7 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 | Class Teacher / `class_teacher` | Overview → Class Overview | Appointed school, grade and class | Own sample-class attendance, follow-ups, private discussion records, Grade Coordinator support requests, class reports, publication only on courses assigned to the same account. |
 | Subject Teacher / `teacher` | Overview → Subject Overview | Current assigned teaching courses and matching-class enrolled students in appointed school | Publish/edit materials, lesson plans, internal learning reviews, Grade Coordinator support requests and subject reports. |
 | School Administrator / `admin` | Overview → Administration Overview | Actual student, guardian and course records in appointed school | Register/edit admissions, link existing guardians, assign school teachers/matching-class enrolments and generate administration reports. |
-| Transport Coordinator / `transport` | Bus tracking | Assigned school fleet | Bus route/stop/driver/student assignments. |
+| Transport Coordinator / `transport` | Overview → Fleet Activity | Appointed school’s operational fleet, transport roster and own assigned transport follow-ups | Route/driver/student allocation, shared Vice Principal issue progress and transport reports. |
 | Driver / `driver` | Bus tracking | Currently assigned bus | Start and end the assigned demo trip. |
 | Librarian / `librarian` | Library | Assigned school catalogue/orders | Edit price/availability; mark orders collected. |
 | Parent / `parent` | Admission login → Bus tracking | Selected linked student and own orders | Download/mark materials done; place book orders; manage own book bag. |
@@ -134,7 +134,7 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 
 **Entry:** `#vice_principal/overview/transport`. **Scope:** appointed school. **Navigation:** Overview, Bus tracking, Courses, Students & guardians, Library.
 
-- **Daily pulse and follow-up board:** school attendance, teacher availability, classes to review, delayed bus signals; three seed coordination tasks plus added tasks; category, owner, due date, status and dated note history. Open/in progress/resolved states persist locally.
+- **Daily pulse and follow-up board:** school attendance, teacher availability, classes to review, delayed bus signals; three seed coordination tasks plus added tasks; category, owner, due date, status and dated note history. Transport Coordinators can create bus issues assigned to themselves and update their own transport tasks through the shared board. The Vice Principal sees their progress/bus reference and retains owner, category, title and due-date control. Reassignment removes the task from its former coordinator’s view. No external notification is sent.
 - **Transport Activity:** assigned-school map/fleet/details; record a bus issue as a named follow-up. The separate Bus tracking workspace provides existing bus/driver/student/stop management.
 - **Academic Performance:** school comparisons, assignment/material progress, course assignment and comparison CSV; assign or cancel one-day temporary teaching cover.
 - **Attendance:** section-independent school/class registers (including saved Class Teacher sample entries), repeated absences and calendars; create a student-specific attendance follow-up.
@@ -397,20 +397,61 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 
 ## Transport Coordinator
 
-**Entry:** `#transport/transport`. **Scope:** appointed school’s operational buses.
+**Entry:** `#transport/overview/fleet`. **Scope:** current Transport Coordinator appointment in one school; editable operational buses only. **Navigation:** Overview and Bus tracking. Five overview views are implemented:
 
-- Fleet map, vehicle status counts, status filters, selected route, stops and simulated progress; pause/resume demonstration.
-- Manage existing route name, ordered stop names, school driver assignment and students assigned to a bus.
-- Assignment updates are reflected in Driver and Parent portals and the relevant operational network overview vehicle.
+### Fleet Activity
 
-**Limits:** cannot edit another school's fleet, synthetic overview vehicles, admissions, courses, staff roles or library orders. Dedicated trip start/end controls belong to Driver/Principal workflows. Vice Principal follow-up ownership records a coordinator name but does not send a message or create a separate coordinator task inbox.
+- Opens with an OpenStreetMap street map of the assigned school’s routes and operational vehicles, ahead of the summary cards. Select a vehicle through its map marker or school-fleet list.
+- Fixed school identity and presenter account selector; no network/school scope selector. New schools with no operational records show an empty fleet rather than the two synthetic national-overview vehicles.
+- Saved vehicle-status filters (on route, at school, signal delayed), school-route reset, pan/zoom and shared demonstration pause/resume.
+- Selected vehicle shows registration, current driver, actual assigned-student count, next stop, route progress, arrival estimate, speed and signal update. Map positions, paths, speed, GPS signals and arrival estimates are labelled simulated.
+- Fleet counts, on-route/delayed counts, actual student allocations, missing drivers and the current coordinator’s open issue count. No sample occupancy is presented as a student allocation count.
+- Manage the selected bus or record a bus issue. Driver/Principal trip start/end controls remain separate from this role.
+
+### Routes & Stops
+
+- School operational route cards with status, registration/driver, ordered pickup-stop names, school destination and assigned-student counts.
+- Search bus ID, route, registration, driver or stop; filter by school bus and saved vehicle status.
+- Edit an existing route name and the existing ordered stop labels through Manage route & assignments. Final school destination is read-only and validated; map geometry remains illustrative.
+- The prototype does not create/delete buses, add/remove stop positions, geocode stop labels, optimise routes or connect GPS hardware.
+
+### Drivers & Students
+
+- Two views: Student allocations and Driver assignments. Only actual students and current Driver appointments in the school are included; admissions, guardians, class data and academic records remain read-only.
+- Student rows show name, admission number, class, allocated bus/route and driver; bus/allocation filters, search and 12-record pagination.
+- Allocate an unassigned student to a chosen school bus, or manage a bus’s full student selection. A student has one bus property; moving them changes that allocation and preserves admission, class, course and completion records. Removing them from a bus clears that bus link.
+- Driver rows show current vehicle/route status, with bus/assigned/unassigned filters and search. Allocate an existing school driver through the quick form or bus management.
+- A driver serves one bus at a time. Moving a driver leaves their former bus unassigned. A replaced/cleared driver retains an unassigned Driver appointment in that school, remains selectable for later allocation, and sees an empty Driver trip workspace until allocated.
+- Driver bus appointments synchronise with bus assignment so Driver and Parent portals follow current allocations. This is limited bus-assignment coordination, not general staff appointment management; the Principal/Chairman creates Driver accounts/appointments.
+- A coordinator cannot move a multi-school driver away from another school’s bus. Such a transfer requires the Chairman. Cross-school students/drivers and duplicate student selections are rejected before mutation.
+
+### Issues & Coordination
+
+- Read only **transport-category** follow-ups currently assigned to the active coordinator in the school, including the illustrative school-readiness seed and Vice Principal assignments.
+- Record a new issue against an existing school bus with title, due date (20–27 November 2026), open/in-progress/resolved status and note. It is assigned to the current coordinator and saved to the same `viceFollowups` board used by the Vice Principal.
+- Update status and add notes (latest 20); read the shared coordination history. Coordinator updates preserve the task’s title, owner, category, due date and bus reference.
+- The Vice Principal reviews through **Follow-up board**, can update/reassign the record, and sees the linked bus badge. Ownership or category changes remove it from the old coordinator’s issue view. Other coordinators’ and other schools’ tasks remain unavailable.
+- Bus/status/search filters operate only within that assigned queue. Resolving a task does not change trip status, GPS signals, dispatch a vehicle or send an external notification.
+
+### Transport Reports
+
+- Five types: transport coordination brief, fleet activity snapshot, route/stop register, student bus allocations and assigned transport issues.
+- School operational bus/status/query filters apply to fleet/routes. Allocation and issue reports use their relevant query/status controls and ignore unrelated vehicle-status filters. The brief ignores unrelated text search.
+- Fleet reports capture simulated latitude/longitude, next stop, progress, signal and arrival estimate at generation time. Allocation counts/rows use actual school records. Issue reports include title, bus/school scope, due date, status and owner; free-text note history and guardian credentials are excluded.
+- Preview, formula-safe CSV, branded standalone HTML and Print / Save PDF. Latest eight per coordinator account and school, separate from school leadership reports and other coordinators.
+- Snapshots remain unchanged after subsequent trip/route/assignment/task edits. Current appointment, captured bus/student school membership and current ownership of captured transport tasks are revalidated on open/download/print; snapshots losing access are hidden.
+
+**Other workspace:** `#transport/transport` retains the existing operational fleet map and bus management experience.
+
+**Limits:** no another-school or synthetic-fleet edits, general staff appointments, admissions/guardian/course/library changes, attendance marking, trip start/end, leave/cover decisions or leadership dashboards. Existing bus records and fixed demo paths are retained. This is a browser-only UI demonstration with local checks, not production transport security or GPS.
 
 ## Driver
 
 **Entry:** `#driver/transport`. **Scope:** one current bus appointment matching its school and driver account.
 
 - Mobile-responsive trip view with assigned route, stop sequence, map/progress and vehicle context.
-- Start/end the assigned simulated trip; linked Parent/leadership views reflect status.
+- Start/end the assigned simulated trip; linked Parent/leadership/Transport Coordinator views reflect status.
+- Bus allocation updates synchronise the Driver appointment. Replaced/cleared drivers retain an unassigned appointment and see No bus assigned until a school bus is allocated again; no former-bus access is retained.
 
 **Limits:** no other bus, school roster, route/driver/student reassignment, course/library/role access or real phone GPS upload. No device permission or GPS hardware integration is requested by this UI prototype.
 
@@ -500,7 +541,9 @@ The Vice Principal may also create cover directly without a request. Cover teach
 
 ### Transport and books
 
-- Transport Coordinator/authorized school leadership updates the operational bus's route/driver/students; Driver controls its trip; the student's Parent follows the assignment/status.
+- Transport Coordinator/authorised school leadership updates an operational bus’s route labels, eligible driver and school students. The final school stop stays fixed. Student moves change only the transport allocation; Driver/Parent views use the current bus and status.
+- Driver moves leave the former vehicle without a driver, synchronise the new bus appointment and retain replaced/cleared drivers as unassigned school Driver accounts. The coordinator can allocate these existing appointments again. Driver/Principal controls trip start/end; coordinator issue status does not dispatch a bus.
+- Transport Coordinator issues and Vice Principal follow-ups share `viceFollowups`. Only transport tasks assigned to the active coordinator are writable in their role; the Vice Principal controls ownership/category/title/due dates. Reassignment removes old-coordinator task/report access. This is local coordination, without messages or notifications.
 - Parent places a school collection order; Librarian/authorized school leadership marks collection. No online payment occurs.
 
 ## Persistence and reports
@@ -515,6 +558,7 @@ The Vice Principal may also create cover directly without a request. Cover teach
 - Subject Teacher state includes `subjectLessonPlans`, `subjectLearningReviews`, `subjectSupportRequests` and `subjectReports`. No new demo accounts or migration flag are required. Notes/history persist in this browser; course ownership follows current assignments. Reports retain eight per teacher/school and recheck captured course/student access. Learning-review text is available to current course staff, excluded from exports/parent views, and never copied into generic activity messages.
 - A one-time `classTeacherVersion` migration adds Nugegoda 6A and Malabe 8A demo Class Teacher accounts while retaining existing enrolment, materials, progress, roles and saved state. Removed appointments are not restored on later loads.
 - School Administrator adds `adminReports`, eight per appointed school/role, shared by administrators in the same school and isolated from other roles. No new demo accounts or migration are required. Captured student/course school membership and the current appointment are rechecked before report access. New admissions, guardian links and course assignments use existing student/assignment storage; report exports omit passwords and internal note text.
+- Transport Coordinator adds `coordinatorReports`, eight per coordinator account/school, and bus-linked transport tasks in the existing `viceFollowups` list. No new demo accounts or migration are required. Saved tasks retain shared note history; reports omit note text and recheck captured task ownership/category plus bus/student school scope. Driver assignment updates preserve unassigned Driver appointments instead of deleting them.
 - Report snapshots capture values at generation time. Filters/data edits do not rewrite older reports. Scope checks apply to opening, downloading and printing saved reports.
 - CSV values are quoted and dangerous leading spreadsheet formula characters are neutralised. Exports carry sample provenance and relevant scope/filter metadata.
 - HTML downloads embed the existing logo when it can be read. Print / Save PDF uses the browser's print dialogue; no automatic PDF service is integrated.
@@ -532,7 +576,7 @@ The Vice Principal may also create cover directly without a request. Cover teach
 | Class Teacher | Dilini Silva (`dilini`) — Nugegoda/8A; Sanduni Rathnayake (`class_teacher6_c`) — Nugegoda/6A; Chamodi Senanayake (`class_teacher8_l`) — Malabe/8A. Only actual subject assignments permit publication. |
 | Subject Teacher | Dilini Silva (`dilini`, Mathematics 8A + ICT 6A); Nuwan Gamage (`nuwan`, Science 8A); Rihana Farook (`rihana`, English 6A); Asha Wickramasinghe (`asha`, Mathematics 4A) — Nugegoda. Lakshmi Fernando (`lakshmi`) — Malabe teaching courses. Actual assignments control visibility. |
 | Administrator | Anjali Fernando (`admin_c`) — Nugegoda; Shanika Dias (`admin_l`) — Malabe. Both preview all five administration views in their own school. |
-| Transport Coordinator | Nimal Rathnayake — Nugegoda; Chamara Silva — Malabe. |
+| Transport Coordinator | Nimal Rathnayake (`transport_c`) — Nugegoda (six operational buses); Chamara Silva (`transport_l`) — Malabe (two operational buses). Both have five scoped overview views. |
 | Driver | Accounts are generated per operational demo bus; choose the presenter account assigned to that bus. |
 | Librarian | Hasini Perera — Nugegoda; school librarian appointments also exist at Malabe. |
 | Parent | Amaya `SCN-1001`, Kavin `SCN-1002`, Meera `SCN-1008`, Thevin `SCN-1009`; password `1234`. |
@@ -545,7 +589,7 @@ Role assignments may be changed in the demo, so these are seeded examples rather
 node --test tests/*.test.mjs
 ```
 
-The suite covers access, migration, parent admission selection, network/directory/fleet data, academic/attendance reconciliation, report isolation, Principal leave decisions, Vice Principal coordination, Section Head scope/reviews/follow-ups and the cover-request handoff, Grade Coordinator scope/class reviews/follow-ups/reports, Section Head support responses and new-account migration. Browser verification should cover all five Section Head views, all three seeded Section Head accounts, 390px/320px layouts, course/material interactions, persistent follow-up/review/request outcomes, role switching and report CSV/HTML/print handling. Grade Coordinator browser checks should cover all five views, all three seeded grade accounts, enrolment teacher protection, material downloads, class/follow-up note persistence, Section Head queue isolation/responses, report exports and 390px/320px layouts. Class Teacher checks should cover fixed class scope, own-subject publication and parent completion, attendance overlays/restores across leadership views, private discussion notes, coordinator responses, report isolation and mobile forms. Check one-choice attendance buttons, keyboard navigation, live totals, draft cancellation, search/empty states, whole-list All present, saving while filtered, saved preselection and persistent Save controls at small screen sizes. Subject Teacher checks cover actual grant and course/student scope, own-course publication and parent completion, plan/review history, staff-only note visibility, coordinator queue isolation/responses, Class Teacher attendance separation, reassignment, report retention and scoped CSV/HTML/print. Check five teaching accounts and 1500px/390px/320px layouts, including forms. School Administrator checks cover both schools, direct registration/edit and duplicate admissions, same-school guardian links, class-change enrolment cleanup, course teacher/enrolment writes and parent completion, private-note exclusion, current-appointment checks, filtered report totals/history, legacy routes and desktop/mobile forms. Keep passing test counts/evidence in the change log when updated.
+The suite covers access, migration, parent admission selection, network/directory/fleet data, academic/attendance reconciliation, report isolation, Principal leave decisions, Vice Principal coordination, Section Head scope/reviews/follow-ups and the cover-request handoff, Grade Coordinator scope/class reviews/follow-ups/reports, Section Head support responses and new-account migration. Browser verification should cover all five Section Head views, all three seeded Section Head accounts, 390px/320px layouts, course/material interactions, persistent follow-up/review/request outcomes, role switching and report CSV/HTML/print handling. Grade Coordinator browser checks should cover all five views, all three seeded grade accounts, enrolment teacher protection, material downloads, class/follow-up note persistence, Section Head queue isolation/responses, report exports and 390px/320px layouts. Class Teacher checks should cover fixed class scope, own-subject publication and parent completion, attendance overlays/restores across leadership views, private discussion notes, coordinator responses, report isolation and mobile forms. Check one-choice attendance buttons, keyboard navigation, live totals, draft cancellation, search/empty states, whole-list All present, saving while filtered, saved preselection and persistent Save controls at small screen sizes. Subject Teacher checks cover actual grant and course/student scope, own-course publication and parent completion, plan/review history, staff-only note visibility, coordinator queue isolation/responses, Class Teacher attendance separation, reassignment, report retention and scoped CSV/HTML/print. Check five teaching accounts and 1500px/390px/320px layouts, including forms. School Administrator checks cover both schools, direct registration/edit and duplicate admissions, same-school guardian links, class-change enrolment cleanup, course teacher/enrolment writes and parent completion, private-note exclusion, current-appointment checks, filtered report totals/history, legacy routes and desktop/mobile forms. Transport Coordinator checks cover the operational-only street map, filtering/selection and paused simulation, driver/student moves and empty assignments, fixed school destination, cross-school rejection, Driver/Parent propagation, shared Vice Principal task history/reassignment, five report types with note exclusion/history isolation, legacy tracking, empty-school fleets and mobile forms/maps. Keep passing test counts/evidence in the change log when updated.
 
 ## Maintenance checklist
 
@@ -611,3 +655,12 @@ For **every future implementation**:
 - Extracted shared student/course record writers with current-appointment and atomic input validation, preserving leadership/section/grade permissions and class-change cleanup. Added a student-form explanation for incompatible enrolment removal.
 - Added four administration report types with applied-filter provenance, matching-record summary totals, CSV/HTML/print and eight immutable snapshots per school/role. Passwords and private notes are excluded. Updated this role reference and README walkthrough.
 - Validation: **97 Node tests passed**, including 12 new administrator/shared-write tests for school/role scope, admissions, guardian links, class changes, assignment validation, protected teacher selection, parent login, report filtering/privacy/history, persistence, escaping and empty schools. Browser checks passed for five views, both demo schools, 1500px/390px/320px layouts, registration/edit, duplicate/mismatched-class errors, guardian profiles/linking, teacher/enrolment changes, an admission → teacher publication → parent download/completion walkthrough, class-change cleanup, reload persistence, four report types, eight-report retention, school isolation, legacy routes and mobile forms. Grade Coordinator, Section Head/parent/senior-leadership and the quick Class Teacher attendance regression workflows passed. The OS print dialogue and exported PDF files were not automated.
+
+### 22 November 2026 — Transport Coordinator
+
+- Added Fleet Activity, Routes & Stops, Drivers & Students, Issues & Coordination and Transport Reports with an appointed-school-only street map opening ahead of summary cards. Existing Bus tracking remains available.
+- Added searchable driver/student allocation views and quick allocation forms, retained full route/bus management, fixed the final school destination, and preserved existing illustrative route geometry. Student counts come from real prototype allocations; map telemetry remains simulated.
+- Extracted scoped, atomic bus assignment and Driver synchronisation. Replaced/cleared drivers retain an unassigned appointment and can be allocated again. Principal/Chairman Driver provisioning remains available; school roles cannot move an already-assigned driver out of another school.
+- Connected coordinator bus issues and owned transport-task progress to the Vice Principal’s existing follow-up records and note history. Vice Principal retains owner/category/title/due-date control; reassignment removes old-coordinator task/report access.
+- Added five report types, snapshot/filter provenance, formula-safe CSV/embedded-logo HTML/print and eight reports per coordinator/school. Reports omit free-text issue notes and revalidate current role, school records and captured task ownership. Updated this full reference and README walkthrough.
+- Validation: **111 Node tests passed**, including 14 new scope, operational-only fleet, driver/student assignment, atomic validation, cross-school transfer, shared task history/ownership, filtered report/privacy/persistence and empty-school tests. Browser checks passed for five views, both schools, 1500px/390px/320px layouts, OSM map/attribution, marker/status selection, pause/resume, route/stop edits, driver and student moves, Driver/Parent status propagation, Vice Principal issue review/history/reassignment, five report types, CSV/embedded-logo HTML/print source, eight-report retention, report/school isolation, legacy tracking and mobile route/issue dialogs. Principal Driver account provisioning and cross-school transfer rejection passed a separate browser check. School Administrator, Section Head/parent/senior-leadership and quick Class Teacher attendance regression workflows passed. The OS print dialogue and exported PDF files were not automated.
