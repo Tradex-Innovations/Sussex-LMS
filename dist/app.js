@@ -240,8 +240,36 @@ function update(mutator, activity) {
 function showDialog(mode, title, description, content) {
   dialogMode = mode;
   dialog.classList.toggle("chairman-dialog", mode.startsWith("chairman-"));
+  dialog.classList.toggle("class-attendance-dialog", mode === "class-attendance");
   dialog.innerHTML = `<header class="dialog-heading"><div><h2 id="dialog-title">${e(title)}</h2>${description ? `<p>${e(description)}</p>` : ""}</div><button type="button" class="icon-button" aria-label="Close dialog" data-action="close-dialog">${icon("x", 21)}</button></header>${content}`;
   if (!dialog.open) dialog.showModal();
+}
+
+function updateAttendanceDraft(form) {
+  const rows = [...form.querySelectorAll("[data-attendance-student]")];
+  const counts = { present: 0, absent: 0, late: 0 };
+  let changes = 0;
+  for (const row of rows) {
+    const selected = row.querySelector("[data-attendance-status]:checked")?.value;
+    if (Object.hasOwn(counts, selected)) counts[selected]++;
+    if (selected !== row.dataset.originalStatus) changes++;
+  }
+  for (const [status, count] of Object.entries(counts)) form.querySelector(`[data-attendance-count="${status}"]`).textContent = count;
+  form.querySelector("[data-attendance-draft]").textContent = changes ? `${changes} change${changes === 1 ? "" : "s"} to save` : "Review selections, then save";
+}
+
+function filterAttendanceDraft(input) {
+  const form = input.closest('[data-form="class-attendance"]');
+  const query = input.value.trim().toLowerCase();
+  const rows = [...form.querySelectorAll("[data-attendance-student]")];
+  let shown = 0;
+  for (const row of rows) {
+    row.hidden = Boolean(query && !row.dataset.studentSearch.includes(query));
+    if (!row.hidden) shown++;
+  }
+  const result = form.querySelector("[data-attendance-search-result]");
+  result.hidden = !query;
+  result.textContent = shown ? `Showing ${shown} of ${rows.length} students. Counts and All present apply to the full list.` : "No students found. Try another name or admission number.";
 }
 
 function closeDialog() {
@@ -505,6 +533,7 @@ function authorizedAction(name, value, ctx) {
     const scope = classScope(state, ctx);
     if (!scope) return false;
     if (["class-student", "class-followup-new"].includes(name)) return classAttendance(state, ctx).roster.some((student) => student.id === value);
+    if (name === "class-attendance-all-present") return can(ctx, "attendance.mark") && dialog.open && dialogMode === "class-attendance" && Boolean(dialog.querySelector('[data-form="class-attendance"]'));
     if (name === "class-mark-attendance") return can(ctx, "attendance.mark") && (!value || classAttendance(state, ctx).roster.some((student) => student.id === value));
     if (["class-reset-attendance", "class-confirm-reset-attendance"].includes(name)) return can(ctx, "attendance.mark") && /^\d{4}-\d{2}-\d{2}$/.test(value);
     if (name === "class-followup-edit") return classFollowups(state, ctx).some((item) => item.id === value);
@@ -674,6 +703,11 @@ function action(event) {
     case "class-student": {
       const student = classAttendance(state, ctx).roster.find((item) => item.id === value), options = optionsFor(ctx);
       showDialog("chairman-class-student", "Class student attendance", "Illustrative register · Class " + classScope(state, ctx).className, sectionStudentPanel({ ...options, section: options.classTeacher }, student, "class-followup-new")); break;
+    }
+    case "class-attendance-all-present": {
+      const form = dialog.querySelector('[data-form="class-attendance"]');
+      for (const radio of form.querySelectorAll('[data-attendance-status][value="present"]')) radio.checked = true;
+      updateAttendanceDraft(form); break;
     }
     case "class-mark-attendance": showDialog("class-attendance", "Mark class attendance", "Illustrative students · Class " + classScope(state, ctx).className, classAttendanceForm(optionsFor(ctx), value)); break;
     case "class-reset-attendance": confirmDialog("class-reset", "Restore generated attendance?", "Restore only this class and school day to the generated sample. Saved reports remain unchanged.", "Restore sample", "class-confirm-reset-attendance", value); break;
@@ -993,6 +1027,10 @@ function change(event) {
   const name = element.dataset.change;
   const ctx = context();
   if (!ctx) return;
+  if (element.matches("[data-attendance-status]") && element.closest('[data-form="class-attendance"]')) {
+    if (classScope(state, ctx) && can(ctx, "attendance.mark")) updateAttendanceDraft(element.form);
+    return;
+  }
   if (name?.startsWith("subject-")) {
     if (!subjectScope(state, ctx)) return;
     const rules = { "subject-course": ["course", ["all", ...subjectScope(state, ctx).courses.map((course) => course.id)]],
@@ -1413,6 +1451,9 @@ document.addEventListener("submit", submit);
 document.addEventListener("input", (event) => {
   if (event.target.dataset.change === "book-search") { ui.query = event.target.value; updateCatalog(); }
   const key = event.target.dataset.change;
+  if (key === "class-attendance-search" && dialogMode === "class-attendance" && classScope(state, context())) {
+    filterAttendanceDraft(event.target); return;
+  }
   if (context()?.role === "teacher" && key === "subject-query") {
     ui.subjectTeacher.query = event.target.value.slice(0, 80); render("subject-search"); return;
   }
@@ -1432,6 +1473,7 @@ document.addEventListener("input", (event) => {
   }
 });
 document.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && event.target.matches('[data-change="class-attendance-search"]')) { event.preventDefault(); return; }
   if (event.key === "Escape" && !dialog.open) {
     const menu = app.querySelector(".role-picker[open]");
     if (menu) { menu.open = false; menu.querySelector("summary").focus(); }

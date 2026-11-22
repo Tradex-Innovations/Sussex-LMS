@@ -97,7 +97,7 @@ Open [Class Teacher → Class Overview](http://127.0.0.1:4183/#class_teacher/ove
 
 - **Class Overview:** daily sample attendance/marked counts, actual class student/course/material counts, parent completion, subject results and follow-up priorities.
 - **Learning & Materials:** read all class courses/progress; publish/edit only on courses assigned to that teacher account; parent downloads/completion continue through the existing portal.
-- **Attendance:** mark single or full illustrative class registers, inspect calendars/watchlists, keep class follow-up history and restore the generated sample for that class/day. Saved entries update related leadership attendance views and new reports; earlier snapshots stay unchanged.
+- **Attendance:** mark single or full illustrative class registers using large Present/Absent/Late choices beside each student, with name/admission search, All present, live totals and Save controls that stay visible. Selections remain drafts until Save; Cancel discards them. Inspect calendars/watchlists, keep class follow-up history and restore the generated sample for that class/day. Saved entries update related leadership attendance views and new reports; earlier snapshots stay unchanged.
 - **Student Support:** actual admission/guardian and completion records, private planned/completed discussion notes, coordinator requests and responses. No messages are sent; private discussion notes are excluded from exports and parent portals.
 - **Class Reports:** management/subject/attendance/learning-progress snapshots; day registers show each sample status/source, multi-day reports show daily totals; CSV/HTML/print; eight saved reports per school/grade/class.
 
