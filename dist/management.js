@@ -49,8 +49,8 @@ export function accessPage({ state, context }) {
         <div><strong>Vice Principal</strong><span>Section Heads</span><span>Grade Coordinators</span><span>Class & Subject Teachers</span></div>
         <div><strong>School Administrator</strong><span>Students & guardians</span><span>Course enrollment</span></div>
         <div><strong>Transport Coordinator</strong><span>Bus routes & assignments</span><span>Drivers</span></div>
-        <div><strong>Librarian</strong><span>Book catalogue</span><span>Parent orders</span></div>
-      </div><p class="hierarchy-family">${icon("users", 17)} Parents access linked children’s bus trips, courses, and their own orders.</p>
+        <div><strong>Book Store Officer</strong><span>Pupil’s books & stock</span><span>Student reservations & collection</span></div>
+      <div><strong>Uniform Store Officer</strong><span>Uniform sizes & stock</span><span>Student reservations & collection</span></div></div><p class="hierarchy-family">${icon("users", 17)} Parents access linked children’s bus trips, courses, and their child’s book and uniform reservations.</p>
     </section>
     <section class="surface section-gap"><header class="panel-heading"><div><h2>Role assignments</h2><p>One person can hold several scoped roles</p></div></header>
       <div class="table-scroll"><table class="course-table"><thead><tr><th>Person</th><th>Role</th><th>Assigned scope</th><th>Actions</th></tr></thead><tbody>

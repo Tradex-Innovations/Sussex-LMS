@@ -1,8 +1,9 @@
 import { freshState, loadState, roles, saveState, sectionFor, sections } from "./data.js";
-import { assignableRoles, can, canManageGrant, contextFor, linkedChildren, visibleBuses, visibleCourses, visibleOrders, visibleStudents, canPublish } from "./access.js";
+import { assignableRoles, can, canManageGrant, contextFor, linkedChildren, visibleBuses, visibleCourses, visibleStudents, canPublish } from "./access.js";
 import { icon } from "./icons.js";
 import { assignmentForm, coursesPage, materialForm } from "./learning.js";
-import { branchBooks, bookForm, cartForm, cartFor, cartItems, catalogResults, libraryPage, orderHistory } from "./library.js";
+import { storeKinds, storeViews, storeReportTypes, storesDefaults, storesScope, storeCatalogue, storeReservations, reservationBag, saveBagItem, submitStoreReservation, cancelParentReservation, updateStoreReservation, saveStoreStock, createStoreReport, storeReports, storeReportCSV } from "./stores-data.js";
+import { booksPage, uniformsPage, storeBagForm, storeRequestDetail, storeProcessForm, storeStockForm } from "./stores.js";
 import { accessPage, branchForm, busForm, peoplePage, roleForm, scopeLabel, studentForm } from "./management.js";
 import { networkBranches, networkOverviewPage } from "./network.js";
 import { subjects } from "./network-analytics.js";
@@ -50,7 +51,8 @@ const navigation = {
   transport: { label: "Bus tracking", icon: "bus" },
   courses: { label: "Courses", icon: "book" },
   people: { label: "Students & guardians", icon: "users" },
-  library: { label: "Library", icon: "library" },
+  library: { label: "Pupil’s books", icon: "library" },
+  uniforms: { label: "School uniforms", icon: "package" },
   access: { label: "Roles & access", icon: "badge" },
 };
 let state = loadState();
@@ -61,14 +63,14 @@ let schoolMapKey;
 let mapViewKey;
 let dialogMode;
 let view = getView();
-const ui = { driver: driverDefaults(), boarding: boardingDefaults(), nfcFeedback: null, transportCoordinator: coordinatorDefaults(), schoolAdmin: adminDefaults(), subjectTeacher: subjectDefaults(), classTeacher: classDefaults(), gradeCoordinator: gradeDefaults(), section: sectionDefaults(), accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", grade: "all", query: "", paused: false, runningSince: performance.now(), elapsed: 0, starts: {},
+const ui = { stores: { books: storesDefaults(), uniforms: storesDefaults() }, driver: driverDefaults(), boarding: boardingDefaults(), nfcFeedback: null, transportCoordinator: coordinatorDefaults(), schoolAdmin: adminDefaults(), subjectTeacher: subjectDefaults(), classTeacher: classDefaults(), gradeCoordinator: gradeDefaults(), section: sectionDefaults(), accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", grade: "all", query: "", paused: false, runningSince: performance.now(), elapsed: 0, starts: {},
   network: { subject: "mathematics", grade: 8, term: 3, selected: "", mode: "", compare: null, category: "all", tab: "transport", status: "all", busId: "", busBranch: "all" }, chairman: { ...chairmanDefaults(), ...(["principal", "vice_principal"].includes(view.role) ? { attendanceFlag: "all" } : {}) } };
 
 function getView() {
   const [requestedRole, requestedPage, requestedModule] = location.hash.slice(1).split("/");
   const role = Object.hasOwn(roles, requestedRole) ? requestedRole : "chairman";
   const page = roles[role].pages.includes(requestedPage) ? requestedPage : roles[role].start;
-  const module = role === "driver" && page === "overview" ? (driverViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "transport" && page === "overview" ? (coordinatorViews.some((item) => item.id === requestedModule) ? requestedModule : "fleet") : role === "admin" && page === "overview" ? (adminViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "teacher" && page === "overview" ? (subjectViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "class_teacher" && page === "overview" ? (classViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "coordinator" && page === "overview" ? (gradeViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "section_head" && page === "overview" ? (sectionViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : ["chairman", "principal", "vice_principal"].includes(role) && page === "overview" && chairmanViews.some((item) => item.id === requestedModule) ? requestedModule : "transport";
+  const module = ["librarian", "uniform_store"].includes(role) && page === "overview" ? (storeViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "driver" && page === "overview" ? (driverViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "transport" && page === "overview" ? (coordinatorViews.some((item) => item.id === requestedModule) ? requestedModule : "fleet") : role === "admin" && page === "overview" ? (adminViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "teacher" && page === "overview" ? (subjectViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "class_teacher" && page === "overview" ? (classViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "coordinator" && page === "overview" ? (gradeViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "section_head" && page === "overview" ? (sectionViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : ["chairman", "principal", "vice_principal"].includes(role) && page === "overview" && chairmanViews.some((item) => item.id === requestedModule) ? requestedModule : "transport";
   return { role, page, module };
 }
 
@@ -86,7 +88,8 @@ function childFor(ctx) {
 function optionsFor(ctx = context()) {
   const children = linkedChildren(state, ctx);
   const child = childFor(ctx);
-  return { state, driver: { ...ui.driver, view: view.module }, boarding: { ...(boardingScope(state, ctx) ? boardingFilters(state, ctx, ui.boarding) : ui.boarding), feedback: ui.nfcFeedback }, transportCoordinator: { ...(ctx?.role === "transport" && coordinatorScope(state, ctx) ? coordinatorFilters(state, ctx, ui.transportCoordinator) : ui.transportCoordinator), view: view.module }, schoolAdmin: { ...(ctx?.role === "admin" && adminScope(state, ctx) ? adminFilters(state, ctx, ui.schoolAdmin) : ui.schoolAdmin), view: view.module }, subjectTeacher: { ...(ctx?.role === "teacher" && subjectScope(state, ctx) ? subjectFilters(state, ctx, ui.subjectTeacher) : ui.subjectTeacher), view: view.module }, classTeacher: { ...(ctx?.role === "class_teacher" && classScope(state, ctx) ? classFilters(state, ctx, ui.classTeacher) : ui.classTeacher), view: view.module }, gradeCoordinator: { ...(ctx?.role === "coordinator" && gradeScope(state, ctx) ? gradeFilters(state, ctx, ui.gradeCoordinator) : ui.gradeCoordinator), view: view.module }, section: { ...(ctx?.role === "section_head" && sectionScope(state, ctx) ? sectionFilters(state, ctx, ui.section) : ui.section), view: view.module }, context: ctx, children, child, fleet: visibleBuses(state, ctx, child), filter: ui.filter, selected: ui.bus, paused: ui.paused, progress, courseId: ui.courseId, grade: ui.grade, query: ui.query, network: isSchoolOperator(ctx) ? { ...ui.network, className: ui.chairman.academicClass } : ui.network, chairman: { ...ui.chairman, view: view.module } };
+  const storeKind = view.page === "uniforms" || ctx?.role === "uniform_store" ? "uniforms" : "books";
+  return { state, stores: { ...ui.stores[storeKind], view: view.page === "overview" && ["librarian", "uniform_store"].includes(ctx?.role) ? view.module : ui.stores[storeKind].view || "catalogue" }, driver: { ...ui.driver, view: view.module }, boarding: { ...(boardingScope(state, ctx) ? boardingFilters(state, ctx, ui.boarding) : ui.boarding), feedback: ui.nfcFeedback }, transportCoordinator: { ...(ctx?.role === "transport" && coordinatorScope(state, ctx) ? coordinatorFilters(state, ctx, ui.transportCoordinator) : ui.transportCoordinator), view: view.module }, schoolAdmin: { ...(ctx?.role === "admin" && adminScope(state, ctx) ? adminFilters(state, ctx, ui.schoolAdmin) : ui.schoolAdmin), view: view.module }, subjectTeacher: { ...(ctx?.role === "teacher" && subjectScope(state, ctx) ? subjectFilters(state, ctx, ui.subjectTeacher) : ui.subjectTeacher), view: view.module }, classTeacher: { ...(ctx?.role === "class_teacher" && classScope(state, ctx) ? classFilters(state, ctx, ui.classTeacher) : ui.classTeacher), view: view.module }, gradeCoordinator: { ...(ctx?.role === "coordinator" && gradeScope(state, ctx) ? gradeFilters(state, ctx, ui.gradeCoordinator) : ui.gradeCoordinator), view: view.module }, section: { ...(ctx?.role === "section_head" && sectionScope(state, ctx) ? sectionFilters(state, ctx, ui.section) : ui.section), view: view.module }, context: ctx, children, child, fleet: visibleBuses(state, ctx, child), filter: ui.filter, selected: ui.bus, paused: ui.paused, progress, courseId: ui.courseId, grade: ui.grade, query: ui.query, network: isSchoolOperator(ctx) ? { ...ui.network, className: ui.chairman.academicClass } : ui.network, chairman: { ...ui.chairman, view: view.module } };
 }
 
 function elapsed() {
@@ -105,7 +108,7 @@ function brand() {
 }
 
 function navigationLinks(mobile = false) {
-  return roles[view.role].pages.map((page) => `<a href="#${view.role}/${page}" class="nav-link ${page === view.page ? "is-active" : ""}" ${page === view.page ? 'aria-current="page"' : ""}>${icon(navigation[page].icon, 20)}<span>${mobile && page === "boarding" ? "Boarding" : mobile && page === "transport" ? "Buses" : mobile && page === "people" ? "Students" : mobile && page === "access" ? "Access" : navigation[page].label}</span></a>`).join("");
+  return roles[view.role].pages.map((page) => `<a href="#${view.role}/${page}" class="nav-link ${page === view.page ? "is-active" : ""}" ${page === view.page ? 'aria-current="page"' : ""}>${icon(navigation[page].icon, 20)}<span>${mobile && page === "uniforms" ? "Uniforms" : mobile && page === "library" ? "Books" : mobile && page === "boarding" ? "Boarding" : mobile && page === "transport" ? "Buses" : mobile && page === "people" ? "Students" : mobile && page === "access" ? "Access" : navigation[page].label}</span></a>`).join("");
 }
 
 function sidebar(ctx) {
@@ -177,13 +180,13 @@ function render(focus, { scrollTop = false } = {}) {
     }
     if (!options.fleet.some((bus) => bus.id === ui.bus)) ui.bus = options.fleet[0]?.id;
     options.selected = ui.bus;
-    const pages = { boarding: boardingPage, overview: ctx.role === "driver" ? driverPage : ctx.role === "transport" ? transportCoordinatorPage : ctx.role === "admin" ? schoolAdminPage : ctx.role === "teacher" ? subjectTeacherPage : ctx.role === "class_teacher" ? classTeacherPage : ctx.role === "coordinator" ? gradeCoordinatorPage : ctx.role === "section_head" ? sectionHeadPage : ctx.role === "chairman" ? chairmanOverviewPage : isSchoolOperator(ctx) ? principalOverviewPage : networkOverviewPage, courses: coursesPage, people: peoplePage, library: libraryPage, access: accessPage };
+    const pages = { boarding: boardingPage, overview: ctx.role === "uniform_store" ? uniformsPage : ctx.role === "librarian" ? booksPage : ctx.role === "driver" ? driverPage : ctx.role === "transport" ? transportCoordinatorPage : ctx.role === "admin" ? schoolAdminPage : ctx.role === "teacher" ? subjectTeacherPage : ctx.role === "class_teacher" ? classTeacherPage : ctx.role === "coordinator" ? gradeCoordinatorPage : ctx.role === "section_head" ? sectionHeadPage : ctx.role === "chairman" ? chairmanOverviewPage : isSchoolOperator(ctx) ? principalOverviewPage : networkOverviewPage, courses: coursesPage, people: peoplePage, library: booksPage, uniforms: uniformsPage, access: accessPage };
     body = view.page === "transport" ? transportPage(view.role, options) : pages[view.page](options);
   }
-  document.title = `${view.role === "driver" && view.page === "overview" ? driverViews.find((item) => item.id === view.module).name : view.role === "transport" && view.page === "overview" ? coordinatorViews.find((item) => item.id === view.module).name : view.role === "admin" && view.page === "overview" ? adminViews.find((item) => item.id === view.module).name : view.role === "teacher" && view.page === "overview" ? subjectViews.find((item) => item.id === view.module).name : view.role === "class_teacher" && view.page === "overview" ? classViews.find((item) => item.id === view.module).name : view.role === "coordinator" && view.page === "overview" ? gradeViews.find((item) => item.id === view.module).name : view.role === "section_head" && view.page === "overview" ? sectionViews.find((item) => item.id === view.module).name : ["chairman", "principal", "vice_principal"].includes(view.role) && view.page === "overview" ? chairmanViews.find((item) => item.id === view.module).name : navigation[view.page].label} · ${roles[view.role].name} · Sussex College Network`;
+  document.title = `${["librarian", "uniform_store"].includes(view.role) && view.page === "overview" ? storeViews.find((item) => item.id === view.module).name : view.role === "driver" && view.page === "overview" ? driverViews.find((item) => item.id === view.module).name : view.role === "transport" && view.page === "overview" ? coordinatorViews.find((item) => item.id === view.module).name : view.role === "admin" && view.page === "overview" ? adminViews.find((item) => item.id === view.module).name : view.role === "teacher" && view.page === "overview" ? subjectViews.find((item) => item.id === view.module).name : view.role === "class_teacher" && view.page === "overview" ? classViews.find((item) => item.id === view.module).name : view.role === "coordinator" && view.page === "overview" ? gradeViews.find((item) => item.id === view.module).name : view.role === "section_head" && view.page === "overview" ? sectionViews.find((item) => item.id === view.module).name : ["chairman", "principal", "vice_principal"].includes(view.role) && view.page === "overview" ? chairmanViews.find((item) => item.id === view.module).name : navigation[view.page].label} · ${roles[view.role].name} · Sussex College Network`;
   const mobileNavigation = roles[view.role].pages.length > 1;
   app.innerHTML = `<div class="app-shell role-${view.role} ${mobileNavigation ? "has-mobile-nav" : ""}">
-    ${sidebar(ctx)}<div class="desktop-content">${topbar(ctx)}<main id="main" class="page page-${view.page}">${view.page === "overview" ? "" : scopeBar(ctx)}${body}</main></div>
+    ${sidebar(ctx)}<div class="desktop-content">${topbar(ctx)}<main id="main" class="page page-${view.page}">${view.page === "overview" || ["library", "uniforms"].includes(view.page) && ctx?.role !== "parent" ? "" : scopeBar(ctx)}${body}</main></div>
     ${mobileNavigation ? `<nav class="mobile-nav" aria-label="Workspace">${navigationLinks(true)}</nav>` : ""}
   </div>`;
   const coordinatorStage = app.querySelector("#coordinator-fleet-map");
@@ -515,39 +518,6 @@ function filterBuses(status, focus) {
   render(focus);
 }
 
-function showCart() {
-  showDialog("cart", "Book bag", "Review books for school collection.", cartForm(state, context()));
-}
-
-function adjustBook(id, delta) {
-  const ctx = context();
-  const book = branchBooks(state, ctx).find((item) => item.id === id && item.available);
-  if (!book) return;
-  const quantity = Math.max(0, Math.min(10, (cartFor(state, ctx)[id] || 0) + delta));
-  if (!update((next) => {
-    next.carts[ctx.account.id] ??= {};
-    next.carts[ctx.account.id][ctx.branch] ??= {};
-    if (quantity) next.carts[ctx.account.id][ctx.branch][id] = quantity;
-    else delete next.carts[ctx.account.id][ctx.branch][id];
-  })) return;
-  render();
-  if (dialogMode === "cart") showCart();
-  else toast("Book added to your bag.");
-}
-
-function placeOrder() {
-  const ctx = context();
-  const items = cartItems(state, ctx).map(({ id, title, price, quantity }) => ({ id, title, price, quantity }));
-  if (!items.length) return;
-  const number = `CW-${1001 + state.orders.length}`;
-  const order = { number, parent: ctx.account.id, branch: ctx.branch, status: "pending", items,
-    total: items.reduce((sum, item) => sum + item.price * item.quantity, 0),
-    date: new Intl.DateTimeFormat("en-LK", { day: "numeric", month: "short", timeZone: "Asia/Colombo" }).format(new Date()) };
-  if (!update((next) => { next.orders.push(order); next.carts[ctx.account.id][ctx.branch] = {}; }, { branch: ctx.branch, category: "library", message: "New library order placed." })) return;
-  render();
-  showDialog("receipt", "Order placed", number, `<div class="form-body order-confirmation">${iconTile("checkCircle", "green")}<p>Collect your books and pay at your school library.</p></div><footer class="dialog-actions">${button("View my orders", "orders", { iconName: "package" })}</footer>`);
-}
-
 function downloadMaterial(id) {
   const material = state.materials.find((item) => item.id === id);
   const link = document.createElement("a");
@@ -572,6 +542,24 @@ function authorizedAction(name, value, ctx) {
   if (name === "parent-logout") return view.role === "parent";
   if (!ctx) return false;
   const options = optionsFor(ctx);
+  if (name.startsWith("store-")) {
+    const [kind, id, target] = String(value || "").split("|"), scope = storesScope(state, ctx, kind);
+    if (!scope) return false;
+    if (name === "store-tab") return (scope.parent ? ["catalogue", "reservations"] : storeViews.map((item) => item.id)).includes(id);
+    if (["store-bag", "store-submit"].includes(name)) return scope.parent;
+    if (name === "store-remove") return scope.parent && reservationBag(state, ctx, kind).some((line) => line.itemId === id && line.variantId === target);
+    if (["store-request", "store-cancel", "store-confirm-cancel", "store-process"].includes(name)) {
+      const request = storeReservations(state, ctx, kind).find((request) => request.id === id);
+      if (!request) return false;
+      if (name === "store-request") return true;
+      if (["store-cancel", "store-confirm-cancel"].includes(name)) return scope.parent && ["requested", "confirmed"].includes(request.status);
+      return scope.canManage && ({ requested: ["confirmed", "declined"], confirmed: ["ready", "cancelled"], ready: ["collected", "cancelled"] })[request.status]?.includes(target);
+    }
+    if (name === "store-stock") return scope.canManage && storeCatalogue(state, ctx, kind).some((item) => item.id === id && item.variants.some((variant) => variant.id === target));
+    if (name === "store-report") return scope.canManage;
+    if (["store-report-open", "store-report-download"].includes(name)) return scope.canManage && storeReports(state, ctx, kind).some((report) => report.id === id);
+    return false;
+  }
   if (name.startsWith("driver-")) {
     if (!driverScope(state, ctx)) return false;
     const runs = driverRuns(state, ctx), run = runs.find((run) => run.id === String(value || "").split("|")[0]);
@@ -737,10 +725,6 @@ function authorizedAction(name, value, ctx) {
     "add-material": course && canPublish(state, ctx, course),
     "edit-material": materialCourse && canPublish(state, ctx, materialCourse),
     "download": Boolean(materialCourse), "complete": can(ctx, "materials.complete") && Boolean(materialCourse),
-    "add-book": can(ctx, "library.order"), "increase-book": can(ctx, "library.order"), "decrease-book": can(ctx, "library.order"),
-    "cart": can(ctx, "library.order"), "place-order": can(ctx, "library.order"), "orders": can(ctx, "library.order"),
-    "edit-book": can(ctx, "library.manage") && branchBooks(state, ctx).some((book) => book.id === value),
-    "collect-order": can(ctx, "library.manage") && visibleOrders(state, ctx).some((order) => order.number === value),
     "end-trip": can(ctx, "trip.manage") && options.fleet.length > 0, "confirm-end-trip": can(ctx, "trip.manage") && options.fleet.length > 0, "start-trip": can(ctx, "trip.manage") && options.fleet.length > 0,
     "edit-bus": can(ctx, "transport.manage") && options.fleet.some((bus) => bus.id === value),
     "edit-student": can(ctx, "students.edit") && (!value || visibleStudents(state, ctx).some((student) => student.id === value)),
@@ -785,6 +769,33 @@ function action(event) {
   const ctx = context();
   if (!authorizedAction(name, value, ctx)) return toast("This action is outside the current role’s assigned access.");
   switch (name) {
+    case "store-tab": { const [kind, tab] = value.split("|"); ui.stores[kind].tab = tab; ui.stores[kind].view = tab; ui.stores[kind].query = ""; ui.stores[kind].status = "all"; render(); break; }
+    case "store-bag": showDialog("store-bag", "Reservation list", storeKinds[value].store + " · school collection", storeBagForm(state, ctx, value)); break;
+    case "store-remove": {
+      const [kind, itemId, variantId] = value.split("|");
+      try { if (update((next) => saveBagItem(next, ctx, { kind, itemId, variantId, quantity: 0 }))) { render(); showDialog("store-bag", "Reservation list", storeKinds[kind].store + " · school collection", storeBagForm(state, ctx, kind)); } } catch (error) { toast(error.message); } break;
+    }
+    case "store-submit": {
+      let request;
+      try { if (update((next) => { request = submitStoreReservation(next, ctx, { kind: value }); }, { branch: ctx.branch, category: "stores", message: "A parent submitted a school collection reservation." })) {
+        ui.stores[value].tab = "reservations"; ui.stores[value].query = ""; ui.stores[value].status = "all"; render();
+        showDialog("store-request", "Reservation requested", request.reference, storeRequestDetail(state, ctx, value, request.id)); toast("Request recorded for the school’s " + storeKinds[value].store + ".");
+      } } catch (error) { toast(error.message); } break;
+    }
+    case "store-request": { const [kind, id] = value.split("|"); showDialog("store-request", "Reservation details", storeKinds[kind].store + " · school collection", storeRequestDetail(state, ctx, kind, id)); break; }
+    case "store-cancel": confirmDialog("store-cancel", "Cancel this reservation?", "Any units held for this request will be released. You can submit a new request later.", "Cancel reservation", "store-confirm-cancel", value); break;
+    case "store-confirm-cancel": {
+      const [kind, id] = value.split("|"); try { if (update((next) => cancelParentReservation(next, ctx, { kind, id }))) { closeDialog(); render(); toast("Reservation cancelled."); } } catch (error) { toast(error.message); } break;
+    }
+    case "store-process": { const [kind, id, status] = value.split("|"); showDialog("store-process", "Update reservation", storeKinds[kind].store, storeProcessForm(state, ctx, kind, id, status)); break; }
+    case "store-stock": { const [kind, id, variant] = value.split("|"); showDialog("store-stock", "Update store stock", storeKinds[kind].store, storeStockForm(state, ctx, kind, id, variant)); break; }
+    case "store-report": {
+      let report; try { if (update((next) => { report = createStoreReport(next, ctx, { kind: value, type: ui.stores[value].reportType }); })) { ui.stores[value].reportId = report.id; render(); toast("Store snapshot saved."); } } catch (error) { toast(error.message); } break;
+    }
+    case "store-report-open": { const [kind, id] = value.split("|"); ui.stores[kind].reportId = id; render(); break; }
+    case "store-report-download": {
+      const [kind, id] = value.split("|"); try { const csv = storeReportCSV(state, ctx, kind, id), url = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" })); const a = document.createElement("a"); a.href = url; a.download = "sussex-" + kind + "-" + id + ".csv"; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); } catch (error) { toast(error.message); } break;
+    }
     case "driver-readiness": showDialog("driver-readiness", "Pre-trip safety checklist", "Assigned school bus", driverReadinessForm(state, ctx, value)); break;
     case "driver-issue": showDialog("driver-issue", "Report a transport issue", "School coordination", driverIssueForm(state, ctx)); break;
     case "driver-start":
@@ -1160,15 +1171,6 @@ function action(event) {
       if (update((next) => { const list = next.completed[child.id] || []; next.completed[child.id] = done ? list.filter((id) => id !== value) : [...list, value]; }, { branch: child.branch, category: "academic", message: done ? "A lesson was marked incomplete." : "A lesson was marked complete." })) { render(focus); toast(done ? "Marked as incomplete." : "Marked as done."); }
       break;
     }
-    case "add-book":
-    case "increase-book": adjustBook(value, 1); break;
-    case "decrease-book": adjustBook(value, -1); break;
-    case "cart": showCart(); break;
-    case "place-order": placeOrder(); break;
-    case "orders": showDialog("orders", "My orders", "Your family’s library orders.", orderHistory(state, ctx)); break;
-    case "edit-book": showDialog("book", "Edit book", "Manage the catalogue for this branch.", bookForm(state.books.find((book) => book.id === value))); break;
-    case "collect-order":
-      if (update((next) => { next.orders.find((order) => order.number === value).status = "collected"; }, { branch: state.orders.find((order) => order.number === value).branch, category: "library", message: "A library order was collected." })) { render(); toast("Order marked as collected."); } break;
     case "end-trip": confirmDialog("trip", "End this trip?", "The bus will appear as At school for the branch and assigned parents.", "End trip", "confirm-end-trip"); break;
     case "confirm-end-trip": try { updateTrip("school"); } catch (error) { closeDialog(); toast(error.message); } break;
     case "start-trip": if (ctx.role === "driver") showDialog("driver-readiness", "Pre-trip safety checklist", "Assigned school bus", driverReadinessForm(state, ctx)); else updateTrip("route"); break;
@@ -1191,7 +1193,7 @@ function action(event) {
     }
     case "branch-map": if (ctx.role === "chairman") ui.branch = value; location.hash = `${view.role}/transport`; break;
     case "edit-branch": showDialog("branch", "Edit school branch", "School branch details.", branchForm(state.branches.find((branch) => branch.id === value))); break;
-    case "reset": confirmDialog("reset", "Reset the demo?", "Restore the sample roles, branches, bus assignments, courses, and orders.", "Reset demo", "confirm-reset"); break;
+    case "reset": confirmDialog("reset", "Reset the demo?", "Restore the sample roles, branches, bus assignments, courses, stock and reservations.", "Reset demo", "confirm-reset"); break;
     case "confirm-reset":
       if (saveState(freshState())) {
         state = freshState(); Object.assign(ui, { accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", starts: {}, paused: false, runningSince: performance.now(), elapsed: 0 });
@@ -1213,6 +1215,15 @@ function change(event) {
   if (element.matches("[data-attendance-status]") && element.closest('[data-form="class-attendance"]')) {
     if (classScope(state, ctx) && can(ctx, "attendance.mark")) updateAttendanceDraft(element.form);
     return;
+  }
+  if (name?.startsWith("store-")) {
+    const kind = element.dataset.kind, scope = storesScope(state, ctx, kind);
+    if (!scope) return;
+    if (name === "store-status" && ["all", "requested", "confirmed", "ready", "collected", "cancelled", "declined"].includes(element.value)) ui.stores[kind].status = element.value;
+    else if (name === "store-grade" && scope.canManage && ["all", ...Array.from({ length: 13 }, (_, index) => String(index + 1))].includes(element.value)) ui.stores[kind].grade = element.value;
+    else if (name === "store-report-type" && scope.canManage && Object.hasOwn(storeReportTypes, element.value)) ui.stores[kind].reportType = element.value;
+    else return;
+    render(); return;
   }
   if (name === "driver-issue-status" && driverScope(state, ctx)) {
     if (["all", "open", "in_progress", "resolved", "unavailable"].includes(element.value)) { ui.driver.issueStatus = element.value; render(); }
@@ -1386,13 +1397,13 @@ function change(event) {
       break;
     }
     case "account":
-      ui.driver = driverDefaults(); ui.boarding = boardingDefaults(); ui.nfcFeedback = null; ui.transportCoordinator = coordinatorDefaults(); ui.schoolAdmin = adminDefaults(); ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults();
+      ui.stores = { books: storesDefaults(), uniforms: storesDefaults() }; ui.driver = driverDefaults(); ui.boarding = boardingDefaults(); ui.nfcFeedback = null; ui.transportCoordinator = coordinatorDefaults(); ui.schoolAdmin = adminDefaults(); ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults();
       ui.accounts[view.role] = element.value; ui.courseId = ""; ui.filter = "all"; ui.chairman = chairmanDefaults();
       if (isSchoolOperator(ctx)) ui.chairman.attendanceFlag = "all";
       ui.network.selected = ""; ui.network.mode = ""; ui.network.busId = ""; ui.network.compare = null; ui.network.status = "all"; ui.network.busBranch = "all"; ui.network.mapFocus = null; schoolMapKey = null;
       closeDialog(); render(); break;
     case "branch":
-      ui.boarding = boardingDefaults(); ui.nfcFeedback = null;
+      ui.stores = { books: storesDefaults(), uniforms: storesDefaults() }; ui.boarding = boardingDefaults(); ui.nfcFeedback = null;
       if (ctx.role !== "chairman") return;
       ui.branch = element.value; ui.courseId = ""; ui.filter = "all";
       ui.chairman.reportBranches = null; ui.chairman.staffPage = 1; ui.chairman.studentPage = 1; ui.chairman.branchId = "";
@@ -1402,7 +1413,6 @@ function change(event) {
       if (!linkedChildren(state, ctx).some((child) => child.id === element.value)) return;
       update((next) => { next.child = element.value; }); ui.courseId = ""; render("child-select"); break;
     case "filter": filterBuses(element.value, element.dataset.focus); break;
-    case "grade": ui.grade = element.value; updateCatalog(); break;
     case "assignment-course":
       if (!can(ctx, "courses.assign")) return;
       showDialog("assignment", "Assign course", "Choose a teacher and enroll students.", assignmentForm(element.value, optionsFor())); break;
@@ -1417,12 +1427,6 @@ function change(event) {
       showDialog("student", "Add student", "Manage the student record and linked guardians.", studentForm(state, ctx, { ...draft, grade: Number(draft.grade) })); break;
     }
   }
-}
-
-function updateCatalog() {
-  const target = app.querySelector("#catalog-results");
-  const ctx = context();
-  if (target && ctx.role === "parent") target.innerHTML = catalogResults(state, ctx, ui.grade, ui.query);
 }
 
 function showError(form, message) {
@@ -1457,6 +1461,7 @@ async function submit(event) {
       return;
     }
     parentSession = session;
+    ui.stores = { books: storesDefaults(), uniforms: storesDefaults() };
     ui.courseId = "";
     closeDialog();
     location.hash = "parent/transport";
@@ -1469,6 +1474,14 @@ async function submit(event) {
   const allowedBranch = (branch) => state.branches.some((item) => item.id === branch) && (ctx.branch === "all" || ctx.branch === branch);
   const fail = (message = "This change is outside your assigned scope.") => showError(form, message);
 
+  if (["store-add", "store-process", "store-stock"].includes(mode)) {
+    const input = Object.fromEntries(values), scope = storesScope(state, ctx, input.kind);
+    if (!scope || mode === "store-add" && !scope.parent || mode !== "store-add" && !scope.canManage) return fail();
+    const save = mode === "store-add" ? saveBagItem : mode === "store-process" ? updateStoreReservation : saveStoreStock;
+    try { if (update((next) => save(next, ctx, input))) { if (mode !== "store-add") closeDialog(); render(); toast(mode === "store-add" ? "Reservation list updated." : "Store record saved."); } } catch (error) { fail(error.message); }
+    return;
+  }
+  if (mode === "book") return fail("The earlier book-order form is no longer available.");
   if (["driver-readiness", "driver-issue"].includes(mode)) {
     if (!driverScope(state, ctx)) return fail();
     const save = mode === "driver-readiness" ? saveDriverReadiness : saveDriverIncident;
@@ -1553,7 +1566,6 @@ async function submit(event) {
     material: ["academic", id ? "Course material updated." : "New course material published.", state.courses.find((course) => course.id === values.get("course"))?.branch],
     student: ["people", id ? "Student record updated." : "New student added.", state.students.find((student) => student.id === id)?.branch || values.get("branch")],
     bus: ["transport", "Bus route and student assignments updated.", state.buses.find((bus) => bus.id === id)?.branch],
-    book: ["library", "Book catalogue updated.", state.books.find((book) => book.id === id)?.branch],
     branch: ["people", "School branch details updated.", id],
     role: ["people", "Staff role assignment updated.", values.get("branch")],
   }[mode];
@@ -1587,13 +1599,6 @@ async function submit(event) {
   } else if (mode === "bus") {
     try { if (!save((next) => saveBusAssignment(next, ctx, { ...Object.fromEntries(values), stops: values.getAll("stops"), students: values.getAll("students") }))) return; }
     catch (error) { return fail(error.message); }
-  } else if (mode === "book") {
-    const book = branchBooks(state, ctx).find((book) => book.id === id);
-    if (!can(ctx, "library.manage") || !book) return fail();
-    const price = Number(values.get("price"));
-    const title = values.get("title").trim();
-    if (!title || !Number.isInteger(price) || price < 1 || price > 100000) return fail("Enter a title and a price from LKR 1 to 100,000.");
-    if (!save((next) => Object.assign(next.books.find((item) => item.id === id), { title, price, available: values.has("available") }))) return;
   } else if (mode === "branch") {
     if (!can(ctx, "branch.edit") || !state.branches.some((branch) => branch.id === id)) return fail();
     const name = values.get("name").trim(), location = values.get("location").trim();
@@ -1653,10 +1658,14 @@ document.addEventListener("click", (event) => {
 document.addEventListener("change", change);
 document.addEventListener("submit", submit);
 document.addEventListener("input", (event) => {
-  if (event.target.dataset.change === "book-search") { ui.query = event.target.value; updateCatalog(); }
   const key = event.target.dataset.change;
   if (key === "class-attendance-search" && dialogMode === "class-attendance" && classScope(state, context())) {
     filterAttendanceDraft(event.target); return;
+  }
+  if (key === "store-query") {
+    const kind = event.target.dataset.kind;
+    if (storesScope(state, context(), kind)) { ui.stores[kind].query = event.target.value.slice(0, 80); render("store-search"); }
+    return;
   }
   if (key === "driver-query" && driverScope(state, context())) { ui.driver.query = event.target.value.slice(0, 80); render("driver-search"); return; }
   if (key === "nfc-query" && boardingScope(state, context())) { ui.boarding.query = event.target.value.slice(0, 80); render("nfc-search"); return; }
@@ -1703,9 +1712,10 @@ window.addEventListener("hashchange", () => {
   if (view.page === "overview" && (previous.role !== view.role || previous.page !== view.page || previous.module !== view.module)) {
     ui.network.selected = ""; ui.network.mode = ""; ui.network.compare = null; ui.network.busId = ""; ui.network.status = "all"; schoolMapKey = null;
   }
-  if (previous.role !== view.role) { ui.driver = driverDefaults(); ui.boarding = boardingDefaults(); ui.nfcFeedback = null; ui.transportCoordinator = coordinatorDefaults(); ui.schoolAdmin = adminDefaults(); ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults(); ui.chairman = chairmanDefaults(); if (["principal", "vice_principal"].includes(view.role)) ui.chairman.attendanceFlag = "all"; }
+  if (previous.role !== view.role) { ui.stores = { books: storesDefaults(), uniforms: storesDefaults() }; ui.driver = driverDefaults(); ui.boarding = boardingDefaults(); ui.nfcFeedback = null; ui.transportCoordinator = coordinatorDefaults(); ui.schoolAdmin = adminDefaults(); ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults(); ui.chairman = chairmanDefaults(); if (["principal", "vice_principal"].includes(view.role)) ui.chairman.attendanceFlag = "all"; }
   if (["section_head", "coordinator", "class_teacher", "teacher", "admin"].includes(view.role) && previous.module !== view.module) ui.courseId = "";
   if (view.role === "transport" && previous.module !== view.module) { ui.transportCoordinator.query = ""; ui.transportCoordinator.page = 1; }
+  if (["librarian", "uniform_store"].includes(view.role) && previous.module !== view.module) { ui.stores[view.role === "librarian" ? "books" : "uniforms"].query = ""; ui.stores[view.role === "librarian" ? "books" : "uniforms"].status = "all"; }
   if (view.role === "admin" && previous.module !== view.module) { ui.schoolAdmin.query = ""; ui.schoolAdmin.page = 1; }
   if (ui.pendingPulseTransport && view.module === "transport") { ui.network.status = "delayed"; }
   ui.pendingPulseTransport = false;

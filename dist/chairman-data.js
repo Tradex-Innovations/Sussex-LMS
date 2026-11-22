@@ -11,7 +11,7 @@ export const chairmanViews = [
   { id: "reports", name: "Executive Reports", icon: "file" },
 ];
 export const reportTypes = { brief: "Network executive brief", transport: "Transport activity", academic: "Academic performance", attendance: "Attendance", staffing: "Staffing overview" };
-export const staffRoles = { principal: "Principal", vice_principal: "Vice Principal", section_head: "Section Head", coordinator: "Grade Coordinator", class_teacher: "Class Teacher", teacher: "Subject Teacher", admin: "School Administrator", transport: "Transport Coordinator", librarian: "Librarian", driver: "Driver" };
+export const staffRoles = { principal: "Principal", vice_principal: "Vice Principal", section_head: "Section Head", coordinator: "Grade Coordinator", class_teacher: "Class Teacher", teacher: "Subject Teacher", admin: "School Administrator", transport: "Transport Coordinator", librarian: "Book Store Officer", uniform_store: "Uniform Store Officer", driver: "Driver" };
 export const round = (value) => Math.round(value * 10) / 10;
 const hash = (value) => [...String(value)].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0, 7);
 const names = ["Amaya", "Kavin", "Senuli", "Dineth", "Nethmi", "Yenul", "Thisali", "Dulith", "Hasini", "Thevin", "Minuli", "Shenul", "Rashmi", "Sahan", "Tharushi", "Naveen", "Anuki", "Keshan", "Dinuli", "Ravin"];
@@ -118,7 +118,7 @@ export function branchStaff(state, branch, date = demoDate) {
     const leave = (key + day) % 29 === 0;
     const approved = requestStaff.has(person.id) && date === demoDate && state.principalLeaveReviews?.["leave-" + branch.id + "-" + person.id]?.decision === "approved";
     const status = approved || leave ? "leave" : absent ? "absent" : "present";
-    const primaryRole = ["principal", "vice_principal", "section_head", "coordinator", "class_teacher", "teacher", "admin", "transport", "librarian", "driver"].find((role) => person.roles.includes(role));
+    const primaryRole = ["principal", "vice_principal", "section_head", "coordinator", "class_teacher", "teacher", "admin", "transport", "librarian", "uniform_store", "driver"].find((role) => person.roles.includes(role));
     const assignedCourses = state.courses.filter((course) => course.branch === branch.id && state.assignments[course.id]?.teacher === person.id);
     const assignedSubjects = [...new Set(assignedCourses.map((course) => course.title))];
     return { ...person, category: category(person), primaryRole, designation: staffRoles[primaryRole], status, leaveRequestEligible: requestStaff.has(person.id),

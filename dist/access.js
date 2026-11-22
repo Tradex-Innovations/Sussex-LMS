@@ -1,9 +1,9 @@
 import { roles, sectionFor } from "./data.js";
 
 const permissions = {
-  chairman: ["branch.edit", "roles.manage", "students.edit", "courses.assign", "courses.teacher", "materials.publish", "transport.manage", "library.manage"],
-  principal: ["roles.manage", "students.edit", "courses.assign", "courses.teacher", "materials.publish", "transport.manage", "library.manage"],
-  vice_principal: ["students.edit", "courses.assign", "courses.teacher", "materials.publish", "transport.manage", "library.manage"],
+  chairman: ["branch.edit", "roles.manage", "students.edit", "courses.assign", "courses.teacher", "materials.publish", "transport.manage", "library.manage", "stores.books.manage", "stores.uniforms.manage"],
+  principal: ["roles.manage", "students.edit", "courses.assign", "courses.teacher", "materials.publish", "transport.manage", "library.manage", "stores.books.manage", "stores.uniforms.manage"],
+  vice_principal: ["students.edit", "courses.assign", "courses.teacher", "materials.publish", "transport.manage", "library.manage", "stores.books.manage", "stores.uniforms.manage"],
   section_head: ["courses.assign", "courses.teacher"],
   coordinator: ["courses.assign"],
   class_teacher: ["attendance.mark"],
@@ -11,8 +11,9 @@ const permissions = {
   admin: ["students.edit", "courses.assign", "courses.teacher"],
   transport: ["transport.manage"],
   driver: ["trip.manage"],
-  librarian: ["library.manage"],
-  parent: ["materials.complete", "library.order"],
+  librarian: ["library.manage", "stores.books.manage"],
+  uniform_store: ["stores.uniforms.manage"],
+  parent: ["materials.complete", "stores.reserve"],
 };
 
 export function can(context, permission) {

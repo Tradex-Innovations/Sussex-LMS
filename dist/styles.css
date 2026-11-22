@@ -2198,3 +2198,93 @@ form[data-form^="nfc-"] > .form-error { margin: 0 18px 12px; }
   .driver-history details { flex-basis:auto; }
   .driver-check-fields label { padding:13px 10px; }
 }
+
+/* Pupil book and school uniform reservations */
+.stores-parent-banner { display:flex; justify-content:space-between; align-items:center; gap:24px; padding:30px 34px; border-radius:19px; background:#153e32; color:white; margin:24px 0; }
+.stores-parent-banner h2 { margin:17px 0 12px; font-size:29px; letter-spacing:-.7px; }
+.stores-parent-banner p { margin:8px 0; color:#e1ede5; max-width:720px; line-height:1.65; font-size:16px; }
+.stores-parent-banner > svg { flex-shrink:0; color:#d8ba71; margin:12px; }
+.uniform-banner { background:#173e55; }
+.stores-local-tabs, .stores-toolbar, .stores-actions { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
+.stores-local-tabs { margin:26px 0 20px; }
+.stores-toolbar { justify-content:space-between; margin:22px 0; }
+.stores-search { display:flex; align-items:center; gap:12px; border:1px solid #dce6de; border-radius:11px; padding:0 14px; background:white; min-width:0; width:min(100%,430px); }
+.stores-search input { border:0; background:transparent; width:100%; min-width:0; padding:14px 0; font:inherit; font-size:15px; }
+.stores-status { min-width:185px; }
+.stores-status select { min-height:44px; }
+.stores-item-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.stores-item-card { overflow:hidden; min-width:0; }
+.stores-item-card .cover-stage { height:230px; }
+.stores-item-info { padding:23px; }
+.stores-item-info > small { font-size:13px; color:#6a7c70; }
+.stores-item-info h2 { font-size:21px; line-height:1.35; margin:9px 0; letter-spacing:-.3px; }
+.stores-item-info > p { color:#5a7063; font-size:15px; line-height:1.6; margin:10px 0 20px; min-height:48px; }
+.stores-item-info form > .button { width:100%; margin-top:12px; }
+.stores-item-fields { display:grid; grid-template-columns:minmax(0,1fr) 82px; gap:10px; }
+.stores-item-fields .field { min-width:0; font-size:14px; }
+.stores-item-fields select { width:100%; min-width:0; padding:11px 28px 11px 10px; font-size:14px; }
+.stores-uniform-art { background:#e9efed; height:230px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:12px; }
+.stores-uniform-art svg { width:150px; height:150px; fill:#fffdf3; stroke:#485e5a; stroke-width:1.4; filter:drop-shadow(0 8px 6px #203d3020); }
+.stores-uniform-art span { color:#64786d; font-size:11px; font-weight:700; letter-spacing:1.4px; }
+.uniform-trousers { background:#e9eef4; }
+.uniform-trousers svg, .uniform-skirt svg { fill:#27465c; stroke:#e2e9ed; }
+.uniform-skirt { background:#efede8; }
+.uniform-sports { background:#e8efdc; }
+.uniform-sports svg { fill:#e0bd69; stroke:#786534; }
+.stores-request-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+.stores-request-card { padding:24px; min-width:0; }
+.stores-request-card > header, .stores-report-result > header { display:flex; justify-content:space-between; gap:15px; align-items:flex-start; }
+.stores-request-card small { color:#64786b; font-size:13px; line-height:1.6; }
+.stores-request-card h3 { margin:7px 0; font-size:19px; }
+.stores-request-card p { color:#526b5d; font-size:15px; line-height:1.7; overflow-wrap:anywhere; }
+.stores-request-card header p { margin:0; font-size:14px; }
+.stores-actions { margin-top:20px; }
+.stores-pickup { display:grid; gap:8px; padding:17px; background:#edf6f0; border:1px solid #d6e8dc; border-radius:12px; font-size:15px; line-height:1.5; margin:17px 0; }
+.stores-hint { color:#61766b; font-size:14px; line-height:1.7; margin-top:18px; }
+.stores-legacy { margin-top:28px; padding:20px; color:#536c5c; font-size:14px; }
+.stores-legacy summary { cursor:pointer; font-weight:700; }
+.stores-legacy article { border-top:1px solid #e0e8e1; padding:15px 0; }
+.stores-workflow { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:15px; border:1px solid #d9e8dc; border-radius:13px; padding:20px; background:#edf5ee; font-size:15px; color:#285f46; }
+.stores-section-title { font-size:21px; margin:28px 0 19px; }
+.stores-portal .scope-bar { margin:8px 32px 22px; }
+.stores-portal .chairman-view-bar > .button { min-width:0; white-space:nowrap; margin:8px 0; }
+.stores-report-controls { display:flex; gap:20px; align-items:end; padding:24px; flex-wrap:wrap; }
+.stores-report-controls .field { min-width:240px; }
+.stores-report-result { margin-top:22px; padding:24px; }
+.stores-report-result h2 { font-size:20px; margin:0; }
+.stores-report-result p { font-size:14px; color:#607469; }
+.stores-report-history { display:flex; flex-wrap:wrap; gap:10px; margin-top:22px; }
+.stores-report-history .button { font-size:14px; }
+.stores-bag-row { display:flex; gap:15px; align-items:center; justify-content:space-between; padding:20px 0; border-bottom:1px solid #dfe8e0; }
+.stores-bag-row strong { font-size:17px; }
+.stores-bag-row p { margin:8px 0 0; font-size:15px; color:#58705f; }
+.stores-invalid { color:#9b5326; font-size:14px; }
+.stores-request-detail h3 { font-size:21px; margin:20px 0 12px; }
+.stores-request-detail p, .stores-request-detail li { font-size:16px; line-height:1.7; color:#4c6656; overflow-wrap:anywhere; }
+.stores-history { list-style:none; padding:0; margin:15px 0; }
+.stores-history li { display:flex; gap:14px; justify-content:space-between; padding:14px 0; border-bottom:1px solid #e0e9e2; }
+.stores-history li span { font-size:14px; color:#687b6e; }
+.stores-portal .course-table th, .stores-portal .course-table td { font-size:14px; }
+@media (max-width:1200px) { .stores-item-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width:700px) {
+  .stores-parent-banner { padding:25px 22px; margin:20px 0; }
+  .stores-parent-banner h2 { font-size:25px; }
+  .stores-parent-banner > svg { display:none; }
+  .stores-item-grid, .stores-request-grid { grid-template-columns:minmax(0,1fr); }
+  .stores-request-card { padding:21px 18px; }
+  .stores-request-card > header { flex-wrap:wrap; }
+  .stores-local-tabs .button { flex:1; padding-inline:12px; font-size:14px; }
+  .stores-toolbar { align-items:stretch; gap:15px; }
+  .stores-status { flex:1; }
+  .stores-item-info { padding:23px 20px; }
+  .stores-portal .scope-bar { margin:8px 18px 18px; }
+  .stores-portal .chairman-view-bar > .button { font-size:14px; }
+  .stores-report-controls { padding:20px 16px; }
+  .stores-report-controls .field { min-width:0; width:100%; }
+  .stores-report-result { padding:20px 16px; }
+  .stores-report-result > header { flex-direction:column; }
+  .stores-report-history .button { width:100%; white-space:normal; }
+  .stores-workflow { flex-direction:column; align-items:flex-start; }
+  .stores-history li { flex-wrap:wrap; gap:7px; }
+  .stores-bag-row { align-items:flex-start; }
+}

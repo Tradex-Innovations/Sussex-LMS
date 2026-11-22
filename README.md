@@ -1,6 +1,6 @@
 # Sussex College Network
 
-A browser-only school portal prototype for a client walkthrough. Official Sussex school names and approximate locations are paired with sample academic, attendance, staffing, fleet, course and order data. Bus positions and trip statuses are simulated. Demo changes are saved in the current browser.
+A browser-only school portal prototype for a client walkthrough. Official Sussex school names and approximate locations are paired with sample academic, attendance, staffing, fleet, course and school-reservation data. Bus positions and trip statuses are simulated. Demo changes are saved in the current browser.
 
 ## Run locally
 
@@ -14,7 +14,7 @@ Open [the local demo](http://127.0.0.1:4183/). No install or build is required.
 
 ## Features and access reference
 
-[ROLE_FEATURES_ACCESS.md](ROLE_FEATURES_ACCESS.md) documents all 12 roles, their implemented views, read/write scope, approvals, cross-role workflows, demo accounts and prototype limits. Project instructions in [AGENTS.md](AGENTS.md) require this reference to be updated alongside future feature and permission changes. New user feature ideas are also recorded as proposed requirements before implementation. The [NFC boarding prototype](ROLE_FEATURES_ACCESS.md#nfc-boarding-prototype) demonstrates cards, reader taps and boarding registers; physical NFC hardware and notifications remain future integration work.
+[ROLE_FEATURES_ACCESS.md](ROLE_FEATURES_ACCESS.md) documents all 13 roles, their implemented views, read/write scope, approvals, cross-role workflows, demo accounts and prototype limits. Project instructions in [AGENTS.md](AGENTS.md) require this reference to be updated alongside future feature and permission changes. New user feature ideas are also recorded as proposed requirements before implementation. The [NFC boarding prototype](ROLE_FEATURES_ACCESS.md#nfc-boarding-prototype) demonstrates cards, reader taps and boarding registers; physical NFC hardware and notifications remain future integration work.
 
 ## Parent demo login
 
@@ -27,7 +27,7 @@ Open [Parent login](http://127.0.0.1:4183/#parent/login). Use a student's admiss
 | Meera Fernando | SCN-1008 |
 | Thevin Fernando | SCN-1009 |
 
-The account cards fill in demo credentials. Sign in to open that student's bus, courses, and library portal. Log out to choose another admission number. The session survives a tab refresh. Student admission numbers appear in the staff directory and can be edited by authorized branch staff.
+The account cards fill in demo credentials. Sign in to open that student's bus, courses, pupil’s books and school uniform portals. Log out to choose another admission number. The session survives a tab refresh. Student admission numbers appear in the staff directory and can be edited by authorized branch staff.
 
 ## Walkthrough
 
@@ -125,7 +125,7 @@ Open [School Administrator → Administration Overview](http://127.0.0.1:4183/#a
 - **Courses & Enrolment:** assign eligible school teachers and matching-class students, filter courses needing attention, read/download materials and review parent-recorded completion.
 - **Administration Reports:** school summary, admission register, guardian directory and course enrolment snapshots; CSV/standalone HTML/print, with eight reports per school. Passwords and private note text are excluded.
 
-Changing a student's grade/class removes incompatible course enrolments; matching-course enrolment is then assigned separately. Staff appointments, lecture publication, attendance marking and transport/library operations stay with their authorised roles. All changes remain in the browser. See the maintained [role reference](ROLE_FEATURES_ACCESS.md#school-administrator) for complete access, workflow and report rules.
+Changing a student's grade/class removes incompatible course enrolments; matching-course enrolment is then assigned separately. Staff appointments, lecture publication, attendance marking and transport/store operations stay with their authorised roles. All changes remain in the browser. See the maintained [role reference](ROLE_FEATURES_ACCESS.md#school-administrator) for complete access, workflow and report rules.
 
 ### Transport Coordinator workspace
 
@@ -151,6 +151,19 @@ Open [Driver → Daily Overview](http://127.0.0.1:4183/#driver/overview/summary)
 
 These are browser-local morning-trip demonstrations. Full access, persistence and scope are in the [Driver reference](ROLE_FEATURES_ACCESS.md#driver).
 
+### Pupil’s book and school uniform reservations
+
+Parents **reserve and collect at school**, with no purchasing, prices or payment portal. The school Book Store distributes pupil’s books; the **Uniform Store** handles uniforms separately.
+
+1. Sign in as Amaya (`SCN-1001` / `1234`). Open [Pupil’s books](http://127.0.0.1:4183/#parent/library) to see the selected pupil’s grade-matching book list. Add the required book, open **Reservation list** and **Submit reservation**.
+2. Open [School uniforms](http://127.0.0.1:4183/#parent/uniforms), choose an item/size/quantity and submit a separate reservation. Lists and requests are tied to this child, guardian, school and store type.
+3. Preview [Book Store Officer](http://127.0.0.1:4183/#librarian/overview/summary) (Hasini Perera, Nugegoda) or [Uniform Store Officer](http://127.0.0.1:4183/#uniform_store/overview/summary) (Ishara Senanayake, Nugegoda). Each has **Store Overview, Catalogue & Stock, Reservation Requests, School Collection and Store Reports**. Malabe has separate example officers/queues.
+4. Review a request and **Confirm stock** to hold the units. **Mark ready to collect** with a date, counter and hours. Parent **My reservations** then shows the reference and pickup details.
+5. At school, verify the reference/admission number, enter the receiving adult’s name and **Record collection**. Stock is consumed once. Parent can cancel Requested/Confirmed requests; later cancellation is handled by the store with a visible reason.
+6. Adjust variant stock/listing with a reason; generate isolated CSV report snapshots. Internal staff notes never appear to Parent. Old family book records remain a read-only archive, without being assigned to the selected child.
+
+Inventories are **sample 2027 book lists and uniform designs/sizes**, not official Sussex specifications. All state remains in the current browser; no message or payment is sent. Full access rules and limits are in [Book Store Officer](ROLE_FEATURES_ACCESS.md#book-store-officer) and [Uniform Store Officer](ROLE_FEATURES_ACCESS.md#uniform-store-officer).
+
 ### NFC transport cards and boarding
 
 Open [Transport Coordinator → Bus boarding](http://127.0.0.1:4183/#transport/boarding). This workspace is separate from the five existing overview tabs and is also available to Driver, School Administrator, Parent and school/network leadership.
@@ -172,10 +185,10 @@ All taps, readers and synchronisation are simulated in this browser. Physical re
 5. In an assigned Teacher view, publish or edit a handout. Open the enrolled child's course in **Parent → Courses**, download the handout, and mark it done. Teaching staff and leadership can review completion.
 6. In **School Administrator → Students & guardians**, create a student or update a record and link a guardian. Parent accounts are appointed through **Roles & access**.
 7. Open **Transport Coordinator → Bus tracking**, select a bus, and choose **Manage bus** to update its driver, stop names, and assigned students. In **Driver** view, use Daily Overview to prepare/start a checked trip and Route & Stops to confirm school arrival and complete it. The linked Parent view reflects the assignment and trip status.
-8. Open **Parent → Library**, place an order, then use **Librarian → Library** to edit price or availability and mark the order collected. Each branch manages its catalogue and orders, and each parent sees their own orders.
+8. Open **Parent → Pupil’s books** or **School uniforms**, submit a student reservation, then preview **Book Store Officer** or **Uniform Store Officer** to confirm stock, mark it ready and record collection. There are no additional-book sales, prices or payment portal. Each school/store handles its own queue; Parent sees only their own selected-child reservations.
 9. Select **Reset demo** in the role menu before a fresh walkthrough.
 
-The prototype uses browser storage and a sample account switcher. Role, scope, and dummy login checks run in the browser for the demonstration. A production deployment needs authenticated accounts and server-side authorization. GPS and book orders are simulated.
+The prototype uses browser storage and a sample account switcher. Role, scope, and dummy login checks run in the browser for the demonstration. A production deployment needs authenticated accounts and server-side authorization. GPS, stock and school collection are simulated.
 
 ## Check access rules
 
@@ -185,7 +198,7 @@ Run from this directory:
 node --test tests/*.test.mjs
 ```
 
-The checks cover branch and academic scope, teacher publishing, parent and driver assignments, role delegation, order visibility, and migration of existing demo data.
+The checks cover branch and academic scope, teacher publishing, parent and driver assignments, role delegation, book/uniform reservation and stock scope, legacy order visibility, and migration of existing demo data.
 
 ## Branch locations and performance data
 

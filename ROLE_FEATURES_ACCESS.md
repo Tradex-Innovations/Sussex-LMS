@@ -5,7 +5,7 @@
 
 **Application:** `dist/`; start locally with `python3 -m http.server 4183 --bind 127.0.0.1 --directory dist`.
 
-This is the maintained reference for the **current implementation**, covering all 12 roles, and for user-requested features awaiting implementation. A feature appears as available only when the prototype implements it. Record new user feature ideas in **Proposed features and requirements** with their status, affected roles and scope; keep recommendations distinct from requested requirements. Proposed features do not grant current permissions. Update this file alongside future implementation; the maintenance checklist is at the end.
+This is the maintained reference for the **current implementation**, covering all 13 roles, and for user-requested features awaiting implementation. A feature appears as available only when the prototype implements it. Record new user feature ideas in **Proposed features and requirements** with their status, affected roles and scope; keep recommendations distinct from requested requirements. Proposed features do not grant current permissions. Update this file alongside future implementation; the maintenance checklist is at the end.
 
 ## Contents
 
@@ -22,15 +22,16 @@ This is the maintained reference for the **current implementation**, covering al
 11. [School Administrator](#school-administrator)
 12. [Transport Coordinator](#transport-coordinator)
 13. [Driver](#driver)
-14. [Librarian](#librarian)
-15. [Parent](#parent)
-16. [NFC boarding prototype](#nfc-boarding-prototype)
-17. [Cross-role workflows](#cross-role-workflows)
-18. [Persistence and reports](#persistence-and-reports)
-19. [Demo accounts and validation](#demo-accounts-and-validation)
-20. [Proposed features and requirements](#proposed-features-and-requirements)
-21. [Maintenance checklist](#maintenance-checklist)
-22. [Change log](#change-log)
+14. [Book Store Officer](#book-store-officer)
+15. [Uniform Store Officer](#uniform-store-officer)
+16. [Parent](#parent)
+17. [NFC boarding prototype](#nfc-boarding-prototype)
+18. [Cross-role workflows](#cross-role-workflows)
+19. [Persistence and reports](#persistence-and-reports)
+20. [Demo accounts and validation](#demo-accounts-and-validation)
+21. [Proposed features and requirements](#proposed-features-and-requirements)
+22. [Maintenance checklist](#maintenance-checklist)
+23. [Change log](#change-log)
 
 ## Prototype boundaries
 
@@ -58,7 +59,8 @@ flowchart TD
   P --> A[School Administrator]
   V --> B[Transport Coordinator]
   B --> D[Driver: assigned bus]
-  P --> L[Librarian]
+  P --> L[Book Store Officer: pupil’s books]
+  P --> U[Uniform Store Officer: school uniforms]
 ```
 
 This is the recommended operating hierarchy represented by the prototype. Parent access follows the linked student, rather than the staff hierarchy. A reporting line does not automatically inherit permissions.
@@ -84,9 +86,9 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 
 | Role / internal key | Current entry | Read scope | Main changes allowed |
 | --- | --- | --- | --- |
-| Chairman / `chairman` | Overview → Transport | Network or selected school(s) | School details, staff appointments, student/course/material/bus/library management, vacancy review, reports; NFC school oversight and card management. |
-| Principal / `principal` | Overview → Transport | Assigned school | Lower-role appointments, student/course/material/bus/library management, leave decisions, trip controls, vacancy review, reports; NFC school oversight and card management. |
-| Vice Principal / `vice_principal` | Overview → Transport | Assigned school | Daily follow-ups, temporary cover, leave recommendations, cover-request decisions, student/course/material/bus/library coordination, reports; read NFC trip coverage/manifests. |
+| Chairman / `chairman` | Overview → Transport | Network or selected school(s) | School details, staff appointments, student/course/material/bus and book/uniform store management, vacancy review, reports; NFC school oversight and card management. |
+| Principal / `principal` | Overview → Transport | Assigned school | Lower-role appointments, student/course/material/bus and book/uniform store management, leave decisions, trip controls, vacancy review, reports; NFC school oversight and card management. |
+| Vice Principal / `vice_principal` | Overview → Transport | Assigned school | Daily follow-ups, temporary cover, leave recommendations, cover-request decisions, student/course/material/bus and book/uniform store coordination, reports; read NFC trip coverage/manifests. |
 | Section Head / `section_head` | Overview → Section Overview | Appointed school and section | Section course assignments/enrolment, material reviews, attendance follow-ups, cover requests, section reports. |
 | Grade Coordinator / `coordinator` | Overview → Grade Overview | Appointed school and grade | Course enrolment, attendance follow-ups, class coordination reviews, Section Head support requests, grade reports; assigned course teacher is retained. |
 | Class Teacher / `class_teacher` | Overview → Class Overview | Appointed school, grade and class | Own sample-class attendance, follow-ups, private discussion records, Grade Coordinator support requests, class reports, publication only on courses assigned to the same account. |
@@ -94,12 +96,13 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 | School Administrator / `admin` | Overview → Administration Overview | Actual student, guardian and course records in appointed school | Register/edit admissions, link existing guardians, assign school teachers/matching-class enrolments and generate administration reports; issue/replace/deactivate NFC transport cards. |
 | Transport Coordinator / `transport` | Overview → Fleet Activity | Appointed school’s operational fleet, transport roster and own assigned transport follow-ups | Route/driver/student allocation, shared Vice Principal issue progress and transport reports; NFC rosters, simulated reader taps/sync and boarding corrections. |
 | Driver / `driver` | Overview → Daily Overview | Current assigned bus, own current-bus trip logs/issues, allocated students and latest NFC roster | Save safety checklist; start/complete recorded morning trips; confirm stops; report concerns to school transport; operate assigned NFC reader. |
-| Librarian / `librarian` | Library | Assigned school catalogue/orders | Edit price/availability; mark orders collected. |
-| Parent / `parent` | Admission login → Bus tracking | Selected linked student and own orders | Download/mark materials done; place book orders; manage own book bag; read admission-selected child’s NFC boarding status/history. |
+| Book Store Officer / `librarian` | Overview → Store Overview | Appointed school’s pupil-book stock and student reservations | Review/confirm/decline, hold stock, prepare collection, record handover, adjust stock and create store reports. |
+| Uniform Store Officer / `uniform_store` | Overview → Store Overview | Appointed school’s uniform sizes/stock and student reservations | Same reservation/collection workflow for uniforms only, with size-level stock and separate reports. |
+| Parent / `parent` | Admission login → Bus tracking | Admission-selected child’s bus, courses and own book/uniform reservations; own earlier family book records | Download/mark materials done; reserve pupil’s books and sized uniforms for collection, track status/reference and cancel eligible requests; read own child’s NFC status/history. |
 
 ## Chairman
 
-**Entry:** `#chairman/overview/transport`. **Navigation:** Overview, Bus tracking, Courses, Students & guardians, Library, Roles & access, Bus boarding.
+**Entry:** `#chairman/overview/transport`. **Navigation:** Overview, Bus tracking, Courses, Students & guardians, Pupil’s books, School uniforms, Roles & access, Bus boarding.
 
 ### Overview views
 
@@ -117,7 +120,7 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 - Assign school teachers and matching-class students to existing courses.
 - Publish/edit/download materials and review parent-recorded completion.
 - Manage existing operational bus routes, stop names, drivers and assigned students.
-- Manage catalogue price/availability and collect parent book orders.
+- Manage school/network-scoped pupil-book and uniform stock, student reservations and collection; view isolated store report snapshots. No selling, price editing or online payment is provided.
 
 **Limits:** synthetic network buses are read-only. Final leave decisions and the dedicated start/end controls in the school overview are exposed in the Principal workflow; Chairman dashboards do not contain an additional leave approval screen. Reviewing a vacancy does not fill it.
 
@@ -133,7 +136,7 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 - **Attendance:** student/staff registers (including saved Class Teacher student entries), class summaries, grade/class/date/period filters, personal calendars and repeated absence views.
 - **Staffing Overview:** school leadership, availability, capacity, directory, vacancies and sample leave requests. Approve/decline leave; the result changes sample staff availability, attendance, pulse and newly generated reports. See the Vice Principal's recommendation and note before deciding.
 - **Executive Reports:** school brief and individual operational reports, CSV/HTML/print, separate school/Principal snapshot history.
-- **Management:** add/edit students; assign course teachers/students; publish/edit materials; manage buses and catalogue/orders; appoint/remove lower roles within the school.
+- **Management:** add/edit students; assign course teachers/students; publish/edit materials; manage buses and pupil-book/uniform reservations/stock; appoint/remove lower roles within the school.
 
 **Limits:** no other-school records, no school detail edit, no Principal or Chairman appointments, no network-wide comparisons or report history. Final leave decisions do not send messages.
 
@@ -141,7 +144,7 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 
 ## Vice Principal
 
-**Entry:** `#vice_principal/overview/transport`. **Scope:** appointed school. **Navigation:** Overview, Bus tracking, Courses, Students & guardians, Library, Bus boarding.
+**Entry:** `#vice_principal/overview/transport`. **Scope:** appointed school. **Navigation:** Overview, Bus tracking, Courses, Students & guardians, Pupil’s books, School uniforms, Bus boarding.
 
 - **Daily pulse and follow-up board:** school attendance, teacher availability, classes to review, delayed bus signals; three seed coordination tasks plus added tasks; category, owner, due date, status and dated note history. Transport Coordinators can create bus issues assigned to themselves and update their own transport tasks through the shared board. The Vice Principal sees their progress/bus reference and retains owner, category, title and due-date control. Reassignment removes the task from its former coordinator’s view. No external notification is sent.
 - **Transport Activity:** assigned-school map/fleet/details; record a bus issue as a named follow-up. The separate Bus tracking workspace provides existing bus/driver/student/stop management.
@@ -151,7 +154,7 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 - **Section Head cover requests:** pending requests appear in Staffing Overview. Assign available cover to the requested course, or decline with a note. The Section Head sees the outcome. Cancelling cover linked to a request reopens that request for replacement.
 - **Driver transport concerns:** submitted issues join the existing school Follow-up board with their bus reference and assigned Transport Coordinator. Review/reassignment uses the existing follow-up controls. Drivers see their own submitted text and status, not internal staff notes.
 - **School Reports:** operational brief plus transport/academic/attendance/staffing snapshots. Briefs also capture follow-ups, active cover and leave recommendations awaiting Principal decision. CSV/HTML/print; eight snapshots per school/role.
-- **Management retained:** school student records, course teacher/student assignments, material publication, existing bus management and catalogue/order management.
+- **Management retained:** school student records, course teacher/student assignments, material publication, existing bus management and pupil-book/uniform reservation/stock management.
 
 **Limits:** no permanent staff appointments, final leave approval, network scope or other-school inboxes/history. Temporary cover is stored separately from permanent course assignments and does not grant Teacher access. Cover requests are acted on through the local demo, not sent as messages.
 
@@ -503,26 +506,58 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 
 **Persistence and limits:** `driverRuns` and `driverIncidents` persist in the same browser, with empty defaults for existing saved data. No new accounts, device permissions, production GPS, vehicle checks/sensors, protected audit service, notifications, emergency dispatch or student alighting workflow is connected. No route/driver/student reassignment, card administration, school/class attendance, academic marks, courses, library, roles or school-wide report access is added. Replaced/cleared drivers retain an unassigned appointment and see **No bus assigned** until allocated again.
 
-## Librarian
+## Book Store Officer
 
-**Entry:** `#librarian/library`. **Scope:** appointed school’s catalogue and orders.
+**Display role:** Book Store Officer. **Internal key:** `librarian`, retained so existing school appointments/bookmarks keep working. This role now runs a **pupil’s book distribution store**, not a general lending library or additional-book sales catalogue.
 
-- Read catalogue, pricing and availability; edit existing book prices and availability.
-- Read school parents' book orders and mark an order collected.
+**Entry:** `#librarian/overview/summary`. **Navigation:** Overview and Pupil’s books (`#librarian/library` remains a catalogue entry). **Scope:** the currently appointed school, revalidated for reads/writes/reports. Chairman, Principal and Vice Principal also manage stores within their existing network/school scope through Pupil’s books/School uniforms; other staff roles gain no store access.
 
-**Limits:** no payment processing, cross-school orders, student/course/staff/bus management, role appointments or full library lending/inventory system. Book orders are for school collection/payment in the demonstration.
+### Implemented store views
+
+- **Store Overview:** requested, ready-to-collect and collected reservation counts; held-unit total; latest school book requests and the request/confirm/ready/collect workflow. Empty schools do not borrow another branch’s inventory or requests.
+- **Catalogue & Stock:** sample school-issued Mathematics, English and Science Pupil’s Books for Grades 1–13, each with a standard edition and on-hand/held/available quantities. These are **2027 demo lists**, not verified Sussex subject/book requirements. Preschool has no seeded book list. Nugegoda/Malabe have sample stock; the other 18 schools remain empty until configured in a future feature.
+- **Reservation Requests:** search reference/pupil/admission/item; filter status; review pupil/admission/class and captured item/quantity data. New requests are routed by school and `books` type, visible only in the corresponding store/leadership scope.
+- **School Collection:** read ready/collected requests, verify the parent’s reference and pupil admission at handover, enter the receiving adult’s name, then record collection. The reference is a demo collection identifier, not authentication or payment evidence.
+- **Store Reports:** activity brief/reservation register, stock availability and collection-register snapshots; preview and formula-safe CSV; eight per account/role/school/store scope. Reports contain scoped operational pupil data but exclude internal notes and receiving-adult details. No invoice, payment report, exported PDF or stock procurement system is added.
+
+### Reservation lifecycle and stock
+
+1. Parent submits **Requested** for the admission-selected pupil; requested items do **not** hold stock. Parent sees that confirmation is pending.
+2. Store **Confirms** after rechecking every line’s available stock. Confirmation holds the requested units atomically. Insufficient stock cannot be overbooked; staff can adjust stock or decline with a parent-visible reason.
+3. Store marks **Ready to collect**, providing a collection date (**22 November–31 December 2026** demo window), counter/location and collection hours. Parent receives those details in the portal; no message is sent.
+4. Store records **Collected** only after matching the entered reservation reference and receiving-adult name. On-hand units are reduced once; the held quantity is released. Duplicate/invalid transitions are rejected.
+5. Staff can decline Requested or cancel Confirmed/Ready with a parent-facing reason. Parent can cancel own Requested/Confirmed requests; once Ready, the school store handles cancellation. Cancellation releases held units. Collected records are retained and cannot be overwritten through this flow.
+
+Stock edits require an adjustment reason, whole units from 0–10,000 and on-hand stock at least equal to current holds. An item's listing can be hidden (all its sizes/editions); this blocks new requests while existing confirmed reservations can still be fulfilled. Stock adjustment history and fulfilment notes are staff-only. Book title/grade/edition creation/deletion and price editing are not provided.
+
+**Limits:** no uniform-store writes, other-school reservations/stock, school-wide admissions/guardians, role appointments, course or attendance changes, transport operations, lending/returns, purchase/checkout/payment or external notification. Existing earlier `orders`/`carts` are preserved but cannot be processed through the removed sales actions; Parent sees earlier family book records as a separate read-only archive, without invented pupil ownership or payment actions.
+
+## Uniform Store Officer
+
+**Recommended section name:** Uniform Store. **Internal role:** `uniform_store`. **Entry:** `#uniform_store/overview/summary`. **Navigation:** Overview and School uniforms (`#uniform_store/uniforms`).
+
+- Implements the same five scoped views and reservation lifecycle as Book Store Officer: **Store Overview, Catalogue & Stock, Reservation Requests, School Collection and Store Reports**.
+- Sample catalogue: school shirt, trousers, skirt and sports T-shirt. Sizes, illustrations and quantities are prototype examples, not Sussex's approved uniform specification or a sizing guide. Each listed size has separate on-hand/held/available stock and stock-adjustment history.
+- Parent chooses a listed size and quantity (1–3 per item/size), reserves for the selected child and collects from the school Uniform Store. No student gender/body measurements or payment information is collected.
+- Uniform requests, stock holds, confirmations, collection locations and reports remain distinct from books, even when a parent submits both during one login. Requests route to the child's school and `uniforms` type rather than to an individual officer.
+- Only current same-school Uniform Store Officers and scoped leadership can process them. Book Store Officers cannot see/process uniform requests, and Uniform Store Officers cannot process pupil-book requests. Principal/Chairman can appoint the new role through Roles & access.
+- No pattern/supplier procurement, tailoring, exchanges/returns, size recommendation engine, invoice/payment or external messaging is implemented. Other school/academic/transport data remains outside this role.
 
 ## Parent
 
-**Entry:** `#parent/login`, then `#parent/transport`. **Views:** Bus tracking; Courses; Library; Bus boarding. **Scope:** one admission-selected student linked to the guardian’s school role, plus that guardian's own library orders.
+**Entry:** `#parent/login`, then `#parent/transport`. **Views:** Bus tracking; Courses; Pupil’s books; School uniforms; Bus boarding. **Scope:** one admission-selected student linked to the guardian’s school role and that guardian’s own reservations for that child; earlier family book records remain separately labelled.
 
 - Sign in with the selected student's admission number and `1234`; example cards fill credentials. Login rejects an unknown student, wrong password, or missing linked guardian/school role. Log out to select another student.
 - Track the student’s assigned bus, simulated route/progress/stops and arrival context. Show an empty state when no bus is assigned.
 - Read only courses in which the selected student is enrolled; download lecture notes/attachments; mark materials done/undone and see progress. Teachers/leadership can review that completion.
-- Browse the school book catalogue; search/filter, add/remove quantities in a personal book bag, place an order for school collection and review own order history.
-- Session survives refresh. Course completion is stored per student; book bag/order history belongs to the parent account and school.
+- **Pupil’s books:** browse only the selected child’s current grade and school; search school-issued sample subjects, add one copy per pupil’s book to a student-specific reservation list and submit for school collection. No additional reading books, prices, purchasing or payment portal are offered. Duplicate open reservations for the same pupil/book/year are blocked, including a second guardian; a collected 2027 pupil’s book cannot be requested again in this demo cycle.
+- **School uniforms:** browse the child’s school catalogue, choose item/size and 1–3 units per size, then submit a separate request to the Uniform Store. Duplicate open requests for the same pupil/item/size are blocked; later requests after collection are allowed.
+- Each reservation list is separated by guardian, selected pupil, school and store type. Remove unavailable/stale entries and recheck quantities before submission. Current stock is checked on submit and again on staff confirmation.
+- **My reservations:** read own selected-child references, captured items/sizes/quantities, progress and collection location/date/hours. Cancel Requested/Confirmed requests; contact the relevant store after Ready. Internal staff notes/identity history are hidden, while decline/cancellation reasons are shown.
+- Collection is an in-school handover against the reference/admission number. The Parent portal requests no card/bank/payment details. No SMS/email/push notification is sent.
+- Session survives refresh. Course completion stays per student; book/uniform lists and reservations are per guardian/student/school/type. Earlier legacy family book records remain read-only and are not automatically assigned to the currently selected child.
 
-**Limits:** no other family's orders or unlinked student data, staff role switcher inside the signed-in portal, teacher material publication, admission/course/bus edits, school comparisons, payments or real GPS guarantees. Internal Section Head review notes are hidden from this portal.
+**Limits:** no other family's orders or unlinked student data, other guardians’ reservations, internal store notes, staff fulfilment/stock controls, staff role switcher inside the signed-in portal, teacher material publication, admission/course/bus edits, school comparisons, payments or real GPS guarantees. Internal Section Head review notes are hidden from this portal.
 
 **NFC boarding status:** `#parent/boarding` shows only the admission-selected child’s latest transport status, date/direction, bus, recorded time, sync warning and boarding history. It exposes no other passengers, card codes, staff reasons or reader controls. See [NFC boarding prototype](#nfc-boarding-prototype).
 
@@ -653,17 +688,17 @@ The Vice Principal may also create cover directly without a request. Cover teach
 3. Driver/Coordinator flags concerns; Coordinator synchronises readers, closes pickup and reviews untapped students. Confirmed not boarded is a reasoned, post-sync review action. Classroom attendance stays separate.
 4. Parents see only their admission-selected child's status/history. School leadership reads scoped coverage/manifests; physical devices and notifications remain future integration work.
 
-### Transport and books
+### Transport and school supplies
 
 - Transport Coordinator/authorised school leadership updates an operational bus’s route labels, eligible driver and school students. The final school stop stays fixed. Student moves change only the transport allocation; Driver/Parent views use the current bus and status.
 - Driver moves leave the former vehicle without a driver, synchronise the new bus appointment and retain replaced/cleared drivers as unassigned school Driver accounts. The coordinator can allocate these existing appointments again. Driver/Principal controls trip start/end; coordinator issue status does not dispatch a bus.
 - Transport Coordinator issues and Vice Principal follow-ups share `viceFollowups`. Only transport tasks assigned to the active coordinator are writable in their role; the Vice Principal controls ownership/category/title/due dates. Reassignment removes old-coordinator task/report access. This is local coordination, without messages or notifications.
-- Parent places a school collection order; Librarian/authorized school leadership marks collection. No online payment occurs.
+- Parent reserves pupil’s books or sized uniforms for the selected child. Requests route to the school Book Store or Uniform Store separately. Staff confirm stock, set collection details and verify handover; scoped leadership coordinates both. Parent sees own request progress without internal notes or online payment.
 
 ## Persistence and reports
 
 - Application state is stored under browser localStorage key `campusway-demo-v1`; the demo merges saved v2 state with defaults to preserve existing records. Parent session storage is separate from the state payload.
-- Course assignments, materials, completion, carts/orders, bus status/assignment, staff appointments, leave decisions/recommendations, reviews, follow-ups, cover and snapshots persist in the same browser. Other devices/browsers do not share these changes.
+- Course assignments, materials, completion, legacy carts/orders, new reservation lists/store requests/stock, bus status/assignment, staff appointments, leave decisions/recommendations, reviews, follow-ups, cover and snapshots persist in the same browser. Other devices/browsers do not share these changes.
 - **Reset demo** restores sample state. Storage failures show an error/toast instead of claiming success. Browser storage and the 2 MB individual attachment limit constrain uploads; this is not durable document storage.
 - School executive report history is owned by role/school (Principal/Vice Principal), or Chairman account; the latest eight are retained per workspace. Section report history is separately owned by school + section under the Section Head role, eight per workspace.
 - Grade Coordinator report history is independently owned by school + grade under the `coordinator` role, with eight snapshots per workspace; it does not share Section Head or executive report history.
@@ -674,6 +709,8 @@ The Vice Principal may also create cover directly without a request. Cover teach
 - School Administrator adds `adminReports`, eight per appointed school/role, shared by administrators in the same school and isolated from other roles. No new demo accounts or migration are required. Captured student/course school membership and the current appointment are rechecked before report access. New admissions, guardian links and course assignments use existing student/assignment storage; report exports omit passwords and internal note text.
 - Transport Coordinator adds `coordinatorReports`, eight per coordinator account/school, and bus-linked transport tasks in the existing `viceFollowups` list. No new demo accounts or migration are required. Saved tasks retain shared note history; reports omit note text and recheck captured task ownership/category plus bus/student school scope. Driver assignment updates preserve unassigned Driver appointments instead of deleting them.
 - Driver adds `driverRuns` (draft/checklist, route snapshot, start/completion and stop receipts) and `driverIncidents` (own submissions linked to shared school tasks). Existing browser data gains empty collections without resetting records or NFC state. Read/write/export scope is rechecked against the current driver/bus appointment; older records remain stored but become unavailable after reassignment. Trip CSV is generated directly from an accessible record, with no new leadership report-history store.
+- Stores add `storeCatalog`, `storeReservations`, `reservationBags`, `storeReports` and sequence `storeSequence`. A one-time `storesVersion` migration adds sample book/uniform inventories and missing Uniform Store demo accounts while preserving older orders/carts, admissions, courses, NFC and Driver data. Later edits/deactivated listings/removed accounts are not reseeded. Existing `librarian` appointments are renamed in the UI, not replaced. Status transitions and stock changes validate before mutation; this is browser-local consistency, not concurrent server/database transactions.
+- Store reports are independent per active account/role/school/kind, latest eight. Snapshots retain captured values; current appointment, branch scope and captured pupils’ current school membership are rechecked before access/export. A reservation is unavailable to staff/parent if its pupil leaves that school; its units no longer contribute to accessible stock holds. No school-move operational transfer process is added.
 - NFC state includes `nfcCards`, `nfcReaders` (online state/queue/sync), `nfcTrips` (snapshot rosters), `nfcEvents` and ordering counter `nfcSequence`. A one-time `nfcVersion` migration seeds readers/cards from the browser’s current buses/allocated students without replacing existing admissions, assignments, notes or trip state. Later lost/replaced cards, queued taps and event histories persist and are not reseeded. All roles share this browser-local demonstration state; there is no device/backend synchronisation service.
 - Report snapshots capture values at generation time. Filters/data edits do not rewrite older reports. Scope checks apply to opening, downloading and printing saved reports.
 - CSV values are quoted and dangerous leading spreadsheet formula characters are neutralised. Exports carry sample provenance and relevant scope/filter metadata.
@@ -694,7 +731,8 @@ The Vice Principal may also create cover directly without a request. Cover teach
 | Administrator | Anjali Fernando (`admin_c`) — Nugegoda; Shanika Dias (`admin_l`) — Malabe. Both preview all five administration views in their own school. |
 | Transport Coordinator | Nimal Rathnayake (`transport_c`) — Nugegoda (six operational buses); Chamara Silva (`transport_l`) — Malabe (two operational buses). Both have five scoped overview views. |
 | Driver | Kasun Dias (`driver_01`) — Nugegoda Bus 01; Nalin De Silva (`driver_07`) — Malabe Bus 07. All eight operational demo buses have Driver accounts; assignment changes control current access. Five overview views plus map and NFC boarding. |
-| Librarian | Hasini Perera — Nugegoda; school librarian appointments also exist at Malabe. |
+| Book Store Officer | Hasini Perera (`librarian_c`) — Nugegoda; Kumari Rodrigo (`librarian_l`) — Malabe. Existing appointments retained under the renamed role. |
+| Uniform Store Officer | Ishara Senanayake (`uniform_c`) — Nugegoda; Dulani Jayawardena (`uniform_l`) — Malabe. Both have the five store views. |
 | Parent | Amaya `SCN-1001`, Kavin `SCN-1002`, Meera `SCN-1008`, Thevin `SCN-1009`; password `1234`. |
 
 Role assignments may be changed in the demo, so these are seeded examples rather than immutable staff records.
@@ -705,11 +743,19 @@ Role assignments may be changed in the demo, so these are seeded examples rather
 node --test tests/*.test.mjs
 ```
 
-The suite covers access, migration, parent admission selection, network/directory/fleet data, academic/attendance reconciliation, report isolation, Principal leave decisions, Vice Principal coordination, Section Head scope/reviews/follow-ups and the cover-request handoff, Grade Coordinator scope/class reviews/follow-ups/reports, Section Head support responses and new-account migration. Browser verification should cover all five Section Head views, all three seeded Section Head accounts, 390px/320px layouts, course/material interactions, persistent follow-up/review/request outcomes, role switching and report CSV/HTML/print handling. Grade Coordinator browser checks should cover all five views, all three seeded grade accounts, enrolment teacher protection, material downloads, class/follow-up note persistence, Section Head queue isolation/responses, report exports and 390px/320px layouts. Class Teacher checks should cover fixed class scope, own-subject publication and parent completion, attendance overlays/restores across leadership views, private discussion notes, coordinator responses, report isolation and mobile forms. Check one-choice attendance buttons, keyboard navigation, live totals, draft cancellation, search/empty states, whole-list All present, saving while filtered, saved preselection and persistent Save controls at small screen sizes. Subject Teacher checks cover actual grant and course/student scope, own-course publication and parent completion, plan/review history, staff-only note visibility, coordinator queue isolation/responses, Class Teacher attendance separation, reassignment, report retention and scoped CSV/HTML/print. Check five teaching accounts and 1500px/390px/320px layouts, including forms. School Administrator checks cover both schools, direct registration/edit and duplicate admissions, same-school guardian links, class-change enrolment cleanup, course teacher/enrolment writes and parent completion, private-note exclusion, current-appointment checks, filtered report totals/history, legacy routes and desktop/mobile forms. Transport Coordinator checks cover the operational-only street map, filtering/selection and paused simulation, driver/student moves and empty assignments, fixed school destination, cross-school rejection, Driver/Parent propagation, shared Vice Principal task history/reassignment, five report types with note exclusion/history isolation, legacy tracking, empty-school fleets and mobile forms/maps. NFC checks cover seven roles, current school/bus/child scope, card issue/loss/replacement and migration, roster snapshots, repeated/wrong-card taps, offline receipt reconciliation and historical card validity, coordinator review/closure rules, Parent privacy, CSV exclusion and mobile reader/card/review forms. Driver checks additionally cover incomplete/full safety checks, route/allocation invalidation, sequential stops/school arrival, shared fleet status, current-bus student/NFC summaries, issue handoff/status/privacy, trip CSV, existing-map compatibility, saved-state preservation, stale appointment/reassignment rejection and five views/forms at 1500px/390px/320px. Keep passing test counts/evidence in the change log when updated.
+The suite covers access, migration, parent admission selection, network/directory/fleet data, academic/attendance reconciliation, report isolation, Principal leave decisions, Vice Principal coordination, Section Head scope/reviews/follow-ups and the cover-request handoff, Grade Coordinator scope/class reviews/follow-ups/reports, Section Head support responses and new-account migration. Browser verification should cover all five Section Head views, all three seeded Section Head accounts, 390px/320px layouts, course/material interactions, persistent follow-up/review/request outcomes, role switching and report CSV/HTML/print handling. Grade Coordinator browser checks should cover all five views, all three seeded grade accounts, enrolment teacher protection, material downloads, class/follow-up note persistence, Section Head queue isolation/responses, report exports and 390px/320px layouts. Class Teacher checks should cover fixed class scope, own-subject publication and parent completion, attendance overlays/restores across leadership views, private discussion notes, coordinator responses, report isolation and mobile forms. Check one-choice attendance buttons, keyboard navigation, live totals, draft cancellation, search/empty states, whole-list All present, saving while filtered, saved preselection and persistent Save controls at small screen sizes. Subject Teacher checks cover actual grant and course/student scope, own-course publication and parent completion, plan/review history, staff-only note visibility, coordinator queue isolation/responses, Class Teacher attendance separation, reassignment, report retention and scoped CSV/HTML/print. Check five teaching accounts and 1500px/390px/320px layouts, including forms. School Administrator checks cover both schools, direct registration/edit and duplicate admissions, same-school guardian links, class-change enrolment cleanup, course teacher/enrolment writes and parent completion, private-note exclusion, current-appointment checks, filtered report totals/history, legacy routes and desktop/mobile forms. Transport Coordinator checks cover the operational-only street map, filtering/selection and paused simulation, driver/student moves and empty assignments, fixed school destination, cross-school rejection, Driver/Parent propagation, shared Vice Principal task history/reassignment, five report types with note exclusion/history isolation, legacy tracking, empty-school fleets and mobile forms/maps. NFC checks cover seven roles, current school/bus/child scope, card issue/loss/replacement and migration, roster snapshots, repeated/wrong-card taps, offline receipt reconciliation and historical card validity, coordinator review/closure rules, Parent privacy, CSV exclusion and mobile reader/card/review forms. Driver checks additionally cover incomplete/full safety checks, route/allocation invalidation, sequential stops/school arrival, shared fleet status, current-bus student/NFC summaries, issue handoff/status/privacy, trip CSV, existing-map compatibility, saved-state preservation, stale appointment/reassignment rejection and five views/forms at 1500px/390px/320px. Store checks cover grade/student/school/type isolation, uniform sizes/quantities, separate pupil bags, duplicate requests/guardians, stock holds/oversubscription, lifecycle/cancellation/reference verification, private-note exclusion, stock adjustments/listing changes, stale bag cleanup, report ownership/CSV safety, legacy-data migration and mobile catalogue/request/stock/collection forms. Keep passing test counts/evidence in the change log when updated.
 
 ## Proposed features and requirements
 
 This section captures user-requested features before implementation. Keep their status explicit, distinguish the request from recommended additions, and move implemented details into the relevant role/workflow sections only when the system actually supports them. These entries do not change current permissions or imply deployment.
+
+### Pupil’s books and school uniform reservations
+
+**Feature ID:** `SCHOOL-SUPPLIES-RESERVATION-001`. **Requested and confirmed:** 22 November 2026. **Status:** **Prototype implemented**.
+
+**User requirement:** replace additional-book ordering with pupil’s book distribution reservations; add the same reserve-and-collect process for school uniforms; send requests to the Book Store or uniform section and complete both staff roles. The user explicitly confirmed **“Reserve and collect only — no online payment.”**
+
+**Recommended and implemented:** Book Store Officer (existing `librarian` key renamed), new Uniform Store Officer/Uniform Store section, pupil-specific lists and snapshots, separate school/store queues, stock confirmation/holds, Ready collection details, reference-checked handover, controlled cancellation, staff notes, stock adjustment and scoped CSV reports. School book lists/designs/stock are illustrative. Production stock/device/service integration, notifications, sales/payments and uniform returns/exchanges remain unsupported.
 
 ### Driver daily workspace
 
@@ -826,3 +872,11 @@ For **every new user feature idea or future implementation**:
 - Added own-bus student/card-readiness/latest-NFC summaries and driver concerns routed to appointed school Transport Coordinators through the Vice Principal's shared follow-up board. Driver receives submitted-text/status visibility only; staff notes remain private.
 - Added browser-persistent Driver collections and current-appointment/current-bus validation, with stale/foreign record and recipient rejection. Reassignment hides former-bus logs/issues/exports. Updated related Driver/Coordinator/Vice Principal, workflow, persistence, demo-account, proposed-feature and README entries.
 - Validation: **145 Node tests passed**, including 15 new Driver cases. Browser checks passed for partial/full checklists, start, sequential stops/completion, coordinator issue handoff/status privacy, CSV exclusion, assigned-student search/NFC integration, reassignment and Malabe account separation. All five views passed 1500px/390px/320px width checks; mobile checklist and issue forms were inspected. Existing Transport Coordinator workflows (including Driver/Parent propagation) and all seven NFC portals also passed browser regression checks. No physical devices, real alerts, emergency dispatch or alighting were added.
+
+### 22 November 2026 — Pupil’s books and Uniform Store reservations
+
+- Replaced active additional-book sales/cart/price/checkout controls with grade-matching pupil-book reservation lists and separate sized-uniform reservations for the admission-selected child. User confirmed collection only, without online payment. Earlier family order/cart data is preserved as legacy data, with Parent read-only order history.
+- Completed Book Store Officer (renamed existing Librarian appointment) and new Uniform Store Officer roles with five views each: Store Overview, Catalogue & Stock, Reservation Requests, School Collection and Store Reports. Added Nugegoda/Malabe Uniform Store demo appointments and the Principal/Chairman appointment option; leadership retains scoped store coordination.
+- Added requested/confirmed/ready/collected/cancelled/declined state transitions, stock holds and single collection consumption, size-level uniform stock, collection details/reference/receiving-adult capture, private store notes and stock-adjustment history. Added isolated snapshot reports and safe CSV; Parent cancellation/duplicate protection and current school/student/store access are checked.
+- Added one-time store migration preserving academic, transport, NFC, admissions and earlier orders/carts. Updated role reference, hierarchy, current permission/workflow/persistence sections, feature tracker and README. No additional-book sales, payment gateway, production inventory/backend, notification, lending or uniform returns service is connected.
+- Validation: **165 Node tests passed**, including 20 new store/reservation cases. Browser checks passed for selected-pupil grade-matching books, sized/quantity uniform requests, separate school/store queues, confirmation/holds, ready collection details, reference validation and handover, single stock consumption, stock edits, parent cancellation, note/guardian/pupil privacy, CSV snapshots, reload persistence and leadership oversight. Both five-view store portals and both Parent sections passed 1500px/390px/320px width checks; mobile stock/request dialogs were inspected. Existing Driver workflows and all seven NFC portals also passed browser regression checks. No physical stock, payment, external message or actual school-counter handover was connected or performed.

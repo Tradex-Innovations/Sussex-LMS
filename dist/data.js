@@ -1,10 +1,11 @@
+import { storesSeed, storeOfficerAccounts } from "./stores-seed.js";
 import { boardingSeed } from "./boarding-seed.js";
 import { branchDirectory } from "./network-data.js";
 
 export const roles = {
-  chairman: { name: "Chairman", icon: "school", start: "overview", pages: ["overview", "transport", "courses", "people", "library", "access", "boarding"] },
-  principal: { name: "Principal", icon: "badge", start: "overview", pages: ["overview", "transport", "courses", "people", "library", "access", "boarding"] },
-  vice_principal: { name: "Vice Principal", icon: "badge", start: "overview", pages: ["overview", "transport", "courses", "people", "library", "boarding"] },
+  chairman: { name: "Chairman", icon: "school", start: "overview", pages: ["overview", "transport", "courses", "people", "library", "uniforms", "access", "boarding"] },
+  principal: { name: "Principal", icon: "badge", start: "overview", pages: ["overview", "transport", "courses", "people", "library", "uniforms", "access", "boarding"] },
+  vice_principal: { name: "Vice Principal", icon: "badge", start: "overview", pages: ["overview", "transport", "courses", "people", "library", "uniforms", "boarding"] },
   section_head: { name: "Section Head", icon: "users", start: "overview", pages: ["overview", "courses", "people"] },
   coordinator: { name: "Grade Coordinator", icon: "users", start: "overview", pages: ["overview", "courses", "people"] },
   class_teacher: { name: "Class Teacher", icon: "book", start: "overview", pages: ["overview", "courses", "people"] },
@@ -12,8 +13,9 @@ export const roles = {
   admin: { name: "School Administrator", icon: "settings", start: "overview", pages: ["overview", "people", "courses", "boarding"] },
   transport: { name: "Transport Coordinator", icon: "route", start: "overview", pages: ["overview", "transport", "boarding"] },
   driver: { name: "Driver", icon: "bus", start: "overview", pages: ["overview", "transport", "boarding"] },
-  librarian: { name: "Librarian", icon: "library", start: "library", pages: ["library"] },
-  parent: { name: "Parent", icon: "user", start: "transport", pages: ["transport", "courses", "library", "boarding"] },
+  librarian: { name: "Book Store Officer", icon: "library", start: "overview", pages: ["overview", "library"] },
+  uniform_store: { name: "Uniform Store Officer", icon: "package", start: "overview", pages: ["overview", "uniforms"] },
+  parent: { name: "Parent", icon: "user", start: "transport", pages: ["transport", "courses", "library", "uniforms", "boarding"] },
 };
 
 export const sections = [
@@ -118,6 +120,7 @@ function seedAccounts() {
     account("driver_08", "Ashan Mendis", [grant("driver", "lakeside", { bus: "08" })]),
     account("librarian_c", "Hasini Perera", [grant("librarian")]),
     account("librarian_l", "Kumari Rodrigo", [grant("librarian", "lakeside")]),
+    ...structuredClone(storeOfficerAccounts),
     account("parent", "Nadeesha Perera", [grant("parent")]),
     account("parent_l", "Tharushi Fernando", [grant("parent", "lakeside")]),
   ];
@@ -157,6 +160,7 @@ export function freshState() {
   for (const course of courses) scopedAssignments["lake-" + course.id] = { teacher: "lakshmi", students: [course.grade === 8 ? "meera" : "thevin"] };
   return {
     version: 2,
+    ...storesSeed(),
     driverRuns: [],
     driverIncidents: [],
     networkVersion: 1,
@@ -198,7 +202,7 @@ function migrateSchoolLabel(label) {
 
 function migratedDemoAccounts(saved, defaults) {
   const accounts = [...(saved.accounts || defaults.accounts)];
-  const additions = [...(!saved.gradeCoordinatorVersion ? ["coordinator6_c", "coordinator8_l"] : []), ...(!saved.classTeacherVersion ? ["class_teacher6_c", "class_teacher8_l"] : [])];
+  const additions = [...(!saved.storesVersion ? ["uniform_c", "uniform_l"] : []), ...(!saved.gradeCoordinatorVersion ? ["coordinator6_c", "coordinator8_l"] : []), ...(!saved.classTeacherVersion ? ["class_teacher6_c", "class_teacher8_l"] : [])];
   for (const person of defaults.accounts.filter((person) => additions.includes(person.id))) if (!accounts.some((existing) => existing.id === person.id)) accounts.push(person);
   return accounts;
 }
@@ -212,6 +216,7 @@ export function loadState() {
       return {
         ...defaults,
         ...saved,
+        ...(!saved.storesVersion ? storesSeed() : {}),
         ...(!saved.nfcVersion ? boardingSeed(saved.students || defaults.students, saved.buses || defaults.buses) : {}),
         networkVersion: 1,
         gradeCoordinatorVersion: 1,
