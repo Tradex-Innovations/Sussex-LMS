@@ -158,7 +158,7 @@ function attendanceWatchlist(options, branches) {
     const staff = branches.flatMap((branch) => branchStaff(options.state, branch, schoolDays(c.date)[0])).filter((person) => isSchoolOperator(options.context) || person.status !== "present");
     return panel(isSchoolOperator(options.context) ? "Staff register" : "Staff attendance exceptions", "Latest school day in the selected period", staffTable(staff, c.staffPage) + pager(staff.length, c.staffPage, "staff"));
   }
-  const people = attendanceExceptions(branches, c);
+  const people = attendanceExceptions(branches, c, options.state);
   const body = '<div class="chairman-list-tools">' + select("Attendance watchlist", "chairman-attendance-flag", [...(isSchoolOperator(options.context) ? [["all", "All students"]] : []), ["repeated", "3+ absences in 20 school days"], ["absent", "Absent on latest school day"], ["late", "Late on latest school day"]], c.attendanceFlag) + search("Search student or admission", "chairman-student-search", c.studentQuery) + '</div>' +
     table(["Student", "School / class", "Absences in 20 days", "Latest status"], paged(people, c.studentPage).map((student) => '<tr><td><button type="button" class="chairman-person-link" data-action="chairman-student" data-value="' + student.id + '">' + e(student.name) + '</button><small>' + student.admission + '</small></td><td>' + e(student.branchName) + '<small>Class ' + student.className + '</small></td><td><strong>' + student.missed + '</strong></td><td>' + badge(statusLabel[student.status], statusTone[student.status]) + '</td></tr>').join(""), "Student attendance watchlist") + pager(people.length, c.studentPage, "student");
   return panel(isSchoolOperator(options.context) ? "Student register" : "Attendance watchlist", "Illustrative student records · Repeated absences always use the last 20 school days", body);
@@ -329,7 +329,7 @@ export function chairmanBranchPanel(options, branch) {
 
 export function chairmanStudentPanel(options, student, branch) {
   const dates = schoolDays(options.chairman.date, "month");
-  const days = dates.map((date) => ({ date, status: studentStatus(student, date) }));
+  const days = dates.map((date) => ({ date, status: studentStatus(student, date, options.state) }));
   const absent = days.filter((day) => day.status === "absent").length;
   return button("Back to " + e(branch.name), "network-select", { value: branch.id, variant: "secondary compact" }) +
     '<div class="chairman-person-heading"><h3>' + e(student.name) + '</h3><p>' + student.admission + " · " + e(branch.name) + " · Class " + student.className + '</p>' + badge("Illustrative student", "amber") + '</div>' +

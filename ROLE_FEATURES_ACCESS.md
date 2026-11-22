@@ -36,9 +36,9 @@ This is the maintained reference for the **current implementation**, covering al
 - School names and approximate locations use the 20-branch Sussex directory verified in the existing project on 19 November 2026. The directory is not refreshed automatically. Internal IDs `colombo` and `lakeside` display as Nugegoda and Malabe.
 - The national overview shows 44 simulated buses: eight editable operational demo records at Nugegoda/Malabe and two illustrative vehicles at each other branch. Illustrative vehicles do not create student, teacher or editable bus records.
 - Map movement, GPS signals, occupancy, arrival estimates and routes are demonstrations. Street tiles require internet access and retain OpenStreetMap attribution.
-- School registers, assessment marks, staffing complements, vacancies and leave requests are illustrative. The default sample school day is **20 November 2026**, even when the real calendar date is later. Register/report date controls support 12 October–20 November; follow-up due dates support 20–27 November. Temporary cover uses 20 November.
+- School registers, assessment marks, staffing complements, vacancies and leave requests are illustrative. Class Teachers can save present/absent/late entries over their own generated class register; the affected student totals, calendars, watchlists and newly generated reports use those saved entries across leadership views. This is still sample attendance, not a connection to real student attendance data. The default sample school day is **20 November 2026**, even when the real calendar date is later. Register/report date controls support 12 October–20 November; follow-up due dates support 20–27 November. Temporary cover uses 20 November.
 - **Actual prototype records** mean the editable sample student accounts, courses, teacher assignments, materials and parent completion data saved in the browser. They are distinct from generated assessment cohorts and attendance registers. A generated student attendance profile is not an editable admission record.
-- Section and Grade Coordinator academic/attendance samples cover Grades 1–13, with two illustrative classes (A/B) per grade. Preschool appointments are supported by access configuration, but no Preschool assessment/register fixtures are provided; those views show empty data.
+- Section, Grade Coordinator and Class Teacher academic/attendance samples cover Grades 1–13, with illustrative classes A/B per grade. Other configured classes and Preschool have no numeric fixture; their numeric views remain empty instead of borrowing a whole grade's data. Actual admission/course records in those scopes remain separately accessible.
 - Courses can be assigned and enrolments changed, but no create/delete-course screen, exam mark entry, timetable engine, payroll, discipline case system or real parent-notification workflow is implemented.
 
 ## Organisation and access model
@@ -84,7 +84,7 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 | Vice Principal / `vice_principal` | Overview → Transport | Assigned school | Daily follow-ups, temporary cover, leave recommendations, cover-request decisions, student/course/material/bus/library coordination, reports. |
 | Section Head / `section_head` | Overview → Section Overview | Appointed school and section | Section course assignments/enrolment, material reviews, attendance follow-ups, cover requests, section reports. |
 | Grade Coordinator / `coordinator` | Overview → Grade Overview | Appointed school and grade | Course enrolment, attendance follow-ups, class coordination reviews, Section Head support requests, grade reports; assigned course teacher is retained. |
-| Class Teacher / `class_teacher` | Courses | Appointed school, grade and class | Publish/edit materials only on courses assigned to the same account; review class progress. |
+| Class Teacher / `class_teacher` | Overview → Class Overview | Appointed school, grade and class | Own sample-class attendance, follow-ups, private discussion records, Grade Coordinator support requests, class reports, publication only on courses assigned to the same account. |
 | Subject Teacher / `teacher` | Courses | Assigned teaching courses in school | Publish/edit/download course materials; review enrolled-student completion. |
 | School Administrator / `admin` | Students & guardians | Assigned school | Student/admission/guardian records, course teacher assignments and enrolment. |
 | Transport Coordinator / `transport` | Bus tracking | Assigned school fleet | Bus route/stop/driver/student assignments. |
@@ -100,7 +100,7 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 
 - **Transport Activity:** full Sri Lanka map; 20 schools and 44 simulated buses; school and bus drill-downs; route, next stop, speed/signal and arrival information; fleet/status filters; school comparisons; pause/resume and reset map.
 - **Academic Performance:** subject/grade/term filters; weighted averages and pass rates; school ranking and prior-term changes; trend/distribution charts; branch detail and comparison CSV. Current network assessment grade controls list 6, 8, 10 and 11.
-- **Attendance:** student or staff audience; school/date/grade/period filters; one/five/twenty-school-day totals and trends; branch comparisons; repeated absence watchlist; search/pagination and personal 20-day calendars.
+- **Attendance:** student or staff audience; school/date/grade/period filters; saved Class Teacher sample entries are included; one/five/twenty-school-day totals and trends; branch comparisons; repeated absence watchlist; search/pagination and personal 20-day calendars.
 - **Staffing Overview:** leadership and staff profiles; headcount, availability and staffing capacity; group/status/search filters; vacancies and persistent review status; links to school appointments. Actual prototype appointments and illustrative staffing records are labelled separately.
 - **Executive Reports:** network brief and transport/academic/attendance/staffing reports; selectable branch scope; snapshots, CSV, standalone branded HTML and Print / Save PDF; latest eight reports per Chairman account.
 
@@ -123,7 +123,7 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 - **Daily pulse:** student attendance, unavailable teachers, classes requiring review and delayed bus signals, with links into related views.
 - **Transport Activity:** assigned-school map/routes/fleet, bus filters and details; existing vehicle management; start/end demo trips and reset to school routes.
 - **Academic Performance:** class/subject/grade/teacher comparisons; assessment filters and charts; actual course/material progress; assign courses, open lecture materials and export comparison CSV.
-- **Attendance:** student/staff registers, class summaries, grade/class/date/period filters, personal calendars and repeated absence views.
+- **Attendance:** student/staff registers (including saved Class Teacher student entries), class summaries, grade/class/date/period filters, personal calendars and repeated absence views.
 - **Staffing Overview:** school leadership, availability, capacity, directory, vacancies and sample leave requests. Approve/decline leave; the result changes sample staff availability, attendance, pulse and newly generated reports. See the Vice Principal's recommendation and note before deciding.
 - **Executive Reports:** school brief and individual operational reports, CSV/HTML/print, separate school/Principal snapshot history.
 - **Management:** add/edit students; assign course teachers/students; publish/edit materials; manage buses and catalogue/orders; appoint/remove lower roles within the school.
@@ -137,7 +137,7 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 - **Daily pulse and follow-up board:** school attendance, teacher availability, classes to review, delayed bus signals; three seed coordination tasks plus added tasks; category, owner, due date, status and dated note history. Open/in progress/resolved states persist locally.
 - **Transport Activity:** assigned-school map/fleet/details; record a bus issue as a named follow-up. The separate Bus tracking workspace provides existing bus/driver/student/stop management.
 - **Academic Performance:** school comparisons, assignment/material progress, course assignment and comparison CSV; assign or cancel one-day temporary teaching cover.
-- **Attendance:** section-independent school/class registers, repeated absences and calendars; create a student-specific attendance follow-up.
+- **Attendance:** section-independent school/class registers (including saved Class Teacher sample entries), repeated absences and calendars; create a student-specific attendance follow-up.
 - **Staffing Overview:** leadership/capacity/directory/vacancy review, temporary cover and **Leave recommendations**. Add/edit a recommendation and note on a pending leave request; the Principal makes the final decision.
 - **Section Head cover requests:** pending requests appear in Staffing Overview. Assign available cover to the requested course, or decline with a note. The Section Head sees the outcome. Cancelling cover linked to a request reopens that request for replacement.
 - **School Reports:** operational brief plus transport/academic/attendance/staffing snapshots. Briefs also capture follow-ups, active cover and leave recommendations awaiting Principal decision. CSV/HTML/print; eight snapshots per school/role.
@@ -169,7 +169,7 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 
 ### Attendance
 
-- Illustrative section student register and class summaries; grade/class/date/period filters; one/five/twenty-school-day totals; trend; search and pagination.
+- Illustrative section student register and class summaries, including saved Class Teacher attendance entries; grade/class/date/period filters; one/five/twenty-school-day totals; trend; search and pagination.
 - All students, repeated absence (3+ absences in trailing 20 school days), latest-day absent and latest-day late filters.
 - Open a student’s 20-day attendance calendar. Record a follow-up with an owner serving the section (or the Section Head), due date, note and open/in progress/resolved status. Updates retain note history.
 - Export attendance summaries. This role does not edit attendance marks or school admission records.
@@ -216,7 +216,7 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 
 ### Attendance
 
-- Illustrative grade/class registers, class summaries, date/period filters, trend, search and pagination; one/five/twenty-school-day totals.
+- Illustrative grade/class registers, including saved Class Teacher attendance, class summaries, date/period filters, trend, search and pagination; one/five/twenty-school-day totals.
 - All grade students, repeated absence (3+ absences in trailing 20 school days), latest-day absent and latest-day late watchlists.
 - Open a student's 20-day attendance calendar. Record a follow-up owned by the coordinator or a staff member serving the grade, with a due date, note and open/in progress/resolved status. Updates retain note history.
 - Export attendance snapshots. No actual attendance-mark entry, admission edits or other-grade students are available.
@@ -227,7 +227,8 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 - Record an on-track, needs-support or review-completed class review and note. Repeated reviews retain history. These records do not change assessment marks, attendance or teacher appointments.
 - Read teachers serving the grade, availability and workload profiles. Shared teachers' other-grade courses are excluded.
 - Read missing/published-material counts and the Section Head's review outcome for grade courses.
-- Record a course-related **lecture materials, teaching cover or learning support** request for the Section Head. One open request per course/topic is allowed; an unresolved duplicate is rejected.
+- Review requests from Class Teachers in the appointed school/grade. Record an in-progress or resolved response with note history; the requesting class sees it in Student Support. Course-linked requests can open the existing Section Head support form. A response does not itself change attendance, approve materials or allocate cover.
+- Record a course-related **attendance, lecture materials, teaching cover or learning support** request for the Section Head. One open request per course/topic is allowed; an unresolved duplicate is rejected.
 - View open/in-progress/resolved request status and the Section Head's response history. This is a local browser queue, not a notification, teacher instruction or automatic cover assignment.
 
 ### Grade Reports
@@ -243,14 +244,55 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 
 ## Class Teacher
 
-**Entry:** `#class_teacher/courses`. **Scope:** appointed school, grade and class. **Views:** Courses; Students & guardians.
+**Entry:** `#class_teacher/overview/summary`. **Scope:** the actual appointed school, grade and exact class. **Navigation:** Overview, Courses, Students & guardians. The overview has five views:
 
-- Read class courses, lecture materials and enrolled-student completion.
-- Download course materials; view actual class student/guardian records.
-- Publish/edit materials only where the course’s assigned Teacher account matches the active Class Teacher account. A class appointment alone does not make the person publisher of every class subject.
-- Read Section Head material review feedback on visible staff course details.
+### Class Overview
 
-**Limits:** no enrolment/teacher reassignment, admission edits, other-class scope, staff appointments, bus controls, library management or advanced attendance/reporting dashboard. No real attendance-mark entry screen exists.
+- Fixed class/school/grade identity with a presenter-only account selector. There is no class, grade or school scope selector.
+- Daily sample class attendance, actual prototype admission count, existing class courses and pending attendance follow-ups.
+- Number of register entries marked, published materials, parent-recorded completion and open Grade Coordinator support requests.
+- Class priorities and planned parent-discussion count, Term 3 subject comparison, a five-school-day attendance trend and recorded follow-up list.
+- Actual admission records and generated sample-register students are counted separately and labelled in the interface.
+
+### Learning & Materials
+
+- Read all existing courses assigned to this class, their subject teachers, enrolment, published materials and parent-recorded completion.
+- View/download lecture notes, worksheets, slides/readings and attachments; review enrolled-student completion. Read Section Head material-review feedback in staff course details.
+- Publish/edit materials **only where the course's assigned teacher account matches the active Class Teacher account**, within the appointed class. For example, Dilini can publish Mathematics 8A but cannot edit Nuwan's Science 8A materials or her own ICT course in another grade while active as Class Teacher 8A.
+- Publication uses the existing sample-text/attachment workflow with the 2 MB attachment limit; enrolled parents can download and mark the new materials done.
+- Assessment-term control and subject comparison use only this class's illustrative cohorts. Unsupported numeric fixtures remain empty.
+- Course teacher assignments and enrolment are read-only for this role.
+
+### Attendance
+
+- Read the exact class's illustrative register, attendance totals/trend, date/period filters, search/pagination and absence/late/repeated-absence watchlists.
+- Mark a single student or the whole class sample register as **present, absent or late**. Changes apply to the latest school day shown; late arrivals are included in present totals. Only valid sample school days from 12 October to 20 November are writable.
+- Saved statuses overlay generated samples for that class/day. Unmarked entries remain generated. The interface displays the marked count, and the same saved values flow into Grade Coordinator, Section Head, Vice Principal, Principal and Chairman student attendance totals/calendars/watchlists and newly captured reports. Staff attendance is unaffected.
+- Restore generated sample attendance for the appointed class and selected school day, with a confirmation. Other classes/dates and saved report snapshots remain unchanged.
+- Open a sample student's trailing 20-school-day calendar. Record/update an attendance follow-up with a due date, open/in-progress/resolved status and note history; the active Class Teacher is recorded as owner.
+- Export the day register or period summary as a class-scoped CSV snapshot. A day register lists sample students and saved/generated source; multi-day reports show daily totals.
+- This register uses generated sample students, not the actual admission records shown in Student Support. No real attendance integration or parent attendance portal has been added.
+
+### Student Support
+
+- Read actual class admission records, linked guardians, course count and material completion; student/admission/guardian assignments remain read-only.
+- Record a planned/completed parent discussion against an actual class student, with a date, optional existing linked guardian and note. Updates retain history. Guardian options come only from that student's current school links; no phone/email details are invented.
+- Discussion records are private to the class workspace: not copied to parent portals, Grade Coordinator queues or report exports. Records for students moved out of the class are not shown in the current class note list.
+- Record a request for the same school's Grade Coordinator: attendance, learning, lecture materials or teaching cover. Attendance/learning can be class-level; material/cover topics require an existing class course. Unresolved duplicates per course/topic are rejected.
+- Read the coordinator's in-progress/resolved response history. The coordinator can separately request Section Head support; a response does not allocate cover, appoint a teacher, publish materials or edit attendance.
+- No notification is sent and no real parent contact occurs. The form records plans/outcomes for this prototype.
+
+### Class Reports
+
+- Class management brief, subject comparison, attendance register and learning-progress report types.
+- Class/school/grade stay fixed. Subject/term and attendance date/period controls operate only within the appointed class.
+- Day attendance export includes each illustrative student and saved/generated status source; multi-day attendance export includes daily totals. Saved register entries are included.
+- Briefs include scoped attendance follow-ups; progress reports use actual class course/material/completion records. Private discussion text and guardian details are excluded.
+- Snapshot preview, CSV, branded standalone HTML and Print / Save PDF. Latest eight snapshots per school/grade/class, separate from sibling classes and other roles. Later register/material changes do not rewrite old reports.
+
+**Other workspaces:** Courses retains class course/material/progress access with the same publishing rule. Students & guardians is the read-only actual class directory.
+
+**Limits:** no teacher/enrolment reassignment, core admission/guardian edits, staff appointments, leave decisions, lecture readiness approval, cover allocation, bus/library management, another class's records or another role's reports. Being a Class Teacher does not grant publication for all class subjects or permit marking staff attendance. Numeric fixtures exist only for A/B classes and Grades 1–13; other classes/Preschool show empty numeric states.
 
 ## Subject Teacher
 
@@ -336,6 +378,13 @@ The Vice Principal may also create cover directly without a request. Cover teach
 2. Vice Principal records a recommendation and note while the request is pending; availability remains unchanged.
 3. Principal reviews and approves/declines; the sample staff register/pulse and newly captured reports update. Section Heads do not see or approve leave requests.
 
+### Class Teacher register, parent discussions and coordinator requests
+
+1. The appointed Class Teacher marks a single or full illustrative register for their own class and sample school day. Saved entries overlay generated statuses; related class/grade/section/school attendance reads and new reports use those same entries. Late counts as present.
+2. Restoring the generated sample removes only that class/day's saved entries. Historical snapshots retain their captured values.
+3. Parent discussion plans/outcomes use actual class admission records and linked guardian accounts. They stay in the class workspace and are excluded from parent views and reports; no message or phone call is made by the application.
+4. Class Teacher support requests appear only for Grade Coordinators in the same school/grade. The coordinator records a response, or separately opens the existing Section Head request workflow for a course-linked matter. Responding does not execute the requested operational action.
+
 ### Grade Coordinator support and class reviews
 
 1. The Grade Coordinator records a grade-course support request (materials, cover or learning) in Class Coordination.
@@ -348,7 +397,8 @@ The Vice Principal may also create cover directly without a request. Cover teach
 - Grade Coordinators record grade-owned student follow-ups in their own Overview/Attendance views.
 - Section Heads record section-owned student follow-ups in their own Overview/Attendance views.
 - Vice Principals maintain a separate school operational follow-up board, including named transport/student issues.
-- These are three distinct local task collections. Owners, dates and notes are recorded; no SMS, email, WhatsApp or automatic cross-board task delivery occurs.
+- Class Teachers maintain their own class attendance follow-ups.
+- These are four distinct local task collections. Owners, dates and notes are recorded; no SMS, email, WhatsApp or automatic cross-board task delivery occurs.
 
 ### Transport and books
 
@@ -363,6 +413,8 @@ The Vice Principal may also create cover directly without a request. Cover teach
 - School executive report history is owned by role/school (Principal/Vice Principal), or Chairman account; the latest eight are retained per workspace. Section report history is separately owned by school + section under the Section Head role, eight per workspace.
 - Grade Coordinator report history is independently owned by school + grade under the `coordinator` role, with eight snapshots per workspace; it does not share Section Head or executive report history.
 - New coordination state includes grade attendance follow-ups, class review histories and Section Head support requests/responses. A one-time `gradeCoordinatorVersion` migration adds two new demo coordinator accounts to existing v2 browser data while retaining user assignments, materials and appointments; later removed demo appointments are not restored.
+- Class Teacher state additionally includes class/day attendance overrides, class follow-ups, private parent-discussion histories, Grade Coordinator support requests/responses and isolated class report history (eight per school/grade/class). Attendance totals bypass the generated-summary cache when saved entries exist for that school/day so edits and restores are reflected consistently.
+- A one-time `classTeacherVersion` migration adds Nugegoda 6A and Malabe 8A demo Class Teacher accounts while retaining existing enrolment, materials, progress, roles and saved state. Removed appointments are not restored on later loads.
 - Report snapshots capture values at generation time. Filters/data edits do not rewrite older reports. Scope checks apply to opening, downloading and printing saved reports.
 - CSV values are quoted and dangerous leading spreadsheet formula characters are neutralised. Exports carry sample provenance and relevant scope/filter metadata.
 - HTML downloads embed the existing logo when it can be read. Print / Save PDF uses the browser's print dialogue; no automatic PDF service is integrated.
@@ -377,7 +429,7 @@ The Vice Principal may also create cover directly without a request. Cover teach
 | Vice Principal | Roshani Fernando — Nugegoda; Dilan Mendis — Malabe. |
 | Section Head | Dilini Silva — Nugegoda/Middle School; Asha Wickramasinghe — Nugegoda/Primary; Lakshmi Fernando — Malabe/Middle School. |
 | Grade Coordinator | Nuwan Gamage (`nuwan`) — Nugegoda/Grade 8; Tharushi Jayasekara (`coordinator6_c`) — Nugegoda/Grade 6; Kasun Perera (`coordinator8_l`) — Malabe/Grade 8. |
-| Class Teacher | Dilini Silva — Nugegoda/Grade 8/Class 8A. |
+| Class Teacher | Dilini Silva (`dilini`) — Nugegoda/8A; Sanduni Rathnayake (`class_teacher6_c`) — Nugegoda/6A; Chamodi Senanayake (`class_teacher8_l`) — Malabe/8A. Only actual subject assignments permit publication. |
 | Subject Teacher | Dilini Silva, Nuwan Gamage, Rihana Farook, Asha Wickramasinghe — Nugegoda; Lakshmi Fernando — Malabe. Actual course assignments control teaching visibility. |
 | Administrator | Anjali Fernando — Nugegoda; Shanika Dias — Malabe. |
 | Transport Coordinator | Nimal Rathnayake — Nugegoda; Chamara Silva — Malabe. |
@@ -393,7 +445,7 @@ Role assignments may be changed in the demo, so these are seeded examples rather
 node --test tests/*.test.mjs
 ```
 
-The suite covers access, migration, parent admission selection, network/directory/fleet data, academic/attendance reconciliation, report isolation, Principal leave decisions, Vice Principal coordination, Section Head scope/reviews/follow-ups and the cover-request handoff, Grade Coordinator scope/class reviews/follow-ups/reports, Section Head support responses and new-account migration. Browser verification should cover all five Section Head views, all three seeded Section Head accounts, 390px/320px layouts, course/material interactions, persistent follow-up/review/request outcomes, role switching and report CSV/HTML/print handling. Grade Coordinator browser checks should cover all five views, all three seeded grade accounts, enrolment teacher protection, material downloads, class/follow-up note persistence, Section Head queue isolation/responses, report exports and 390px/320px layouts. Keep passing test counts/evidence in the change log when updated.
+The suite covers access, migration, parent admission selection, network/directory/fleet data, academic/attendance reconciliation, report isolation, Principal leave decisions, Vice Principal coordination, Section Head scope/reviews/follow-ups and the cover-request handoff, Grade Coordinator scope/class reviews/follow-ups/reports, Section Head support responses and new-account migration. Browser verification should cover all five Section Head views, all three seeded Section Head accounts, 390px/320px layouts, course/material interactions, persistent follow-up/review/request outcomes, role switching and report CSV/HTML/print handling. Grade Coordinator browser checks should cover all five views, all three seeded grade accounts, enrolment teacher protection, material downloads, class/follow-up note persistence, Section Head queue isolation/responses, report exports and 390px/320px layouts. Class Teacher checks should cover fixed class scope, own-subject publication and parent completion, attendance overlays/restores across leadership views, private discussion notes, coordinator responses, report isolation and mobile forms. Keep passing test counts/evidence in the change log when updated.
 
 ## Maintenance checklist
 
@@ -425,3 +477,13 @@ For **every future implementation**:
 - Added persistent grade follow-ups and class reviews, with a scoped Grade Coordinator → Section Head support queue and response history. Support responses are separate from operational approval/allocation actions.
 - Added Nugegoda Grade 6 and Malabe Grade 8 demo coordinator accounts, with a one-time migration that preserves existing browser edits and removed appointments on later loads.
 - Updated this reference and the README walkthrough. Validation: **62 Node tests passed**, including nine new grade-scope/workflow/migration tests. Browser checks passed for the five views, three accounts, 1500px/390px/320px layouts, protected teacher assignment, downloads, follow-up/class-review persistence, Section Head response privacy, four report types and CSV/HTML/print iframe source. Section Head/parent/senior-leadership regression workflows also passed. The operating-system print dialogue and an exported PDF file were not automated.
+
+
+### 22 November 2026 — Class Teacher
+
+- Implemented Class Overview, Learning & Materials, Attendance, Student Support and Class Reports for the exact school/grade/class appointment.
+- Added own-class sample attendance marking/restoration with consistent leadership totals, calendars, watchlists and new reports; retained late-as-present and immutable saved snapshots.
+- Preserved subject-assignment publication rules, read-only class enrolment/teacher assignments and the existing parent download/completion workflow.
+- Added class follow-up history, private actual-student discussion records, a Class Teacher → Grade Coordinator request/response queue and eight class-scoped report snapshots. Discussion notes are excluded from parent views, coordinator queues and exports.
+- Added Nugegoda 6A and Malabe 8A demo Class Teachers through a one-time migration preserving prior data and later removed appointments. Updated this reference and README walkthrough.
+- Validation: **74 Node tests passed**, including 12 new class-scope, register/cache, privacy, workflow, snapshot and migration tests. Browser checks passed for five views, three teacher accounts, 1500px/390px/320px layouts, owned-course publication and parent completion, single/bulk attendance, leadership propagation, sample restoration, immutable reports, follow-up/discussion history, coordinator response privacy, four report types and CSV/HTML/print iframe source. Grade Coordinator and Section Head/parent/senior-leadership regression workflows also passed. The operating-system print dialogue and an exported PDF file were not automated.

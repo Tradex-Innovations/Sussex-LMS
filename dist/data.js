@@ -6,7 +6,7 @@ export const roles = {
   vice_principal: { name: "Vice Principal", icon: "badge", start: "overview", pages: ["overview", "transport", "courses", "people", "library"] },
   section_head: { name: "Section Head", icon: "users", start: "overview", pages: ["overview", "courses", "people"] },
   coordinator: { name: "Grade Coordinator", icon: "users", start: "overview", pages: ["overview", "courses", "people"] },
-  class_teacher: { name: "Class Teacher", icon: "book", start: "courses", pages: ["courses", "people"] },
+  class_teacher: { name: "Class Teacher", icon: "book", start: "overview", pages: ["overview", "courses", "people"] },
   teacher: { name: "Subject Teacher", icon: "book", start: "courses", pages: ["courses"] },
   admin: { name: "School Administrator", icon: "settings", start: "people", pages: ["people", "courses"] },
   transport: { name: "Transport Coordinator", icon: "route", start: "transport", pages: ["transport"] },
@@ -103,6 +103,8 @@ function seedAccounts() {
     account("nuwan", "Nuwan Gamage", [grant("coordinator", "colombo", { grade: 8 }), grant("teacher")]),
     account("coordinator6_c", "Tharushi Jayasekara", [grant("coordinator", "colombo", { grade: 6 })]),
     account("coordinator8_l", "Kasun Perera", [grant("coordinator", "lakeside", { grade: 8 })]),
+    account("class_teacher6_c", "Sanduni Rathnayake", [grant("class_teacher", "colombo", { grade: 6, className: "6A" })]),
+    account("class_teacher8_l", "Chamodi Senanayake", [grant("class_teacher", "lakeside", { grade: 8, className: "8A" })]),
     account("rihana", "Rihana Farook", [grant("teacher")]),
     account("asha", "Asha Wickramasinghe", [grant("section_head", "colombo", { section: "primary" }), grant("teacher")]),
     account("lakshmi", "Lakshmi Fernando", [grant("section_head", "lakeside", { section: "middle" }), grant("teacher", "lakeside")]),
@@ -156,6 +158,7 @@ export function freshState() {
     version: 2,
     networkVersion: 1,
     gradeCoordinatorVersion: 1,
+    classTeacherVersion: 1,
     activity: [],
     branches: structuredClone(branches),
     accounts: seedAccounts(),
@@ -189,6 +192,13 @@ function migrateSchoolLabel(label) {
     .replace(/^Sussex College Lakeside$/, "Sussex College Malabe");
 }
 
+function migratedDemoAccounts(saved, defaults) {
+  const accounts = [...(saved.accounts || defaults.accounts)];
+  const additions = [...(!saved.gradeCoordinatorVersion ? ["coordinator6_c", "coordinator8_l"] : []), ...(!saved.classTeacherVersion ? ["class_teacher6_c", "class_teacher8_l"] : [])];
+  for (const person of defaults.accounts.filter((person) => additions.includes(person.id))) if (!accounts.some((existing) => existing.id === person.id)) accounts.push(person);
+  return accounts;
+}
+
 export function loadState() {
   const defaults = freshState();
   try {
@@ -200,7 +210,8 @@ export function loadState() {
         ...saved,
         networkVersion: 1,
         gradeCoordinatorVersion: 1,
-        accounts: [...(saved.accounts || defaults.accounts), ...(!saved.gradeCoordinatorVersion ? defaults.accounts.filter((person) => ["coordinator6_c", "coordinator8_l"].includes(person.id) && !(saved.accounts || defaults.accounts).some((existing) => existing.id === person.id)) : [])],
+        classTeacherVersion: 1,
+        accounts: migratedDemoAccounts(saved, defaults),
         students: withAdmissionNumbers(saved.students || defaults.students),
         branches: defaults.branches.map((branch) => {
           const existing = saved.branches.find((item) => item.id === branch.id);

@@ -6,7 +6,7 @@ const permissions = {
   vice_principal: ["students.edit", "courses.assign", "courses.teacher", "materials.publish", "transport.manage", "library.manage"],
   section_head: ["courses.assign", "courses.teacher"],
   coordinator: ["courses.assign"],
-  class_teacher: [],
+  class_teacher: ["attendance.mark"],
   teacher: [],
   admin: ["students.edit", "courses.assign", "courses.teacher"],
   transport: ["transport.manage"],

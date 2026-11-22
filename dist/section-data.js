@@ -33,8 +33,8 @@ function requireSectionScope(state, context) {
 
 export function sectionFilters(state, context, input = {}) {
   const scope = requireScope(state, context), defaults = sectionDefaults();
-  const grade = input.grade === "all" || scope.grades.includes(Number(input.grade)) ? String(input.grade) : "all";
-  const className = grade !== "all" && [grade + "A", grade + "B"].includes(input.className) ? input.className : "all";
+  const grade = scope.className ? String(scope.grade) : input.grade === "all" || scope.grades.includes(Number(input.grade)) ? String(input.grade) : "all";
+  const className = scope.className || (grade !== "all" && [grade + "A", grade + "B"].includes(input.className) ? input.className : "all");
   const validDate = /^\d{4}-\d{2}-\d{2}$/.test(input.date || "") && input.date >= "2026-10-12" && input.date <= demoDate && !Number.isNaN(Date.parse(input.date + "T12:00Z")) && new Date(input.date + "T12:00Z").toISOString().slice(0, 10) === input.date;
   return { ...defaults, ...input, grade, className, subject: subjects.some((subject) => subject.id === input.subject) ? input.subject : defaults.subject,
     term: [1, 2, 3].includes(Number(input.term)) ? Number(input.term) : defaults.term, date: validDate ? input.date : defaults.date,
@@ -57,7 +57,7 @@ export function sectionTeachers(state, context, filters = {}) {
     (["coordinator", "class_teacher"].includes(grant.role) && grades.includes(Number(grant.grade)) && (f.className === "all" || grant.role === "coordinator" || grant.className === f.className))))
     .map((person) => {
       const assigned = courses.filter((course) => state.assignments[course.id]?.teacher === person.id);
-      const gradesHeld = person.grants.filter((grant) => grant.branch === scope.branch.id && ["coordinator", "class_teacher"].includes(grant.role) && grades.includes(Number(grant.grade)));
+      const gradesHeld = person.grants.filter((grant) => grant.branch === scope.branch.id && ["coordinator", "class_teacher"].includes(grant.role) && grades.includes(Number(grant.grade)) && (f.className === "all" || grant.role === "coordinator" || grant.className === f.className));
       return { id: person.id, name: person.name, courses: assigned, role: gradesHeld.some((grant) => grant.role === "coordinator") ? "Grade Coordinator" : gradesHeld.length ? "Class Teacher" : "Subject Teacher",
         status: staff.find((entry) => entry.id === person.id)?.status || "present", classes: [...new Set([...assigned.map((course) => course.className), ...gradesHeld.map((grant) => grant.className || "Grade " + grant.grade)])] };
     });
@@ -75,6 +75,7 @@ export function sectionAcademic(state, context, filters = {}) {
   const scope = requireScope(state, context), f = sectionFilters(state, context, filters);
   const grades = (f.grade === "all" ? scope.grades : [Number(f.grade)]).filter((grade) => grade > 0);
   const courses = sectionCourses(state, context, f), subjectName = subjects.find((subject) => subject.id === f.subject).name;
+  if (scope.className && !new RegExp("^" + scope.grade + "[AB]$").test(scope.className)) return { summary: networkSummary([]), classes: [], rows: [], subjectName, filters: f };
   const classes = grades.flatMap((grade) => ["A", "B"].map((letter) => {
     const className = grade + letter, result = assessmentResult(scope.branch, { ...f, grade, className });
     const course = courses.find((course) => course.grade === grade && course.className === className && course.title === subjectName);
@@ -100,7 +101,7 @@ export function sectionAttendance(state, context, filters = {}) {
   })).filter((row) => f.className === "all" || row.className === f.className);
   const dates = schoolDays(f.date, f.period), repeat = schoolDays(f.date, "month"), last = dates.at(-1);
   const roster = studentRoster(scope.branch).filter((student) => grades.includes(student.grade) && (f.className === "all" || student.className === f.className)).map((student) => ({ ...student,
-    status: studentStatus(student, last), missed: repeat.filter((date) => studentStatus(student, date) === "absent").length }));
+    status: studentStatus(student, last, state), missed: repeat.filter((date) => studentStatus(student, date, state) === "absent").length }));
   const rows = roster.filter((student) => f.flag === "all" || f.flag === "repeated" && student.missed >= 3 || student.status === f.flag)
     .filter((student) => (student.name + " " + student.admission).toLowerCase().includes(f.query.toLowerCase()))
     .sort((a, b) => b.missed - a.missed || a.name.localeCompare(b.name));

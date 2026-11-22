@@ -1859,3 +1859,22 @@ form[data-form^="grade-"] .form-error { margin: 0 18px 12px; }
   .grade-fixed-scope { padding-top: 5px; }
   .grade-support-grid { grid-template-columns: minmax(0,1fr); padding-inline: 15px; }
 }
+
+/* Class Teacher daily register and student support */
+.class-register-state { display: flex; align-items: center; justify-content: space-between; gap: 17px; padding: 18px 20px; margin: 18px 0; border: 1px solid #d8e6d2; border-radius: 12px; background: #f0f6eb; }
+.class-register-state strong { font-size: 15px; line-height: 1.6; }
+.class-register-state p { font-size: 14px; line-height: 1.7; color: var(--muted); margin-top: 7px; }
+.class-register-state .button { flex-shrink: 0; }
+.class-attendance-inputs { display: grid; gap: 12px; margin-top: 18px; }
+.class-attendance-inputs .field { grid-template-columns: minmax(0,1fr) 135px; align-items: center; padding: 12px; margin: 0; border: 1px solid var(--line); border-radius: 10px; }
+.class-attendance-inputs .field > span { min-width: 0; font-size: 14px; }
+.class-attendance-inputs small { display: block; font-size: 12px; margin-top: 5px; }
+form[data-form^="class-"] .form-body > h3 { font-size: 17px; line-height: 1.6; margin-bottom: 18px; }
+form[data-form^="class-"] .chairman-filter-note { margin-top: 14px; }
+form[data-form^="class-"] .form-error { margin: 0 18px 12px; }
+.class-teacher-portal .grade-support-card > .button { margin-top: 14px; }
+@media (max-width:750px) {
+  .class-register-state { flex-direction: column; align-items: flex-start; padding: 16px; }
+  .class-attendance-inputs .field { grid-template-columns: minmax(0,1fr) 110px; gap: 8px; padding: 10px; }
+  .class-attendance-inputs .field > span { font-size: 13px; }
+}

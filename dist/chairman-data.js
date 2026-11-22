@@ -81,7 +81,9 @@ export function studentRoster(branch, grade = "all") {
   return grade === "all" ? roster : roster.filter((student) => student.grade === Number(grade));
 }
 
-export function studentStatus(student, date) {
+export function studentStatus(student, date, state) {
+  const saved = state?.classAttendance?.[student.id + ":" + date];
+  if (saved && saved.branch === student.branch && saved.grade === student.grade && saved.className === student.className && saved.date === date && ["present", "absent", "late"].includes(saved.status)) return saved.status;
   const day = Math.floor(Date.parse(date + "T12:00:00Z") / 86400000);
   const branchIndex = Math.floor(student.seed / 811);
   const value = (student.seed * 37 + day * 19 + (student.seed % 17) * (day % 13) * 7) % 1000;
@@ -145,17 +147,18 @@ export function branchVacancies(state, branch) {
   });
 }
 
-export function studentDaySummary(branch, date, grade = "all", className = "all") {
+export function studentDaySummary(branch, date, grade = "all", className = "all", state) {
   const key = branch.id + ":" + date + ":" + grade + ":" + className;
-  if (attendanceCache.has(key)) return attendanceCache.get(key);
+  const savedRegister = Object.values(state?.classAttendance || {}).some((entry) => entry.branch === branch.id && entry.date === date);
+  if (!savedRegister && attendanceCache.has(key)) return attendanceCache.get(key);
   const roster = studentRoster(branch, grade).filter((student) => className === "all" || student.className === className);
   const counts = { expected: roster.length, present: 0, absent: 0, late: 0 };
   for (const student of roster) {
-    const status = studentStatus(student, date);
+    const status = studentStatus(student, date, state);
     if (status === "absent") counts.absent += 1;
     else { counts.present += 1; if (status === "late") counts.late += 1; }
   }
-  attendanceCache.set(key, counts);
+  if (!savedRegister) attendanceCache.set(key, counts);
   return counts;
 }
 
@@ -169,7 +172,7 @@ export function attendanceResult(state, branch, options = {}) {
       const staff = branchStaff(state, branch, date);
       day = { expected: staff.length, present: staff.filter((person) => person.status === "present").length,
         absent: staff.filter((person) => person.status === "absent").length, late: 0, leave: staff.filter((person) => person.status === "leave").length };
-    } else day = { ...studentDaySummary(branch, date, options.attendanceGrade || "all", options.attendanceClass || "all"), leave: 0 };
+    } else day = { ...studentDaySummary(branch, date, options.attendanceGrade || "all", options.attendanceClass || "all", state), leave: 0 };
     for (const key of Object.keys(counts)) counts[key] += day[key];
     return { date, ...day, rate: day.expected ? round(day.present / day.expected * 100) : 0 };
   });
@@ -178,7 +181,7 @@ export function attendanceResult(state, branch, options = {}) {
   previous.setUTCDate(previous.getUTCDate() - 1);
   const priorDate = schoolDays(previous.toISOString().slice(0, 10), "day")[0];
   const current = trend.at(-1);
-  const prior = audience === "students" ? studentDaySummary(branch, priorDate, options.attendanceGrade || "all", options.attendanceClass || "all") : null;
+  const prior = audience === "students" ? studentDaySummary(branch, priorDate, options.attendanceGrade || "all", options.attendanceClass || "all", state) : null;
   return { branch, dates, ...counts, rate: counts.expected ? round(counts.present / counts.expected * 100) : 0, trend,
     change: prior?.expected && current ? round(current.rate - prior.present / prior.expected * 100) : null };
 }
@@ -191,13 +194,13 @@ export function attendanceSummary(results) {
   return { ...total, rate: total.expected ? round(total.present / total.expected * 100) : 0 };
 }
 
-export function attendanceExceptions(branches, options) {
+export function attendanceExceptions(branches, options, state) {
   const dates = schoolDays(options.date, options.period);
   // Repeated absences use a consistent trailing 20-school-day window.
   const repeatDates = schoolDays(options.date, "month");
   return branches.flatMap((branch) => studentRoster(branch, options.attendanceGrade).map((student) => {
-    const missed = repeatDates.filter((date) => studentStatus(student, date) === "absent").length;
-    const status = studentStatus(student, dates.at(-1));
+    const missed = repeatDates.filter((date) => studentStatus(student, date, state) === "absent").length;
+    const status = studentStatus(student, dates.at(-1), state);
     return { ...student, missed, status };
   })).filter((student) => (!options.attendanceClass || options.attendanceClass === "all" || options.attendanceClass === student.className))
     .filter((student) => options.attendanceFlag === "all" ? true : options.attendanceFlag === "repeated" ? student.missed >= 3
@@ -294,7 +297,7 @@ export function reportCSV(report) {
   const metadata = [["Sussex College Network", report.title], ["Data", "SAMPLE DATA - PROTOTYPE"], ["Reporting period", report.criteria.from + " to " + report.criteria.to],
     ...(["brief", "attendance"].includes(report.type) ? [["Attendance period", report.criteria.from + " to " + report.criteria.to], ["Attendance for", report.criteria.audience]] : []),
     ...(["brief", "academic"].includes(report.type) ? [["Academic assessment", report.criteria.subject + " / Grade " + report.criteria.grade + " / Term " + report.criteria.term]] : []), ["Generated UTC", report.generatedAt], []];
-  if (["section_head", "coordinator"].includes(report.owner?.role)) metadata.splice(-1, 0, ["School", report.owner.school], ["Section", report.owner.sectionName], [report.owner.role === "coordinator" ? "Assigned grade" : "Section grades", report.criteria.grades.join(", ")]);
+  if (["section_head", "coordinator", "class_teacher"].includes(report.owner?.role)) metadata.splice(-1, 0, ["School", report.owner.school], ["Section", report.owner.sectionName], [report.owner.role === "class_teacher" ? "Assigned class grade" : report.owner.role === "coordinator" ? "Assigned grade" : "Section grades", report.criteria.grades.join(", ")]);
   if (report.criteria.className && report.criteria.className !== "all") metadata.splice(-1, 0, ["Academic class", report.criteria.className]);
   if (report.criteria.attendanceClass && report.criteria.attendanceClass !== "all") metadata.splice(-1, 0, ["Attendance class", report.criteria.attendanceClass]);
   if (report.criteria.comparison) metadata.splice(-1, 0, ["Comparison", report.criteria.comparison]);
@@ -302,6 +305,6 @@ export function reportCSV(report) {
   const operations = report.operations ? [[], ["School coordination snapshot"], ["Leave recommendations pending Principal decision", report.operations.recommendations],
     ["Follow-up", "Category", "Status", "Due"], ...report.operations.followups.map((item) => [item.title, item.category, item.status, item.due]), [],
     ["Cover class", "Subject", "Cover teacher", "Date"], ...report.operations.covers.map((item) => [item.className, item.title, item.teacherName, item.date])] : [];
-  const sectionFollowups = ["section_head", "coordinator"].includes(report.owner?.role) && report.type === "brief" && report.followups?.length ? [[], ["Recorded attendance follow-ups"], ["Student", "Class", "Due", "Status"], ...report.followups.map((item) => [item.name, item.className, item.due, item.status])] : [];
+  const sectionFollowups = ["section_head", "coordinator", "class_teacher"].includes(report.owner?.role) && report.type === "brief" && report.followups?.length ? [[], ["Recorded attendance follow-ups"], ["Student", "Class", "Due", "Status"], ...report.followups.map((item) => [item.name, item.className, item.due, item.status])] : [];
   return "\uFEFF" + [...metadata, columns.map(([, label]) => label), ...rows.map((row) => columns.map(([key]) => row[key])), ...operations, ...sectionFollowups].map((row) => row.map(safe).join(",")).join("\r\n");
 }

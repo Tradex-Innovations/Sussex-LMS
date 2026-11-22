@@ -91,6 +91,18 @@ Open [Grade Coordinator → Grade Overview](http://127.0.0.1:4183/#coordinator/o
 
 The Section Head sees coordinator requests in **Teaching Coordination → Requests from Grade Coordinators** and can respond, review materials or start the existing cover-request workflow. A response records coordination; it does not allocate a teacher or approve leave. The two extra demo coordinator accounts are added once to older browser state, preserving existing edits and later removed appointments. Full scope, workflow and prototype limits are in the maintained [role reference](ROLE_FEATURES_ACCESS.md#grade-coordinator).
 
+### Class Teacher workspace
+
+Open [Class Teacher → Class Overview](http://127.0.0.1:4183/#class_teacher/overview/summary). **Demo Class Teacher** previews Dilini Silva (Nugegoda/8A), Sanduni Rathnayake (Nugegoda/6A) or Chamodi Senanayake (Malabe/8A). School, grade and exact class come from the appointment. Five views are available:
+
+- **Class Overview:** daily sample attendance/marked counts, actual class student/course/material counts, parent completion, subject results and follow-up priorities.
+- **Learning & Materials:** read all class courses/progress; publish/edit only on courses assigned to that teacher account; parent downloads/completion continue through the existing portal.
+- **Attendance:** mark single or full illustrative class registers, inspect calendars/watchlists, keep class follow-up history and restore the generated sample for that class/day. Saved entries update related leadership attendance views and new reports; earlier snapshots stay unchanged.
+- **Student Support:** actual admission/guardian and completion records, private planned/completed discussion notes, coordinator requests and responses. No messages are sent; private discussion notes are excluded from exports and parent portals.
+- **Class Reports:** management/subject/attendance/learning-progress snapshots; day registers show each sample status/source, multi-day reports show daily totals; CSV/HTML/print; eight saved reports per school/grade/class.
+
+The Grade Coordinator sees requests in **Class Coordination → Requests from Class Teachers** and records a response; course-linked matters can separately use the existing Section Head support workflow. Responding does not allocate cover or approve materials. The two extra demo Class Teacher accounts migrate once without replacing earlier edits or removed appointments. See the maintained [role reference](ROLE_FEATURES_ACCESS.md#class-teacher) for scope and prototype limits.
+
 ### School portal
 
 1. Start in **Chairman → Overview**. An interactive OpenStreetMap street map shows Sri Lanka and a simulated network fleet of 44 buses across all 20 branches. Nearby vehicles form bus-count groups; click a group to zoom in and see individual buses. Branch-name bubbles appear near their geographic positions where space permits. Use **View all buses** to find every branch's vehicles, or filter by On route, At school and Signal delayed. Pan, zoom, pause or resume the simulation, or choose **View whole island** to reset. Street tiles require an internet connection; a notice appears if they cannot load.

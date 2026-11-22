@@ -12,7 +12,7 @@ export const gradeViews = [
 ];
 export const gradeReportTypes = { brief: "Grade management brief", academic: "Grade academic comparison", attendance: "Grade attendance", teaching: "Grade learning progress" };
 export const gradeTaskStatuses = { open: "Open", in_progress: "In progress", resolved: "Resolved" };
-export const gradeSupportTypes = { materials: "Lecture materials", cover: "Teaching cover", learning: "Learning support" };
+export const gradeSupportTypes = { attendance: "Attendance concern", materials: "Lecture materials", cover: "Teaching cover", learning: "Learning support" };
 export const gradeClassStatuses = { on_track: "On track", needs_support: "Needs support", completed: "Review completed" };
 export const gradeDefaults = () => ({ ...sectionDefaults(), compare: "classes", classStatus: "all" });
 
