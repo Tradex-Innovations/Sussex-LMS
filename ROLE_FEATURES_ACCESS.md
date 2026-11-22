@@ -86,7 +86,7 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 | Grade Coordinator / `coordinator` | Overview → Grade Overview | Appointed school and grade | Course enrolment, attendance follow-ups, class coordination reviews, Section Head support requests, grade reports; assigned course teacher is retained. |
 | Class Teacher / `class_teacher` | Overview → Class Overview | Appointed school, grade and class | Own sample-class attendance, follow-ups, private discussion records, Grade Coordinator support requests, class reports, publication only on courses assigned to the same account. |
 | Subject Teacher / `teacher` | Overview → Subject Overview | Current assigned teaching courses and matching-class enrolled students in appointed school | Publish/edit materials, lesson plans, internal learning reviews, Grade Coordinator support requests and subject reports. |
-| School Administrator / `admin` | Students & guardians | Assigned school | Student/admission/guardian records, course teacher assignments and enrolment. |
+| School Administrator / `admin` | Overview → Administration Overview | Actual student, guardian and course records in appointed school | Register/edit admissions, link existing guardians, assign school teachers/matching-class enrolments and generate administration reports. |
 | Transport Coordinator / `transport` | Bus tracking | Assigned school fleet | Bus route/stop/driver/student assignments. |
 | Driver / `driver` | Bus tracking | Currently assigned bus | Start and end the assigned demo trip. |
 | Librarian / `librarian` | Library | Assigned school catalogue/orders | Edit price/availability; mark orders collected. |
@@ -346,13 +346,54 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 
 ## School Administrator
 
-**Entry:** `#admin/people`. **Scope:** appointed school. **Views:** Students & guardians; Courses.
+**Entry:** `#admin/overview/summary`. **Scope:** the current, actual School Administrator appointment in one school. **Navigation:** Overview, Students & guardians, Courses. Five overview views are implemented:
 
-- Create/edit student names, unique admission numbers, grade/class and linked existing guardian accounts.
-- Read student course enrolment/completion and linked guardians.
-- Assign school teachers and matching-class students to existing courses; read/download materials and progress.
+### Administration Overview
 
-**Limits:** cannot appoint parent/staff accounts, publish lecture materials through this role, create courses, manage buses/library/leave or access senior-leader dashboards. A Principal/Chairman appoints existing accounts to guardian/staff roles.
+- Fixed school identity, administrator name and presenter-only account selector; no school selector.
+- Actual registered-student, school parent-account and existing-course counts, plus the share of students linked to a valid guardian appointment in that school.
+- Record-readiness counts for missing guardian links, students without matching-class enrolment, courses lacking an eligible school teacher and classes with actual records.
+- Class-by-class coverage of student admissions, linked access, course enrolment and existing courses.
+- Recent local student-registration/edit and course-assignment activity in the school. Private discussion/review notes, leave decisions and other administrative-role events are not included in this feed.
+- Register-student shortcut and links to the admission workspace. No synthetic attendance or academic results are presented as admission records.
+
+### Admissions & Students
+
+- School-only register with grade (Preschool–13), actual class, name/admission/linked-guardian search, missing-guardian/no-course filters and 12-record pagination.
+- Register/edit student name, unique admission number, grade/class and linked existing guardian accounts through the existing student form. Admission numbers use 3–32 letters/numbers/hyphens, are normalised to uppercase and must be unique across all schools.
+- Class must match the grade. Guardian choices must have a current Parent appointment in the student’s school. A student's school cannot be changed through Edit student.
+- Student drill-down shows admission/class, valid guardian links, matching-class courses, parent-recorded material completion and demo-access readiness.
+- Changing grade/class removes incompatible course enrolments. Existing student identity, bus assignment and completion history are retained; new matching-course enrolment is a separate action. The form explains this effect before saving.
+- This is direct registration of prototype admission records. No applicant approval pipeline, fee collection, admission documents or admission-decision workflow is implemented.
+
+### Guardians & Access
+
+- Directory of current Parent appointments in the school, linked students/admission numbers/classes and access-link status.
+- Grade/class/search and linked/unlinked filters; when a grade/class is selected, only guardians with a student in that selection are shown.
+- Open a guardian's complete school-only student links, then edit a student to add/remove an existing eligible guardian. The separate missing-link register follows the chosen grade/class and shows students needing attention.
+- Display admission-based parent demo-login instructions and the existing temporary demo password `1234`; linked student profiles show their demo credentials. Real passwords are not created/reset, and credentials are excluded from reports.
+- Principal/Chairman still creates or appoints Parent accounts through Roles & access. This role does not create accounts, change appointments, send invitations or sign in on a parent's behalf.
+
+### Courses & Enrolment
+
+- Existing school courses with grade/class/search filters, assigned teacher, matching-class enrolment, material count and parent-completion totals.
+- Readiness filters for no eligible teacher, no enrolled students and no published materials.
+- Assign an eligible teacher in the school and enrol/remove students whose school, grade and class match the selected course. Invalid or duplicate student selections are rejected before mutation.
+- Teacher/enrolment changes immediately affect teacher and parent course visibility. A newly registered student is not automatically enrolled in a course.
+- Read/download materials, Section Head readiness feedback, current course staff learning-review notes and student completion. Material publishing/editing remains with authorised teaching/leadership roles.
+- Shared record writers validate the current appointment before student or course writes. Grade Coordinators retain their teacher-selection restriction; Section Heads retain section scope.
+
+### Administration Reports
+
+- Four types: administration summary by class, student admission register, guardian access directory and course enrolment register.
+- Assigned school stays fixed; grade/class filters apply throughout. Search and record-readiness filters apply to the selected detailed report type. The summary ignores unrelated search/status filters. Report totals follow the selected report's matching records and their related student/guardian/course links.
+- Current prototype data with a capture date in Asia/Colombo. Reports exclude passwords, private class discussions, free-text learning reviews, generated assessment marks and attendance registers.
+- Snapshot preview, formula-safe CSV, branded standalone HTML and Print / Save PDF. Latest eight per school under the `admin` role; administrators appointed to the same school share that history, separate from other roles/schools.
+- Later record edits do not rewrite snapshots. Current role/school and captured student/course school membership are revalidated on open/download/print; snapshots whose captured records move outside the school are hidden.
+
+**Other workspaces:** `#admin/people` retains the student/guardian directory and edits; `#admin/courses` retains course assignments and material/progress access.
+
+**Limits:** no staff/parent appointment changes, course creation/deletion, lecture publication, sample class/staff attendance marking, Class Teacher private discussion records, leave decisions, teaching-cover allocation, bus/library management, another school's records or leadership dashboards. School data edits remain browser-local prototype actions, not server-enforced security.
 
 ## Transport Coordinator
 
@@ -395,6 +436,14 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 **Limits:** no other family's orders or unlinked student data, staff role switcher inside the signed-in portal, teacher material publication, admission/course/bus edits, school comparisons, payments or real GPS guarantees. Internal Section Head review notes are hidden from this portal.
 
 ## Cross-role workflows
+
+### School administration and parent access
+
+1. The School Administrator registers a student with a network-unique admission number and a class matching the grade, and links existing Parent accounts appointed to the same school. Principal/Chairman still controls account creation/appointments.
+2. Link readiness appears in the school admission/guardian views. The guardian uses that student's current admission number and demo password `1234` in the existing Parent login; no invitation or real password reset occurs.
+3. The administrator separately assigns an eligible school teacher and matching-class students to an existing course. Assigned teaching access and enrolled parent course access use that same assignment record.
+4. Teaching staff publish materials; parents download/mark them done; school administration reads the stored completion totals. It cannot publish through the Administrator role.
+5. Moving a student to another grade/class removes incompatible enrolments and retains identity/completion history. Admission-number or guardian-link edits affect subsequent parent authentication against current records. Saved administration reports retain capture-time values.
 
 ### Course learning and completion
 
@@ -465,6 +514,7 @@ The Vice Principal may also create cover directly without a request. Cover teach
 - Class Teacher state additionally includes class/day attendance overrides, class follow-ups, private parent-discussion histories, Grade Coordinator support requests/responses and isolated class report history (eight per school/grade/class). Attendance totals bypass the generated-summary cache when saved entries exist for that school/day so edits and restores are reflected consistently.
 - Subject Teacher state includes `subjectLessonPlans`, `subjectLearningReviews`, `subjectSupportRequests` and `subjectReports`. No new demo accounts or migration flag are required. Notes/history persist in this browser; course ownership follows current assignments. Reports retain eight per teacher/school and recheck captured course/student access. Learning-review text is available to current course staff, excluded from exports/parent views, and never copied into generic activity messages.
 - A one-time `classTeacherVersion` migration adds Nugegoda 6A and Malabe 8A demo Class Teacher accounts while retaining existing enrolment, materials, progress, roles and saved state. Removed appointments are not restored on later loads.
+- School Administrator adds `adminReports`, eight per appointed school/role, shared by administrators in the same school and isolated from other roles. No new demo accounts or migration are required. Captured student/course school membership and the current appointment are rechecked before report access. New admissions, guardian links and course assignments use existing student/assignment storage; report exports omit passwords and internal note text.
 - Report snapshots capture values at generation time. Filters/data edits do not rewrite older reports. Scope checks apply to opening, downloading and printing saved reports.
 - CSV values are quoted and dangerous leading spreadsheet formula characters are neutralised. Exports carry sample provenance and relevant scope/filter metadata.
 - HTML downloads embed the existing logo when it can be read. Print / Save PDF uses the browser's print dialogue; no automatic PDF service is integrated.
@@ -481,7 +531,7 @@ The Vice Principal may also create cover directly without a request. Cover teach
 | Grade Coordinator | Nuwan Gamage (`nuwan`) — Nugegoda/Grade 8; Tharushi Jayasekara (`coordinator6_c`) — Nugegoda/Grade 6; Kasun Perera (`coordinator8_l`) — Malabe/Grade 8. |
 | Class Teacher | Dilini Silva (`dilini`) — Nugegoda/8A; Sanduni Rathnayake (`class_teacher6_c`) — Nugegoda/6A; Chamodi Senanayake (`class_teacher8_l`) — Malabe/8A. Only actual subject assignments permit publication. |
 | Subject Teacher | Dilini Silva (`dilini`, Mathematics 8A + ICT 6A); Nuwan Gamage (`nuwan`, Science 8A); Rihana Farook (`rihana`, English 6A); Asha Wickramasinghe (`asha`, Mathematics 4A) — Nugegoda. Lakshmi Fernando (`lakshmi`) — Malabe teaching courses. Actual assignments control visibility. |
-| Administrator | Anjali Fernando — Nugegoda; Shanika Dias — Malabe. |
+| Administrator | Anjali Fernando (`admin_c`) — Nugegoda; Shanika Dias (`admin_l`) — Malabe. Both preview all five administration views in their own school. |
 | Transport Coordinator | Nimal Rathnayake — Nugegoda; Chamara Silva — Malabe. |
 | Driver | Accounts are generated per operational demo bus; choose the presenter account assigned to that bus. |
 | Librarian | Hasini Perera — Nugegoda; school librarian appointments also exist at Malabe. |
@@ -495,7 +545,7 @@ Role assignments may be changed in the demo, so these are seeded examples rather
 node --test tests/*.test.mjs
 ```
 
-The suite covers access, migration, parent admission selection, network/directory/fleet data, academic/attendance reconciliation, report isolation, Principal leave decisions, Vice Principal coordination, Section Head scope/reviews/follow-ups and the cover-request handoff, Grade Coordinator scope/class reviews/follow-ups/reports, Section Head support responses and new-account migration. Browser verification should cover all five Section Head views, all three seeded Section Head accounts, 390px/320px layouts, course/material interactions, persistent follow-up/review/request outcomes, role switching and report CSV/HTML/print handling. Grade Coordinator browser checks should cover all five views, all three seeded grade accounts, enrolment teacher protection, material downloads, class/follow-up note persistence, Section Head queue isolation/responses, report exports and 390px/320px layouts. Class Teacher checks should cover fixed class scope, own-subject publication and parent completion, attendance overlays/restores across leadership views, private discussion notes, coordinator responses, report isolation and mobile forms. Check one-choice attendance buttons, keyboard navigation, live totals, draft cancellation, search/empty states, whole-list All present, saving while filtered, saved preselection and persistent Save controls at small screen sizes. Subject Teacher checks cover actual grant and course/student scope, own-course publication and parent completion, plan/review history, staff-only note visibility, coordinator queue isolation/responses, Class Teacher attendance separation, reassignment, report retention and scoped CSV/HTML/print. Check five teaching accounts and 1500px/390px/320px layouts, including forms. Keep passing test counts/evidence in the change log when updated.
+The suite covers access, migration, parent admission selection, network/directory/fleet data, academic/attendance reconciliation, report isolation, Principal leave decisions, Vice Principal coordination, Section Head scope/reviews/follow-ups and the cover-request handoff, Grade Coordinator scope/class reviews/follow-ups/reports, Section Head support responses and new-account migration. Browser verification should cover all five Section Head views, all three seeded Section Head accounts, 390px/320px layouts, course/material interactions, persistent follow-up/review/request outcomes, role switching and report CSV/HTML/print handling. Grade Coordinator browser checks should cover all five views, all three seeded grade accounts, enrolment teacher protection, material downloads, class/follow-up note persistence, Section Head queue isolation/responses, report exports and 390px/320px layouts. Class Teacher checks should cover fixed class scope, own-subject publication and parent completion, attendance overlays/restores across leadership views, private discussion notes, coordinator responses, report isolation and mobile forms. Check one-choice attendance buttons, keyboard navigation, live totals, draft cancellation, search/empty states, whole-list All present, saving while filtered, saved preselection and persistent Save controls at small screen sizes. Subject Teacher checks cover actual grant and course/student scope, own-course publication and parent completion, plan/review history, staff-only note visibility, coordinator queue isolation/responses, Class Teacher attendance separation, reassignment, report retention and scoped CSV/HTML/print. Check five teaching accounts and 1500px/390px/320px layouts, including forms. School Administrator checks cover both schools, direct registration/edit and duplicate admissions, same-school guardian links, class-change enrolment cleanup, course teacher/enrolment writes and parent completion, private-note exclusion, current-appointment checks, filtered report totals/history, legacy routes and desktop/mobile forms. Keep passing test counts/evidence in the change log when updated.
 
 ## Maintenance checklist
 
@@ -553,3 +603,11 @@ For **every future implementation**:
 - Added full-class All present, name/admission search with match/empty states, live full-list status counts and draft change counts. A searched list does not narrow the save or bulk-action roster.
 - Kept summary/search and Save/Cancel visible while the roster scrolls, with responsive stacked choices on mobile. Enter in search does not submit; edits persist only on Save and Cancel/close discards drafts. Existing data shape, scoped permissions and attendance reconciliation are retained.
 - Updated this role reference and the README walkthrough. Validation: **85 Node tests passed**. Browser workflow checks passed for individual/full-class selection, keyboard arrows, live counts, cancellation, name/admission search, empty matches, All present and saving while filtered, preselection/reload persistence, leadership attendance reconciliation, cross-school and Subject Teacher rejection, and 1500×1000 / 390×844 / 320×844 / 320×568 layouts. Save controls remained visible and choices met 44px minimum tap targets; no browser errors were observed.
+
+### 22 November 2026 — School Administrator
+
+- Added Administration Overview, Admissions & Students, Guardians & Access, Courses & Enrolment and Administration Reports with fixed appointed-school scope and Overview/Students/Courses navigation.
+- Connected registration, unique admission validation, eligible guardian links, student profiles, teacher assignments, matching-class enrolment and parent-completion reads to the existing records. Added school record-readiness filters, search, student pagination, guardian profiles and relevant local record activity.
+- Extracted shared student/course record writers with current-appointment and atomic input validation, preserving leadership/section/grade permissions and class-change cleanup. Added a student-form explanation for incompatible enrolment removal.
+- Added four administration report types with applied-filter provenance, matching-record summary totals, CSV/HTML/print and eight immutable snapshots per school/role. Passwords and private notes are excluded. Updated this role reference and README walkthrough.
+- Validation: **97 Node tests passed**, including 12 new administrator/shared-write tests for school/role scope, admissions, guardian links, class changes, assignment validation, protected teacher selection, parent login, report filtering/privacy/history, persistence, escaping and empty schools. Browser checks passed for five views, both demo schools, 1500px/390px/320px layouts, registration/edit, duplicate/mismatched-class errors, guardian profiles/linking, teacher/enrolment changes, an admission → teacher publication → parent download/completion walkthrough, class-change cleanup, reload persistence, four report types, eight-report retention, school isolation, legacy routes and mobile forms. Grade Coordinator, Section Head/parent/senior-leadership and the quick Class Teacher attendance regression workflows passed. The OS print dialogue and exported PDF files were not automated.

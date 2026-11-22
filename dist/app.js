@@ -1,5 +1,5 @@
 import { freshState, loadState, roles, saveState, sectionFor, sections } from "./data.js";
-import { assignableRoles, branchTeachers, can, canManageGrant, contextFor, linkedChildren, visibleBuses, visibleCourses, visibleOrders, visibleStudents, canPublish } from "./access.js";
+import { assignableRoles, can, canManageGrant, contextFor, linkedChildren, visibleBuses, visibleCourses, visibleOrders, visibleStudents, canPublish } from "./access.js";
 import { icon } from "./icons.js";
 import { assignmentForm, coursesPage, materialForm } from "./learning.js";
 import { branchBooks, bookForm, cartForm, cartFor, cartItems, catalogResults, libraryPage, orderHistory } from "./library.js";
@@ -26,6 +26,9 @@ import { classSupportRequestForm, classSupportResponseForm } from "./class-suppo
 import { subjectViews, subjectDefaults, subjectScope, subjectFilters, subjectEnrolments, subjectPlans, subjectReportTypes, subjectPlanStatuses, subjectReviewStatuses, gradeSubjectRequests, visibleSubjectReports, generateSubjectReport, saveSubjectPlan, saveSubjectReview, requestSubjectSupport, respondSubjectSupport } from "./subject-data.js";
 import { subjectTeacherPage, subjectPlanForm, subjectReviewForm, subjectReportHTML } from "./subject-teacher.js";
 import { subjectSupportRequestForm, subjectSupportResponseForm } from "./subject-support.js";
+import { adminViews, adminDefaults, adminScope, adminFilters, adminClasses, adminGuardianAccounts, adminReportTypes, adminStudentStatuses, adminGuardianStatuses, adminCourseStatuses, visibleAdminReports, generateAdminReport } from "./admin-data.js";
+import { schoolAdminPage, adminStudentPanel, adminGuardianPanel, adminReportHTML } from "./school-admin.js";
+import { saveStudentRecord, saveCourseAssignment } from "./records.js";
 import { FleetMap } from "./map.js";
 import { mountMapSummary, transportPage, updateTripDetails } from "./transport.js";
 import { avatar, button, emptyState, escapeHtml as e, iconTile } from "./ui.js";
@@ -50,14 +53,14 @@ let schoolMapKey;
 let mapViewKey;
 let dialogMode;
 let view = getView();
-const ui = { subjectTeacher: subjectDefaults(), classTeacher: classDefaults(), gradeCoordinator: gradeDefaults(), section: sectionDefaults(), accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", grade: "all", query: "", paused: false, runningSince: performance.now(), elapsed: 0, starts: {},
+const ui = { schoolAdmin: adminDefaults(), subjectTeacher: subjectDefaults(), classTeacher: classDefaults(), gradeCoordinator: gradeDefaults(), section: sectionDefaults(), accounts: {}, branch: "all", bus: "01", filter: "all", courseId: "", grade: "all", query: "", paused: false, runningSince: performance.now(), elapsed: 0, starts: {},
   network: { subject: "mathematics", grade: 8, term: 3, selected: "", mode: "", compare: null, category: "all", tab: "transport", status: "all", busId: "", busBranch: "all" }, chairman: { ...chairmanDefaults(), ...(["principal", "vice_principal"].includes(view.role) ? { attendanceFlag: "all" } : {}) } };
 
 function getView() {
   const [requestedRole, requestedPage, requestedModule] = location.hash.slice(1).split("/");
   const role = Object.hasOwn(roles, requestedRole) ? requestedRole : "chairman";
   const page = roles[role].pages.includes(requestedPage) ? requestedPage : roles[role].start;
-  const module = role === "teacher" && page === "overview" ? (subjectViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "class_teacher" && page === "overview" ? (classViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "coordinator" && page === "overview" ? (gradeViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "section_head" && page === "overview" ? (sectionViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : ["chairman", "principal", "vice_principal"].includes(role) && page === "overview" && chairmanViews.some((item) => item.id === requestedModule) ? requestedModule : "transport";
+  const module = role === "admin" && page === "overview" ? (adminViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "teacher" && page === "overview" ? (subjectViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "class_teacher" && page === "overview" ? (classViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "coordinator" && page === "overview" ? (gradeViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : role === "section_head" && page === "overview" ? (sectionViews.some((item) => item.id === requestedModule) ? requestedModule : "summary") : ["chairman", "principal", "vice_principal"].includes(role) && page === "overview" && chairmanViews.some((item) => item.id === requestedModule) ? requestedModule : "transport";
   return { role, page, module };
 }
 
@@ -75,7 +78,7 @@ function childFor(ctx) {
 function optionsFor(ctx = context()) {
   const children = linkedChildren(state, ctx);
   const child = childFor(ctx);
-  return { state, subjectTeacher: { ...(ctx?.role === "teacher" && subjectScope(state, ctx) ? subjectFilters(state, ctx, ui.subjectTeacher) : ui.subjectTeacher), view: view.module }, classTeacher: { ...(ctx?.role === "class_teacher" && classScope(state, ctx) ? classFilters(state, ctx, ui.classTeacher) : ui.classTeacher), view: view.module }, gradeCoordinator: { ...(ctx?.role === "coordinator" && gradeScope(state, ctx) ? gradeFilters(state, ctx, ui.gradeCoordinator) : ui.gradeCoordinator), view: view.module }, section: { ...(ctx?.role === "section_head" && sectionScope(state, ctx) ? sectionFilters(state, ctx, ui.section) : ui.section), view: view.module }, context: ctx, children, child, fleet: visibleBuses(state, ctx, child), filter: ui.filter, selected: ui.bus, paused: ui.paused, progress, courseId: ui.courseId, grade: ui.grade, query: ui.query, network: isSchoolOperator(ctx) ? { ...ui.network, className: ui.chairman.academicClass } : ui.network, chairman: { ...ui.chairman, view: view.module } };
+  return { state, schoolAdmin: { ...(ctx?.role === "admin" && adminScope(state, ctx) ? adminFilters(state, ctx, ui.schoolAdmin) : ui.schoolAdmin), view: view.module }, subjectTeacher: { ...(ctx?.role === "teacher" && subjectScope(state, ctx) ? subjectFilters(state, ctx, ui.subjectTeacher) : ui.subjectTeacher), view: view.module }, classTeacher: { ...(ctx?.role === "class_teacher" && classScope(state, ctx) ? classFilters(state, ctx, ui.classTeacher) : ui.classTeacher), view: view.module }, gradeCoordinator: { ...(ctx?.role === "coordinator" && gradeScope(state, ctx) ? gradeFilters(state, ctx, ui.gradeCoordinator) : ui.gradeCoordinator), view: view.module }, section: { ...(ctx?.role === "section_head" && sectionScope(state, ctx) ? sectionFilters(state, ctx, ui.section) : ui.section), view: view.module }, context: ctx, children, child, fleet: visibleBuses(state, ctx, child), filter: ui.filter, selected: ui.bus, paused: ui.paused, progress, courseId: ui.courseId, grade: ui.grade, query: ui.query, network: isSchoolOperator(ctx) ? { ...ui.network, className: ui.chairman.academicClass } : ui.network, chairman: { ...ui.chairman, view: view.module } };
 }
 
 function elapsed() {
@@ -166,10 +169,10 @@ function render(focus, { scrollTop = false } = {}) {
     }
     if (!options.fleet.some((bus) => bus.id === ui.bus)) ui.bus = options.fleet[0]?.id;
     options.selected = ui.bus;
-    const pages = { overview: ctx.role === "teacher" ? subjectTeacherPage : ctx.role === "class_teacher" ? classTeacherPage : ctx.role === "coordinator" ? gradeCoordinatorPage : ctx.role === "section_head" ? sectionHeadPage : ctx.role === "chairman" ? chairmanOverviewPage : isSchoolOperator(ctx) ? principalOverviewPage : networkOverviewPage, courses: coursesPage, people: peoplePage, library: libraryPage, access: accessPage };
+    const pages = { overview: ctx.role === "admin" ? schoolAdminPage : ctx.role === "teacher" ? subjectTeacherPage : ctx.role === "class_teacher" ? classTeacherPage : ctx.role === "coordinator" ? gradeCoordinatorPage : ctx.role === "section_head" ? sectionHeadPage : ctx.role === "chairman" ? chairmanOverviewPage : isSchoolOperator(ctx) ? principalOverviewPage : networkOverviewPage, courses: coursesPage, people: peoplePage, library: libraryPage, access: accessPage };
     body = view.page === "transport" ? transportPage(view.role, options) : pages[view.page](options);
   }
-  document.title = `${view.role === "teacher" && view.page === "overview" ? subjectViews.find((item) => item.id === view.module).name : view.role === "class_teacher" && view.page === "overview" ? classViews.find((item) => item.id === view.module).name : view.role === "coordinator" && view.page === "overview" ? gradeViews.find((item) => item.id === view.module).name : view.role === "section_head" && view.page === "overview" ? sectionViews.find((item) => item.id === view.module).name : ["chairman", "principal", "vice_principal"].includes(view.role) && view.page === "overview" ? chairmanViews.find((item) => item.id === view.module).name : navigation[view.page].label} · ${roles[view.role].name} · Sussex College Network`;
+  document.title = `${view.role === "admin" && view.page === "overview" ? adminViews.find((item) => item.id === view.module).name : view.role === "teacher" && view.page === "overview" ? subjectViews.find((item) => item.id === view.module).name : view.role === "class_teacher" && view.page === "overview" ? classViews.find((item) => item.id === view.module).name : view.role === "coordinator" && view.page === "overview" ? gradeViews.find((item) => item.id === view.module).name : view.role === "section_head" && view.page === "overview" ? sectionViews.find((item) => item.id === view.module).name : ["chairman", "principal", "vice_principal"].includes(view.role) && view.page === "overview" ? chairmanViews.find((item) => item.id === view.module).name : navigation[view.page].label} · ${roles[view.role].name} · Sussex College Network`;
   const mobileNavigation = roles[view.role].pages.length > 1;
   app.innerHTML = `<div class="app-shell role-${view.role} ${mobileNavigation ? "has-mobile-nav" : ""}">
     ${sidebar(ctx)}<div class="desktop-content">${topbar(ctx)}<main id="main" class="page page-${view.page}">${view.page === "overview" ? "" : scopeBar(ctx)}${body}</main></div>
@@ -293,6 +296,7 @@ function chairmanPerson(kind, id, ctx = context()) {
 }
 
 function permittedReport(id, ctx = context()) {
+  if (ctx?.role === "admin") return visibleAdminReports(state, ctx).find((report) => report.id === id);
   if (ctx?.role === "teacher") return visibleSubjectReports(state, ctx).find((report) => report.id === id);
   if (ctx?.role === "class_teacher") return visibleClassReports(state, ctx).find((report) => report.id === id);
   if (ctx?.role === "coordinator") return visibleGradeReports(state, ctx).find((report) => report.id === id);
@@ -375,6 +379,16 @@ function captureSubjectReport() {
   return report;
 }
 
+function captureAdminReport() {
+  const ctx = context(), report = generateAdminReport(state, ctx, adminFilters(state, ctx, ui.schoolAdmin));
+  if (!update((next) => {
+    const existing = next.adminReports || [], key = report.owner.key;
+    next.adminReports = [report, ...existing.filter((item) => item.owner?.key === key)].slice(0, 8).concat(existing.filter((item) => item.owner?.key !== key));
+  })) return null;
+  ui.schoolAdmin.reportId = report.id;
+  return report;
+}
+
 async function downloadExecutiveReport(report, format = "csv", print = false) {
   try {
     let content;
@@ -390,7 +404,7 @@ async function downloadExecutiveReport(report, format = "csv", print = false) {
           });
         }
       } catch {}
-      content = report.owner?.role === "teacher" ? subjectReportHTML(report, logo) : ["section_head", "coordinator", "class_teacher"].includes(report.owner?.role) ? sectionReportHTML(report, logo) : executiveReportHTML(report, logo);
+      content = report.owner?.role === "admin" ? adminReportHTML(report, logo) : report.owner?.role === "teacher" ? subjectReportHTML(report, logo) : ["section_head", "coordinator", "class_teacher"].includes(report.owner?.role) ? sectionReportHTML(report, logo) : executiveReportHTML(report, logo);
     } else content = reportCSV(report);
     if (print) {
       const frame = document.createElement("iframe");
@@ -519,6 +533,16 @@ function authorizedAction(name, value, ctx) {
   if (name === "parent-logout") return view.role === "parent";
   if (!ctx) return false;
   const options = optionsFor(ctx);
+  if (name.startsWith("admin-")) {
+    const scope = adminScope(state, ctx);
+    if (!scope) return false;
+    if (name === "admin-student") return state.students.some((student) => student.id === value && student.branch === scope.branch.id);
+    if (name === "admin-guardian") return adminGuardianAccounts(state, ctx).some((person) => person.id === value);
+    if (name === "admin-page") return /^[1-9]\d*$/.test(value);
+    if (name === "admin-generate-report") return true;
+    if (["admin-open-report", "admin-download-report", "admin-print-report"].includes(name)) return Boolean(permittedReport(value, ctx));
+    return false;
+  }
   if (name.startsWith("subject-")) {
     const scope = subjectScope(state, ctx);
     if (!scope) return false;
@@ -681,6 +705,20 @@ function action(event) {
   const ctx = context();
   if (!authorizedAction(name, value, ctx)) return toast("This action is outside the current role’s assigned access.");
   switch (name) {
+    case "admin-student": {
+      const student = state.students.find((student) => student.id === value);
+      showDialog("admin-student", "Student admission record", adminScope(state, ctx).branch.school, adminStudentPanel(optionsFor(ctx), student)); break;
+    }
+    case "admin-guardian": {
+      const person = adminGuardianAccounts(state, ctx).find((person) => person.id === value);
+      showDialog("admin-guardian", "Guardian access links", "Existing school parent account", adminGuardianPanel(optionsFor(ctx), person)); break;
+    }
+    case "admin-page": ui.schoolAdmin.page = Number(value); render(); break;
+    case "admin-generate-report":
+      try { if (captureAdminReport()) { render(); app.querySelector(".chairman-report-result")?.scrollIntoView({ block: "start", behavior: "smooth" }); toast("Administration report saved."); } } catch (error) { toast(error.message); } break;
+    case "admin-open-report": ui.schoolAdmin.reportId = value; render(); app.querySelector(".chairman-report-result")?.scrollIntoView({ block: "start", behavior: "smooth" }); break;
+    case "admin-download-report": downloadExecutiveReport(permittedReport(value, ctx), ui.schoolAdmin.reportFormat); break;
+    case "admin-print-report": downloadExecutiveReport(permittedReport(value, ctx), "html", true); break;
     case "subject-plan-new":
     case "subject-plan-edit": {
       const previous = name === "subject-plan-edit" ? subjectPlans(state, ctx).find((item) => item.id === value) : null;
@@ -1031,6 +1069,17 @@ function change(event) {
     if (classScope(state, ctx) && can(ctx, "attendance.mark")) updateAttendanceDraft(element.form);
     return;
   }
+  if (name?.startsWith("admin-")) {
+    if (!adminScope(state, ctx)) return;
+    const rules = { "admin-grade": ["grade", ["all", ...Array.from({ length: 14 }, (_, grade) => String(grade))]], "admin-class": ["className", ["all", ...adminClasses(state, ctx, ui.schoolAdmin.grade)]],
+      "admin-student-status": ["studentStatus", Object.keys(adminStudentStatuses)], "admin-guardian-status": ["guardianStatus", Object.keys(adminGuardianStatuses)], "admin-course-status": ["courseStatus", Object.keys(adminCourseStatuses)],
+      "admin-report-type": ["reportType", Object.keys(adminReportTypes)], "admin-report-format": ["reportFormat", ["csv", "html"]] };
+    if (!rules[name]?.[1].includes(element.value)) return;
+    ui.schoolAdmin[rules[name][0]] = element.value;
+    if (name === "admin-grade") ui.schoolAdmin.className = "all";
+    if (name === "admin-report-type") ui.schoolAdmin.query = "";
+    ui.schoolAdmin = adminFilters(state, ctx, ui.schoolAdmin); ui.schoolAdmin.page = 1; ui.courseId = ""; render(); return;
+  }
   if (name?.startsWith("subject-")) {
     if (!subjectScope(state, ctx)) return;
     const rules = { "subject-course": ["course", ["all", ...subjectScope(state, ctx).courses.map((course) => course.id)]],
@@ -1169,7 +1218,7 @@ function change(event) {
       break;
     }
     case "account":
-      ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults();
+      ui.schoolAdmin = adminDefaults(); ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults();
       ui.accounts[view.role] = element.value; ui.courseId = ""; ui.filter = "all"; ui.chairman = chairmanDefaults();
       if (isSchoolOperator(ctx)) ui.chairman.attendanceFlag = "all";
       ui.network.selected = ""; ui.network.mode = ""; ui.network.busId = ""; ui.network.compare = null; ui.network.status = "all"; ui.network.busBranch = "all"; ui.network.mapFocus = null; schoolMapKey = null;
@@ -1324,13 +1373,8 @@ async function submit(event) {
 
 
   if (mode === "assignment") {
-    const course = visibleCourses(state, ctx).find((item) => item.id === values.get("course"));
-    if (!can(ctx, "courses.assign") || !course) return fail();
-    const teacher = can(ctx, "courses.teacher") ? values.get("teacher") : state.assignments[course.id].teacher;
-    const students = values.getAll("students");
-    if (!branchTeachers(state, course.branch).some((person) => person.id === teacher)) return fail("Select a teacher assigned to this branch.");
-    if (!students.every((id) => state.students.some((student) => student.id === id && student.branch === course.branch && student.className === course.className && student.grade === course.grade))) return fail();
-    if (!save((next) => { next.assignments[course.id] = { teacher, students }; })) return;
+    try { if (!save((next) => saveCourseAssignment(next, ctx, { course: values.get("course"), teacher: values.get("teacher"), students: values.getAll("students") }))) return; }
+    catch (error) { return fail(error.message); }
   } else if (mode === "material") {
     const course = state.courses.find((course) => course.id === values.get("course"));
     const existing = state.materials.find((item) => item.id === id);
@@ -1350,23 +1394,8 @@ async function submit(event) {
     } catch { return fail("The file could not be read."); }
     finally { submitButton.disabled = false; }
   } else if (mode === "student") {
-    const existing = state.students.find((student) => student.id === id);
-    const branch = existing?.branch || values.get("branch");
-    if (!can(ctx, "students.edit") || !allowedBranch(branch) || (id && !existing)) return fail();
-    const grade = Number(values.get("grade"));
-    const className = values.get("className").trim().toUpperCase();
-    const name = values.get("name").trim();
-    const admissionNumber = values.get("admissionNumber").trim().toUpperCase();
-    const guardians = values.getAll("guardians");
-    if (!name || !sectionFor(grade) || !new RegExp("^" + grade + "[A-Z]{1,2}$").test(className)) return fail("Enter a class matching the selected grade, such as 8A.");
-    if (!/^[A-Z0-9][A-Z0-9-]{2,31}$/.test(admissionNumber)) return fail("Use 3–32 letters, numbers, or hyphens for the admission number.");
-    if (state.students.some((student) => student.id !== id && student.admissionNumber === admissionNumber)) return fail("That admission number belongs to another student.");
-    if (!guardians.every((id) => state.accounts.some((person) => person.id === id && person.grants.some((grant) => grant.role === "parent" && grant.branch === branch)))) return fail("Select guardian accounts from this branch.");
-    if (!save((next) => {
-      const student = { ...existing, id: id || "student-" + crypto.randomUUID(), name, admissionNumber, initials: name.split(" ").map((word) => word[0]).slice(0, 2).join(""), grade, className, branch, guardians, tone: existing?.tone || "green" };
-      if (existing) next.students[next.students.findIndex((item) => item.id === id)] = student; else next.students.push(student);
-      for (const course of next.courses) if (course.branch !== branch || course.grade !== grade || course.className !== className) next.assignments[course.id].students = next.assignments[course.id].students.filter((studentId) => studentId !== student.id);
-    })) return;
+    try { if (!save((next) => saveStudentRecord(next, ctx, { ...Object.fromEntries(values), guardians: values.getAll("guardians") }))) return; }
+    catch (error) { return fail(error.message); }
   } else if (mode === "bus") {
     const bus = options.fleet.find((item) => item.id === id);
     if (!can(ctx, "transport.manage") || !bus) return fail();
@@ -1454,6 +1483,9 @@ document.addEventListener("input", (event) => {
   if (key === "class-attendance-search" && dialogMode === "class-attendance" && classScope(state, context())) {
     filterAttendanceDraft(event.target); return;
   }
+  if (context()?.role === "admin" && key === "admin-query") {
+    ui.schoolAdmin.query = event.target.value.slice(0, 80); ui.schoolAdmin.page = 1; render("admin-search"); return;
+  }
   if (context()?.role === "teacher" && key === "subject-query") {
     ui.subjectTeacher.query = event.target.value.slice(0, 80); render("subject-search"); return;
   }
@@ -1491,8 +1523,9 @@ window.addEventListener("hashchange", () => {
   if (view.page === "overview" && (previous.role !== view.role || previous.page !== view.page || previous.module !== view.module)) {
     ui.network.selected = ""; ui.network.mode = ""; ui.network.compare = null; ui.network.busId = ""; ui.network.status = "all"; schoolMapKey = null;
   }
-  if (previous.role !== view.role) { ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults(); ui.chairman = chairmanDefaults(); if (["principal", "vice_principal"].includes(view.role)) ui.chairman.attendanceFlag = "all"; }
-  if (["section_head", "coordinator", "class_teacher", "teacher"].includes(view.role) && previous.module !== view.module) ui.courseId = "";
+  if (previous.role !== view.role) { ui.schoolAdmin = adminDefaults(); ui.subjectTeacher = subjectDefaults(); ui.classTeacher = classDefaults(); ui.gradeCoordinator = gradeDefaults(); ui.section = sectionDefaults(); ui.chairman = chairmanDefaults(); if (["principal", "vice_principal"].includes(view.role)) ui.chairman.attendanceFlag = "all"; }
+  if (["section_head", "coordinator", "class_teacher", "teacher", "admin"].includes(view.role) && previous.module !== view.module) ui.courseId = "";
+  if (view.role === "admin" && previous.module !== view.module) { ui.schoolAdmin.query = ""; ui.schoolAdmin.page = 1; }
   if (ui.pendingPulseTransport && view.module === "transport") { ui.network.status = "delayed"; }
   ui.pendingPulseTransport = false;
   if (ui.pendingCourse && view.page === "courses") {

@@ -115,6 +115,18 @@ Open [Subject Teacher → Subject Overview](http://127.0.0.1:4183/#teacher/overv
 
 Class Teachers mark attendance only for their appointed class while that role is active. The Subject Teacher workspace records attendance concerns through coordinator requests. Course plans/reviews/requests follow teaching reassignment; the former teacher loses access. All changes remain in this browser. Full boundaries are in the maintained [role reference](ROLE_FEATURES_ACCESS.md#subject-teacher).
 
+### School Administrator workspace
+
+Open [School Administrator → Administration Overview](http://127.0.0.1:4183/#admin/overview/summary). **Demo School Administrator** previews Anjali Fernando (Nugegoda) or Shanika Dias (Malabe), with access fixed to the appointed school.
+
+- **Administration Overview:** actual admissions, guardian access, courses, record-readiness priorities, class coverage and recent student/course updates.
+- **Admissions & Students:** register/edit students, validate unique admission numbers and matching grade/class, link existing school guardians, search/filter records and inspect enrolment/completion.
+- **Guardians & Access:** school parent-account directory, linked student/admission profiles, missing-link records and parent demo-login guidance. Principal/Chairman manages guardian appointments.
+- **Courses & Enrolment:** assign eligible school teachers and matching-class students, filter courses needing attention, read/download materials and review parent-recorded completion.
+- **Administration Reports:** school summary, admission register, guardian directory and course enrolment snapshots; CSV/standalone HTML/print, with eight reports per school. Passwords and private note text are excluded.
+
+Changing a student's grade/class removes incompatible course enrolments; matching-course enrolment is then assigned separately. Staff appointments, lecture publication, attendance marking and transport/library operations stay with their authorised roles. All changes remain in the browser. See the maintained [role reference](ROLE_FEATURES_ACCESS.md#school-administrator) for complete access, workflow and report rules.
+
 ### School portal
 
 1. Start in **Chairman → Overview**. An interactive OpenStreetMap street map shows Sri Lanka and a simulated network fleet of 44 buses across all 20 branches. Nearby vehicles form bus-count groups; click a group to zoom in and see individual buses. Branch-name bubbles appear near their geographic positions where space permits. Use **View all buses** to find every branch's vehicles, or filter by On route, At school and Signal delayed. Pan, zoom, pause or resume the simulation, or choose **View whole island** to reset. Street tiles require an internet connection; a notice appears if they cannot load.

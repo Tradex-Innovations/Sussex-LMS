@@ -1939,3 +1939,23 @@ form[data-form="class-attendance"] { display: flex; flex-direction: column; min-
   .class-attendance-footer > div { display: grid; grid-template-columns: auto minmax(0,1fr); }
   .class-attendance-footer .button { padding-inline: 10px; font-size: 12px; }
 }
+
+/* School Administrator */
+.admin-filters .chairman-search { min-width: 210px; flex: 1; align-self: end; }
+.admin-access-note { display: flex; align-items: flex-start; gap: 16px; padding: 22px; margin: 20px 0; background: #edf4ee; border-color: #d8e6dc; }
+.admin-access-note > svg { flex: none; color: var(--accent); }
+.admin-access-note h2 { font-size: 18px; margin-bottom: 8px; }
+.admin-access-note p { font-size: 14px; line-height: 1.7; color: var(--muted); }
+.admin-activity { padding: 8px 20px 18px; }
+.admin-activity article { display: flex; gap: 12px; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--line); }
+.admin-activity article > svg { flex: none; color: var(--accent); }
+.admin-activity strong { font-size: 14px; }
+.admin-activity small, .admin-guardian-links small { display: block; font-size: 12px; color: var(--muted); margin-top: 5px; }
+.admin-report-brand { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.admin-profile-facts { display: grid; gap: 16px; background: #f4f7f3; padding: 16px; margin: 20px 0; border-radius: 10px; }
+.admin-profile-facts span { display: block; color: var(--muted); font-size: 12px; margin-bottom: 5px; }
+.admin-profile-facts strong { display: block; font-size: 14px; }
+.admin-student-profile > p { font-size: 14px; line-height: 1.7; }
+.admin-guardian-links article { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.admin-guardian-links .button { flex: none; }
+@media (max-width: 640px) { .admin-filters .chairman-search { width: 100%; min-width: 0; grid-column: 1 / -1; } .admin-access-note { padding: 16px; } .admin-guardian-links article { align-items: flex-start; flex-direction: column; } }
