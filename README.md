@@ -18,9 +18,9 @@ Open [the local demo](http://127.0.0.1:4183/). No install or build is required.
 
 ## Interactive client presentation
 
-Open [A Connected School Day](https://campusway-school-demo.manusara.chatgpt.site/showcase/) or the [local showcase](http://127.0.0.1:4183/showcase/). This separate seven-chapter presentation introduces the product with 3D Sri Lanka, bus and NFC scenes, interactive sample workflows, four guided role tours and links to all 13 LMS roles. It does not change LMS records.
+Open [A Connected School Day](https://campusway-school-demo.manusara.chatgpt.site/showcase/) or the [local showcase](http://127.0.0.1:4183/showcase/). This separate seven-chapter presentation combines cinematic 3D scenes with **32 actual prototype screenshots**, four guided role tours and links to all 13 LMS roles. Chapters open in **Screens** view; click a screenshot to enlarge it, then choose **Actual size** to inspect the original. **Try demo** opens the interactive sample workflow. It does not change LMS records.
 
-Use **Present** for the guided story or **Explore** for client browsing. Left/right keys move chapters, **N** opens presenter notes and **M** opens the chapter menu. The menu includes reduced motion, simpler graphics, reset, fullscreen and a short backup video. Load once online until **Presentation available offline** appears before using it without a connection. Prototype links still require internet/Site access.
+Use **Present** for the guided story or **Explore** for client browsing. The presentation keeps large headlines and functional controls; supporting explanations and prototype limits are in presenter notes. Left/right keys move chapters, **N** opens notes and **M** opens the chapter menu. The menu includes reduced motion, simpler graphics, reset, fullscreen and a short backup video. Load once online until **Presentation available offline** appears before using it without a connection; screenshots and video are included. Prototype links still require internet/Site access.
 
 The built presentation is included in `dist/showcase/`, so the same static server runs both experiences. To develop/rebuild only the presentation:
 

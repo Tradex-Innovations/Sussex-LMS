@@ -8,19 +8,21 @@ Open the presentation online once and wait for **Presentation available offline*
 
 Choose **Present** for a guided walkthrough. **Explore** additionally supports scrolling over the scene and horizontal swiping to change chapters. Each chapter's mobile content scrolls vertically. The progress bar and chapter menu always allow direct navigation.
 
-Use the fullscreen button or the menu's fullscreen action when supported by the browser. Load the menu's **Watch the backup walkthrough** before the meeting if a video-only fallback is needed. The downloadable H264 video is about 36 seconds, with no audio; it is a short visual summary rather than the full narrated presentation.
+Chapters open in **Screens** view with actual prototype captures. Use the screen tabs to show related views; select the image to enlarge it. **Actual size** allows scrolling across the original pixels; **Fit to view** restores the full frame. **Open prototype** opens that captured view's real LMS route. Choose **Try demo** for the presentation's interactive examples. Headlines and functional controls remain visible; supporting narration and limits are in **Notes** instead of small on-screen annotations.
+
+Use the fullscreen button or the menu's fullscreen action when supported by the browser. Load the menu's **Watch the backup walkthrough** before the meeting if a video-only fallback is needed. The downloadable H264 video is about 32 seconds at 1440×900, with no audio; it is a short visual summary rather than the full narrated presentation.
 
 ## Seven chapters
 
 | Chapter | Suggested discussion | Interaction |
 | --- | --- | --- |
-| The network | Explain 20 branches and 13 roles. | Pick a school on the Sri Lanka map or school selector. Locations are approximate. |
-| The journey | Show school-bus visibility for parents/staff. | Advance the sample Nugegoda Bus 01, then try a delayed signal. |
-| The tap | Explain card-linked boarding and exceptions. | Tap/repeat, try offline/reconnect/sync, then show missing-scan review. |
-| The classroom | Connect teaching, parent learning and attendance. | Publish notes, download/mark done as Parent, mark class attendance separately. |
-| The bigger picture | Discuss network/school oversight. | Compare subjects using the LMS's sample Grade 8 Term 3 assessment model. |
-| School essentials | Explain collection-only reservations. | Walk books/uniforms through requested, confirmed, ready and collected. |
-| Your next chapter | Explain role scope and proposed pilot. | Four three-step role tours, all 13 role previews, then pilot discussion. |
+| The network | Explain 20 branches and 13 roles. | Show the actual Chairman map. In Try demo, pick a school on the 3D map or selector. |
+| The journey | Show school-bus visibility for parents/staff. | Show Parent and Driver screens. In Try demo, advance Bus 01 and try a delayed signal. |
+| The tap | Explain card-linked boarding and exceptions. | Show the boarding roster, Parent status and student cards. In Try demo, tap/repeat, reconnect/sync and review a missing scan. |
+| The classroom | Connect teaching, parent learning and attendance. | Show lecture notes, Parent learning and the attendance form. In Try demo, publish, mark done and save attendance separately. |
+| The bigger picture | Discuss network/school oversight. | Show Academic, Attendance, Staffing and Reports screens. In Try demo, compare illustrative subjects. |
+| School essentials | Explain collection-only reservations. | Show Parent books/uniforms, both store queues and collection. In Try demo, progress a reservation. |
+| Your next chapter | Explain role scope and proposed pilot. | Show four three-screen role tours or All roles, then discuss Pilot plan. |
 
 Allow roughly 8–10 minutes for the guided story plus discussion. Chapter notes suggest individual discussion time and explain prototype limits. The example journey follows Nugegoda Bus 01; selecting another branch on the network map does not imply a verified operating route for that school.
 
@@ -35,6 +37,6 @@ Allow roughly 8–10 minutes for the guided story plus discussion. Chapter notes
 
 ## What the client is seeing
 
-All interactions are presentation examples held in memory. They do not read or write the LMS's browser database. GPS, NFC, academic results, uniform designs, collection and student records are sample demonstrations. A missed tap means review, not automatic student absence. Lesson completion does not create academic marks. Book/uniform flows have no checkout or online payment.
+The 32 screenshots are unaltered captures of actual prototype views in an isolated demo browser. They are static images, not live data. Try demo interactions are presentation examples held in memory; they do not read or write the LMS's browser database. GPS, NFC, academic results, uniform designs, collection and student records are sample demonstrations. A missed tap means review, not automatic student absence. Lesson completion does not create academic marks. Book/uniform flows have no checkout or online payment.
 
 Role links open the existing LMS in a separate tab with its normal demo account/login behavior. Parent demo admission: **SCN-1001**, password **1234**. Suggested pilot stages are a proposal, not a delivery commitment or an installed hardware claim.

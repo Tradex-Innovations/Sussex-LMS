@@ -1,0 +1,230 @@
+{
+  "sourceCommit": "91001742046deb7ce05b2862e53908b083a39a38",
+  "source": "Current LMS rendered in an isolated local browser with demo records",
+  "captures": [
+    {
+      "id": "network",
+      "route": "chairman/overview/transport",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T05:59:54.354Z"
+    },
+    {
+      "id": "chairman-academic",
+      "route": "chairman/overview/academic",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T05:59:56.282Z"
+    },
+    {
+      "id": "chairman-attendance",
+      "route": "chairman/overview/attendance",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T05:59:58.260Z"
+    },
+    {
+      "id": "chairman-staffing",
+      "route": "chairman/overview/staffing",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:00.192Z"
+    },
+    {
+      "id": "chairman-reports",
+      "route": "chairman/overview/reports",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:04.656Z"
+    },
+    {
+      "id": "principal",
+      "route": "principal/overview/transport",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:06.654Z"
+    },
+    {
+      "id": "principal-attendance",
+      "route": "principal/overview/attendance",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:07.189Z"
+    },
+    {
+      "id": "principal-reports",
+      "route": "principal/overview/reports",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:11.658Z"
+    },
+    {
+      "id": "vice_principal",
+      "route": "vice_principal/overview/transport",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:13.629Z"
+    },
+    {
+      "id": "section_head",
+      "route": "section_head/overview/summary",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:14.144Z"
+    },
+    {
+      "id": "coordinator",
+      "route": "coordinator/overview/summary",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:14.655Z"
+    },
+    {
+      "id": "class_teacher",
+      "route": "class_teacher/overview/summary",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:15.160Z"
+    },
+    {
+      "id": "teacher",
+      "route": "teacher/overview/summary",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:15.669Z"
+    },
+    {
+      "id": "admin",
+      "route": "admin/overview/summary",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:16.178Z"
+    },
+    {
+      "id": "transport",
+      "route": "transport/overview/fleet",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:18.131Z"
+    },
+    {
+      "id": "driver",
+      "route": "driver/overview/summary",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:18.655Z"
+    },
+    {
+      "id": "driver-issues",
+      "route": "driver/overview/issues",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:19.181Z"
+    },
+    {
+      "id": "librarian",
+      "route": "librarian/overview/summary",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:19.686Z"
+    },
+    {
+      "id": "uniform_store",
+      "route": "uniform_store/overview/summary",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:20.190Z"
+    },
+    {
+      "id": "teacher-notes",
+      "route": "teacher/courses",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:20.727Z"
+    },
+    {
+      "id": "class-attendance",
+      "route": "class_teacher/overview/attendance",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:21.273Z"
+    },
+    {
+      "id": "boarding",
+      "route": "transport/boarding",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:21.820Z"
+    },
+    {
+      "id": "driver-boarding",
+      "route": "driver/boarding",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:22.336Z"
+    },
+    {
+      "id": "transport-cards",
+      "route": "admin/boarding",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:22.866Z"
+    },
+    {
+      "id": "book-requests",
+      "route": "librarian/overview/reservations",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:23.392Z"
+    },
+    {
+      "id": "uniform-requests",
+      "route": "uniform_store/overview/reservations",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:23.902Z"
+    },
+    {
+      "id": "parent-courses",
+      "route": "parent/courses",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:24.460Z"
+    },
+    {
+      "id": "parent-books",
+      "route": "parent/library",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:25.001Z"
+    },
+    {
+      "id": "parent-uniforms",
+      "route": "parent/uniforms",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:25.517Z"
+    },
+    {
+      "id": "parent-ready",
+      "route": "parent/library",
+      "width": 1440,
+      "height": 960,
+      "capturedAt": "2026-11-23T06:00:26.064Z"
+    },
+    {
+      "id": "parent-bus",
+      "route": "parent/transport",
+      "width": 390,
+      "height": 844,
+      "capturedAt": "2026-11-23T06:00:26.602Z"
+    },
+    {
+      "id": "parent-boarding",
+      "route": "parent/boarding",
+      "width": 390,
+      "height": 844,
+      "capturedAt": "2026-11-23T06:00:27.123Z"
+    }
+  ]
+}
