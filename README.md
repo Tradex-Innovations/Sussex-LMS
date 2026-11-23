@@ -16,6 +16,22 @@ Open [the local demo](http://127.0.0.1:4183/). No install or build is required.
 
 [ROLE_FEATURES_ACCESS.md](ROLE_FEATURES_ACCESS.md) documents all 13 roles, their implemented views, read/write scope, approvals, cross-role workflows, demo accounts and prototype limits. Project instructions in [AGENTS.md](AGENTS.md) require this reference to be updated alongside future feature and permission changes. New user feature ideas are also recorded as proposed requirements before implementation. The [NFC boarding prototype](ROLE_FEATURES_ACCESS.md#nfc-boarding-prototype) demonstrates cards, reader taps and boarding registers; physical NFC hardware and notifications remain future integration work.
 
+## Interactive client presentation
+
+Open [A Connected School Day](https://campusway-school-demo.manusara.chatgpt.site/showcase/) or the [local showcase](http://127.0.0.1:4183/showcase/). This separate seven-chapter presentation introduces the product with 3D Sri Lanka, bus and NFC scenes, interactive sample workflows, four guided role tours and links to all 13 LMS roles. It does not change LMS records.
+
+Use **Present** for the guided story or **Explore** for client browsing. Left/right keys move chapters, **N** opens presenter notes and **M** opens the chapter menu. The menu includes reduced motion, simpler graphics, reset, fullscreen and a short backup video. Load once online until **Presentation available offline** appears before using it without a connection. Prototype links still require internet/Site access.
+
+The built presentation is included in `dist/showcase/`, so the same static server runs both experiences. To develop/rebuild only the presentation:
+
+```sh
+cd showcase
+npm ci
+npm run build
+```
+
+The build writes only `dist/showcase/`. Read [the meeting guide](showcase/PRESENTATION_GUIDE.md), [asset provenance](showcase/ASSETS.md) and [presentation access/limits](ROLE_FEATURES_ACCESS.md#interactive-client-presentation). GPS, NFC, results and collection examples remain simulated; there is no online payment.
+
 ## Parent demo login
 
 Open [Parent login](http://127.0.0.1:4183/#parent/login). Use a student's admission number and the temporary demo password `1234`.

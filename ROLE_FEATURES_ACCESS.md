@@ -1,6 +1,6 @@
 # Sussex College Network — Role Features and Access Reference
 
-**Last updated:** 22 November 2026 (Asia/Colombo).  
+**Last updated:** 23 November 2026 (Asia/Colombo).
 **Status:** Implemented browser-only demonstration, plus separately labelled proposed requirements; limitations are listed below.
 
 **Application:** `dist/`; start locally with `python3 -m http.server 4183 --bind 127.0.0.1 --directory dist`.
@@ -26,12 +26,13 @@ This is the maintained reference for the **current implementation**, covering al
 15. [Uniform Store Officer](#uniform-store-officer)
 16. [Parent](#parent)
 17. [NFC boarding prototype](#nfc-boarding-prototype)
-18. [Cross-role workflows](#cross-role-workflows)
-19. [Persistence and reports](#persistence-and-reports)
-20. [Demo accounts and validation](#demo-accounts-and-validation)
-21. [Proposed features and requirements](#proposed-features-and-requirements)
-22. [Maintenance checklist](#maintenance-checklist)
-23. [Change log](#change-log)
+18. [Interactive client presentation](#interactive-client-presentation)
+19. [Cross-role workflows](#cross-role-workflows)
+20. [Persistence and reports](#persistence-and-reports)
+21. [Demo accounts and validation](#demo-accounts-and-validation)
+22. [Proposed features and requirements](#proposed-features-and-requirements)
+23. [Maintenance checklist](#maintenance-checklist)
+24. [Change log](#change-log)
 
 ## Prototype boundaries
 
@@ -610,6 +611,34 @@ Stock edits require an adjustment reason, whole units from 0–10,000 and on-han
 - Manifest CSV is generated from the current accessible roster, including admission/class, bus/direction, transport status, recorded time/source and reader/sync context. It excludes card codes, free-text reasons and guardian credentials, and neutralises spreadsheet formula characters. It is a current export, not an added saved-report history or PDF service.
 - Bus boarding never writes Class Teacher attendance, academic marks, course enrolment or parent lesson completion.
 
+## Interactive client presentation
+
+**Entry:** `/showcase/` on the existing private Site; local `http://127.0.0.1:4183/showcase/`. **Title:** Sussex College Network — A Connected School Day. **Source:** `showcase/`; **built output:** `dist/showcase/`. The main LMS remains at `/` with its existing role routes and browser data.
+
+### Story and interaction scope
+
+1. **The network:** actual Sri Lanka coastline from the existing Natural Earth source, 20 previously verified approximate school locations, clickable 3D points and an accessible school selector. This is not a new verification of branch addresses or real transport routes.
+2. **The journey:** original procedural 3D school bus/road and parent-phone illustration, sample Nugegoda Bus 01 stop progress and delayed-signal state. The initial network selection does not invent an operational route for another branch.
+3. **The tap:** original 3D card/reader, one illustrative pupil, accepted/repeated/offline/queued/synced taps and a missing-scan review scenario. No missing scan automatically marks absence. No physical NFC reader is connected.
+4. **The classroom:** separate Subject Teacher, Class Teacher and Parent perspectives; sample publication/download/completion and one pupil's Present/Absent/Late entry. The downloadable text notes are labelled sample material. Completion, attendance and assessment marks remain separate concepts.
+5. **The bigger picture:** subject comparison using the exact existing illustrative Grade 8/Term 3 assessment model, selected schools or all 20 with the top five shown, and school selection. Values are labelled sample, not actual Sussex results.
+6. **School essentials:** pupil-book/uniform selection, sample size, requested/confirmed/ready/collected progression and the responsible store role. No sales, prices, checkout or payment. This simplified presentation does not create a real reservation or change stock.
+7. **Your next chapter:** four focused three-step tours (Chairman, Principal, Parent, Driver), contextual prototype links, all 13 role summaries/links, and a proposed one-school/one-bus/small-card-group pilot. The pilot is for discussion, with production work explicitly identified.
+
+### Presenter, exploration and resilience
+
+- **Presenter mode:** fullscreen where the browser permits it, Next/Previous, seven direct chapter controls, notes, discussion timing and animation pause/resume. Left/right and Page Up/Down navigate; Space pauses outside button/link focus; N opens notes and M chapters. Form controls/role tabs retain their native keys. Native dialogs support focus containment, labelled headings and Escape dismissal.
+- **Explore mode:** the same content with chapter selection, scene-area wheel navigation and horizontal touch swipes. Mobile chapter content scrolls vertically; all controls remain reachable. URL hash addresses each chapter; query values retain Explore and simple-graphics choices on reload.
+- **Motion/graphics:** GSAP transitions, one shared React Three Fiber/Three.js canvas, locally generated bus/card/reader/map meshes and supporting tablet/books/uniform props. OS reduced-motion preferences are respected; manual reduced-motion/2D choices remain available. A 2D SVG/CSS alternative supports every interaction when chosen or after GPU context loss.
+- **Offline:** a content-versioned service worker scoped strictly to `/showcase/` caches its local HTML/JS/CSS/font/logo/poster/video after an initial successful online load. Cache updates remove old showcase caches only. The menu reports readiness; clearing browser storage removes the cache. Existing LMS routes and private Site authorization remain separate; opening the LMS still requires access/internet.
+- **Backup:** a downloadable approximately 36-second 1440×810 H264 MP4 screen recording, without audio, demonstrates the seven chapters and example interactions. It is available from the presentation menu and cached for offline playback, with a local poster. It is not live bus/hardware footage.
+
+### Access, state, production limits and maintenance
+
+The existing Site audience is retained. This presentation is a client-facing explanation, not an additional authenticated role. Its state is in memory and resets on reload/menu reset; it does not read/write `campusway-demo-v1`, parent sessions, admissions, real course assignments, reservations, NFC or attendance. Prototype buttons use fixed, verified role routes and open a separate tab with the LMS's normal demo switcher/admission login. Parent example credentials remain SCN-1001 / 1234.
+
+No backend, physical GPS/NFC, notification, protected authorization, real academic result or payment integration is added. Model assets, sample data provenance and dependency licences/notices are documented in `showcase/ASSETS.md`. `showcase/PRESENTATION_GUIDE.md` gives meeting controls and a chapter walkthrough. The isolated Vite build empties only `dist/showcase/`; it does not rebuild/replace the main LMS. Rebuild/re-record the backup when the story changes and keep this role reference current.
+
 ## Cross-role workflows
 
 ### School administration and parent access
@@ -749,6 +778,12 @@ The suite covers access, migration, parent admission selection, network/director
 
 This section captures user-requested features before implementation. Keep their status explicit, distinguish the request from recommended additions, and move implemented details into the relevant role/workflow sections only when the system actually supports them. These entries do not change current permissions or imply deployment.
 
+### Interactive product presentation
+
+**Feature ID:** `CLIENT-SHOWCASE-001`. **Requested:** 23 November 2026. **Status:** **Implemented**, with seven chapters and three primary cinematic 3D scenes plus supporting product props.
+
+The user approved the recommended web presentation as proposed: a separate fullscreen experience, Sussex navy/gold, Sri Lanka network map, 3D school bus and NFC card/reader, interactive transport/boarding/learning/leadership/collection examples, Presenter/Explore modes, four guided role tours and all 13 prototype links. Keyboard/touch navigation, notes, reduced motion/2D fallback, offline caching and a short backup video are included. See [Interactive client presentation](#interactive-client-presentation). This is presentation access only and adds no LMS role permissions or production integrations.
+
 ### Pupil’s books and school uniform reservations
 
 **Feature ID:** `SCHOOL-SUPPLIES-RESERVATION-001`. **Requested and confirmed:** 22 November 2026. **Status:** **Prototype implemented**.
@@ -880,3 +915,13 @@ For **every new user feature idea or future implementation**:
 - Added requested/confirmed/ready/collected/cancelled/declined state transitions, stock holds and single collection consumption, size-level uniform stock, collection details/reference/receiving-adult capture, private store notes and stock-adjustment history. Added isolated snapshot reports and safe CSV; Parent cancellation/duplicate protection and current school/student/store access are checked.
 - Added one-time store migration preserving academic, transport, NFC, admissions and earlier orders/carts. Updated role reference, hierarchy, current permission/workflow/persistence sections, feature tracker and README. No additional-book sales, payment gateway, production inventory/backend, notification, lending or uniform returns service is connected.
 - Validation: **165 Node tests passed**, including 20 new store/reservation cases. Browser checks passed for selected-pupil grade-matching books, sized/quantity uniform requests, separate school/store queues, confirmation/holds, ready collection details, reference validation and handover, single stock consumption, stock edits, parent cancellation, note/guardian/pupil privacy, CSV snapshots, reload persistence and leadership oversight. Both five-view store portals and both Parent sections passed 1500px/390px/320px width checks; mobile stock/request dialogs were inspected. Existing Driver workflows and all seven NFC portals also passed browser regression checks. No physical stock, payment, external message or actual school-counter handover was connected or performed.
+
+### 23 November 2026 — Interactive client product showcase
+
+- Implemented the approved seven-chapter web showcase at `/showcase/`, with Sussex navy/gold styling, a shared 3D canvas, procedural Sri Lanka/bus/NFC scenes and supporting product props. Added scoped narrative demos, four three-step role tours and all 13 prototype links.
+- Added Present/Explore modes, notes, keyboard/touch/chapter controls, fullscreen/pause, reduced motion/2D fallback, isolated in-memory examples and content-versioned offline caching. Supplied a short H264 screen-recording backup and meeting guide. Preserved the main LMS and Site audience; no production integrations or LMS permissions were added.
+- Updated the feature tracker, maintained reference, README and asset/dependency provenance. Validation evidence follows.
+
+- **173 Node tests passed**, including eight presentation cases for chapter/branch/role completeness, fixed prototype links, NFC offline/duplicate/missing-scan behavior, academic/attendance separation, collection progression, shared assessment calculations and reset isolation.
+- Browser checks passed for the seven interactive chapters, navigation/notes, delayed routes, NFC states, actual sample-note download, publication/completion/attendance, comparisons, book/uniform flows, four contextual role tours/all 13 roles, pilot information, Explore scrolling, reduced motion and full 2D fallback. The LMS storage payload stayed unchanged.
+- All seven chapters passed width/reachability checks at 1500×1000, 1366×768, 1024×768, 768×1024, 390×844 and 320×800; additional WebGL mobile checks passed at 390/320px. Desktop/mobile visuals were inspected. An actual disconnected-browser reload passed with WebGL and NFC interaction. All 12 presentation assets were cached, including the 36.25-second 1440×810 H264 backup; online/offline video playback and fullscreen entry/exit passed.
