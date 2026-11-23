@@ -6,7 +6,7 @@ import { gradeScope } from "./grade-data.js";
 
 export const classViews = [
   { id: "summary", name: "Class Overview", short: "Overview", icon: "school" },
-  { id: "learning", name: "Learning & Materials", short: "Learning", icon: "book" },
+  { id: "learning", name: "Subjects & Materials", short: "Subjects", icon: "book" },
   { id: "attendance", name: "Attendance", short: "Attendance", icon: "checkCircle" },
   { id: "support", name: "Student Support", short: "Support", icon: "users" },
   { id: "reports", name: "Class Reports", short: "Reports", icon: "file" },
@@ -128,9 +128,9 @@ export function classSupportRequests(state, context) {
 }
 export function requestClassSupport(state, context, input) {
   const scope = requireClass(state, context), course = input.course ? classCourses(state, context).find((item) => item.id === input.course) : null;
-  if (input.course && !course) throw new Error("Choose a course from your class.");
+  if (input.course && !course) throw new Error("Choose a subject from your class.");
   if (!Object.hasOwn(classSupportTypes, input.type)) throw new Error("Choose a support topic.");
-  if (["cover", "materials"].includes(input.type) && !course) throw new Error("Choose a class course for lecture-material or cover support.");
+  if (["cover", "materials"].includes(input.type) && !course) throw new Error("Choose a class subject for lecture-material or cover support.");
   if (classSupportRequests(state, context).some((item) => item.type === input.type && item.course === (course?.id || "") && item.status !== "resolved")) throw new Error("An open request already exists for this class/course and topic.");
   const note = String(input.note || "").trim();
   if (!note || note.length > 1000) throw new Error("Enter a request note for the Grade Coordinator.");
@@ -187,11 +187,11 @@ export function generateClassReport(state, context, input = {}) {
     columns = [["date", "School day"], ["rate", "Attendance %"], ["expected", "Expected"], ["present", "Present"], ["absent", "Absent"], ["late", "Late arrivals"]];
   } else if (f.reportType === "teaching") {
     rows = courses.map((course) => ({ title: course.title, className: course.className, ...sectionCourseProgress(state, course), review: state.sectionCourseReviews?.[course.id]?.status || "Not reviewed" }));
-    columns = [["title", "Course"], ["className", "Class"], ["teacher", "Assigned teacher"], ["enrolled", "Course enrolment"], ["materials", "Materials"], ["completed", "Completed material assignments"], ["expected", "Expected material assignments"], ["review", "Section Head review"]];
+    columns = [["title", "Subject"], ["className", "Class"], ["teacher", "Assigned teacher"], ["enrolled", "Subject enrolment"], ["materials", "Materials"], ["completed", "Completed material assignments"], ["expected", "Expected material assignments"], ["review", "Section Head review"]];
   } else {
     rows = [{ className: scope.className, academic: academic.summary.count ? academic.summary.mean : "No sample data", attendance: attendance.summary.expected ? attendance.summary.rate : "No register data",
       registered: classStudents(state, context).length, courses: courses.length, materials: progress.reduce((sum, row) => sum + row.materials, 0), completed: progress.reduce((sum, row) => sum + row.completed, 0), expected: progress.reduce((sum, row) => sum + row.expected, 0), pending: followups.filter((item) => item.status !== "resolved").length }];
-    columns = [["className", "Class"], ["academic", "Sample subject average %"], ["attendance", "Sample attendance %"], ["registered", "Actual prototype students"], ["courses", "Courses"], ["materials", "Materials"], ["completed", "Completed material assignments"], ["expected", "Expected material assignments"], ["pending", "Pending follow-ups"]];
+    columns = [["className", "Class"], ["academic", "Sample subject average %"], ["attendance", "Sample attendance %"], ["registered", "Actual prototype students"], ["courses", "Subjects"], ["materials", "Materials"], ["completed", "Completed material assignments"], ["expected", "Expected material assignments"], ["pending", "Pending follow-ups"]];
   }
   return { id: "class-report-" + crypto.randomUUID(), title: classReportTypes[f.reportType], type: f.reportType, sample: true, generatedAt: new Date().toISOString(),
     owner: { key: scope.key, role: "class_teacher", name: context.account.name, school: scope.branch.school, grade: scope.grade, className: scope.className, sectionName: scope.section.name },

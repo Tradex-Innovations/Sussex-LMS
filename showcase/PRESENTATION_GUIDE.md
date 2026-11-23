@@ -8,9 +8,9 @@ Open the presentation online once and wait for **Presentation available offline*
 
 Choose **Present** for a guided walkthrough. **Explore** additionally supports scrolling over the scene and horizontal swiping to change chapters. Each chapter's mobile content scrolls vertically. The progress bar and chapter menu always allow direct navigation.
 
-Chapters open in **Screens** view with actual prototype captures. Use the screen tabs to show related views; select the image to enlarge it. **Actual size** allows scrolling across the original pixels; **Fit to view** restores the full frame. **Open prototype** opens that captured view's real LMS route. Choose **Try demo** for the presentation's interactive examples. Headlines and functional controls remain visible; supporting narration and limits are in **Notes** instead of small on-screen annotations.
+Chapters open in **Screens** view with actual prototype captures. Use the screen tabs (or **Prototype view** in The classroom) to show related views; select the image to enlarge it. **Actual size** allows scrolling across the original pixels; **Fit to view** restores the full frame. **Open prototype** opens that captured view's real LMS route. Choose **Try demo** for the presentation's interactive examples. Headlines and functional controls remain visible; supporting narration and limits are in **Notes** instead of small on-screen annotations.
 
-Use the fullscreen button or the menu's fullscreen action when supported by the browser. Load the menu's **Watch the backup walkthrough** before the meeting if a video-only fallback is needed. The downloadable H264 video is about 32 seconds at 1440×900, with no audio; it is a short visual summary rather than the full narrated presentation.
+Use the fullscreen button or the menu's fullscreen action when supported by the browser. Load the menu's **Watch the backup walkthrough** before the meeting if a video-only fallback is needed. The downloadable H264 video is 39 seconds at 1440×900, with no audio; it is a short visual summary rather than the full narrated presentation.
 
 ## Seven chapters
 
@@ -19,7 +19,7 @@ Use the fullscreen button or the menu's fullscreen action when supported by the 
 | The network | Explain 20 branches and 13 roles. | Show the actual Chairman map. In Try demo, pick a school on the 3D map or selector. |
 | The journey | Show school-bus visibility for parents/staff. | Show Parent and Driver screens. In Try demo, advance Bus 01 and try a delayed signal. |
 | The tap | Explain card-linked boarding and exceptions. | Show the boarding roster, Parent status and student cards. In Try demo, tap/repeat, reconnect/sync and review a missing scan. |
-| The classroom | Connect teaching, parent learning and attendance. | Show lecture notes, Parent learning and the attendance form. In Try demo, publish, mark done and save attendance separately. |
+| The classroom | Connect class teaching with each family. | Show Parent identity/subjects, per-student selections, separate teaching classes, homework, class notices, lecture notes and attendance using Prototype view. In Try demo, publish for Science 8A/8B, select the pupil’s subject, share a common notice and mark homework/notes/attendance separately. |
 | The bigger picture | Discuss network/school oversight. | Show Academic, Attendance, Staffing and Reports screens. In Try demo, compare illustrative subjects. |
 | School essentials | Explain collection-only reservations. | Show Parent books/uniforms, both store queues and collection. In Try demo, progress a reservation. |
 | Your next chapter | Explain role scope and proposed pilot. | Show four three-screen role tours or All roles, then discuss Pilot plan. |
@@ -37,6 +37,6 @@ Allow roughly 8–10 minutes for the guided story plus discussion. Chapter notes
 
 ## What the client is seeing
 
-The 32 screenshots are unaltered captures of actual prototype views in an isolated demo browser. They are static images, not live data. Try demo interactions are presentation examples held in memory; they do not read or write the LMS's browser database. GPS, NFC, academic results, uniform designs, collection and student records are sample demonstrations. A missed tap means review, not automatic student absence. Lesson completion does not create academic marks. Book/uniform flows have no checkout or online payment.
+The 38 screenshots are unaltered captures of actual prototype views in an isolated demo browser. They are static images, not live data. Try demo interactions are presentation examples held in memory; they do not read or write the LMS's browser database. GPS, NFC, academic results, uniform designs, collection and student records are sample demonstrations. A missed tap means review, not automatic student absence. Lesson completion does not create academic marks. Book/uniform flows have no checkout or online payment.
 
 Role links open the existing LMS in a separate tab with its normal demo account/login behavior. Parent demo admission: **SCN-1001**, password **1234**. Suggested pilot stages are a proposal, not a delivery commitment or an installed hardware claim.

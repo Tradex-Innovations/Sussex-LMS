@@ -310,7 +310,7 @@ export function chairmanBranchPanel(options, branch) {
         return '<div><span>' + subject.name + '</span><strong>' + percent(score.mean) + '</strong><progress max="100" value="' + score.mean + '" aria-label="' + subject.name + ' average"></progress></div>';
       }).join("") + '</div>') + panel("Term trend", "Selected subject and grade", sparkline(academicTrend([branch], options.network), branch.name + " term trend")) +
       panel("Mark distribution", "Pass mark 50% · High scores 75%+", histogram(academicDistribution([branch], options.network))) +
-      button("Open branch courses", "network-open", { value: branch.id, variant: "secondary", iconName: "book" });
+      button("Open branch subjects", "network-open", { value: branch.id, variant: "secondary", iconName: "book" });
   }
   if (view === "attendance") {
     const result = attendanceResult(options.state, branch, c);

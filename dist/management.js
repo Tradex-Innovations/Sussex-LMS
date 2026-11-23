@@ -13,7 +13,7 @@ export function peoplePage({ state, context }) {
   const students = visibleStudents(state, context);
   return `${pageHeading("Students & guardians", "Student records and linked parent accounts within your assigned scope.", can(context, "students.edit") ? button("Add student", "edit-student", { iconName: "plus" }) : "")}
     <section class="surface"><header class="panel-heading"><div><h2>Student directory</h2><p>${students.length} students in your scope</p></div></header>
-    <div class="table-scroll"><table class="course-table"><thead><tr><th>Student</th><th>Branch / Class</th><th>Linked guardians</th><th>Courses</th><th>Actions</th></tr></thead><tbody>
+    <div class="table-scroll"><table class="course-table"><thead><tr><th>Student</th><th>Branch / Class</th><th>Linked guardians</th><th>Subjects</th><th>Actions</th></tr></thead><tbody>
       ${students.map((student) => {
         const guardians = state.accounts.filter((person) => student.guardians.includes(person.id));
         const assigned = state.courses.filter((course) => state.assignments[course.id].students.includes(student.id));
@@ -34,7 +34,7 @@ export function studentForm(state, context, student = {}) {
     <label class="field">Branch<select aria-label="Branch" name="branch" data-change="student-branch" ${student.id ? "disabled" : ""}>${branches.map((item) => `<option value="${item.id}" ${item.id === branch ? "selected" : ""}>${e(item.name)}</option>`).join("")}</select></label>
     <label class="field">Grade<select aria-label="Grade" name="grade">${Array.from({ length: 14 }, (_, grade) => `<option value="${grade}" ${grade === (student.grade ?? 8) ? "selected" : ""}>${grade === 0 ? "Preschool" : "Grade " + grade}</option>`).join("")}</select></label>
     <label class="field">Class<input name="className" value="${e(student.className || "8A")}" required maxlength="8" pattern="[0-9]{1,2}[A-Za-z]{1,2}"></label>
-    ${student.id ? '<p class="chairman-filter-note">Changing grade or class removes course enrolments that no longer match.</p>' : ""}<fieldset class="roster-picker"><legend>Linked guardian accounts</legend>${guardians.map((person) => `<label class="roster-check"><input type="checkbox" name="guardians" value="${person.id}" ${student.guardians?.includes(person.id) ? "checked" : ""}>${e(person.name)}</label>`).join("") || '<p class="secondary-text">A Principal can appoint a parent account from Roles & access.</p>'}</fieldset>
+    ${student.id ? '<p class="chairman-filter-note">Changing grade or class removes subject enrolments that no longer match.</p>' : ""}<fieldset class="roster-picker"><legend>Linked guardian accounts</legend>${guardians.map((person) => `<label class="roster-check"><input type="checkbox" name="guardians" value="${person.id}" ${student.guardians?.includes(person.id) ? "checked" : ""}>${e(person.name)}</label>`).join("") || '<p class="secondary-text">A Principal can appoint a parent account from Roles & access.</p>'}</fieldset>
     <p class="form-error" role="alert" hidden></p></div><footer class="dialog-actions">${button("Cancel", "close-dialog", { variant: "secondary" })}<button class="button primary" type="submit">Save student</button></footer></form>`;
 }
 
@@ -47,10 +47,10 @@ export function accessPage({ state, context }) {
       <div class="hierarchy-principal"><strong>Principal</strong><span>Full assigned branch access</span></div>
       <div class="hierarchy-lanes">
         <div><strong>Vice Principal</strong><span>Section Heads</span><span>Grade Coordinators</span><span>Class & Subject Teachers</span></div>
-        <div><strong>School Administrator</strong><span>Students & guardians</span><span>Course enrollment</span></div>
+        <div><strong>School Administrator</strong><span>Students & guardians</span><span>Subject enrollment</span></div>
         <div><strong>Transport Coordinator</strong><span>Bus routes & assignments</span><span>Drivers</span></div>
         <div><strong>Book Store Officer</strong><span>Pupil’s books & stock</span><span>Student reservations & collection</span></div>
-      <div><strong>Uniform Store Officer</strong><span>Uniform sizes & stock</span><span>Student reservations & collection</span></div></div><p class="hierarchy-family">${icon("users", 17)} Parents access linked children’s bus trips, courses, and their child’s book and uniform reservations.</p>
+      <div><strong>Uniform Store Officer</strong><span>Uniform sizes & stock</span><span>Student reservations & collection</span></div></div><p class="hierarchy-family">${icon("users", 17)} Parents access linked children’s bus trips, subjects, and their child’s book and uniform reservations.</p>
     </section>
     <section class="surface section-gap"><header class="panel-heading"><div><h2>Role assignments</h2><p>One person can hold several scoped roles</p></div></header>
       <div class="table-scroll"><table class="course-table"><thead><tr><th>Person</th><th>Role</th><th>Assigned scope</th><th>Actions</th></tr></thead><tbody>

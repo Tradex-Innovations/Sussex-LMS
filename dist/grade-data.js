@@ -5,7 +5,7 @@ import { sectionDefaults, sectionFilters, sectionCourses, sectionAcademic, secti
 
 export const gradeViews = [
   { id: "summary", name: "Grade Overview", short: "Overview", icon: "school" },
-  { id: "academic", name: "Academic & Courses", short: "Academic", icon: "book" },
+  { id: "academic", name: "Academic & Subjects", short: "Academic", icon: "book" },
   { id: "attendance", name: "Attendance", short: "Attendance", icon: "checkCircle" },
   { id: "coordination", name: "Class Coordination", short: "Classes", icon: "users" },
   { id: "reports", name: "Grade Reports", short: "Reports", icon: "file" },
@@ -76,9 +76,9 @@ export function gradeSupportRequests(state, context) {
 }
 export function requestGradeSupport(state, context, input) {
   const scope = requireGrade(state, context), course = gradeCourses(state, context).find((item) => item.id === input.course);
-  if (!course) throw new Error("Choose a course from your assigned grade.");
+  if (!course) throw new Error("Choose a subject from your assigned grade.");
   if (!Object.hasOwn(gradeSupportTypes, input.type)) throw new Error("Choose a support request type.");
-  if (gradeSupportRequests(state, context).some((item) => item.course === course.id && item.type === input.type && item.status !== "resolved")) throw new Error("An open support request already exists for this course and topic.");
+  if (gradeSupportRequests(state, context).some((item) => item.course === course.id && item.type === input.type && item.status !== "resolved")) throw new Error("An open support request already exists for this subject and topic.");
   const note = String(input.note || "").trim();
   if (!note || note.length > 1000) throw new Error("Enter a support request note for the Section Head.");
   const item = { id: "grade-support-" + crypto.randomUUID(), branch: scope.branch.id, grade: scope.grade, section: scope.section.id,
@@ -134,14 +134,14 @@ export function generateGradeReport(state, context, input = {}) {
     columns = [["className", "Class"], ["rate", "Attendance %"], ["expected", "Expected attendance-days"], ["present", "Present attendance-days"], ["absent", "Absent attendance-days"], ["late", "Late arrivals"]];
   } else if (f.reportType === "teaching") {
     rows = courses.map((course) => ({ title: course.title, className: course.className, ...sectionCourseProgress(state, course), review: state.sectionCourseReviews?.[course.id]?.status || "Not reviewed" }));
-    columns = [["title", "Course"], ["className", "Class"], ["teacher", "Assigned teacher"], ["enrolled", "Course enrolment"], ["materials", "Materials"], ["completed", "Completed material assignments"], ["expected", "Expected material assignments"], ["review", "Section Head review"]];
+    columns = [["title", "Subject"], ["className", "Class"], ["teacher", "Assigned teacher"], ["enrolled", "Subject enrolment"], ["materials", "Materials"], ["completed", "Completed material assignments"], ["expected", "Expected material assignments"], ["review", "Section Head review"]];
   } else {
     rows = attendance.classes.map((row) => {
       const score = academic.classes.find((item) => item.className === row.className), classCourses = courses.filter((course) => course.className === row.className);
       return { className: row.className, academic: score?.count ? score.mean : "No sample data", attendance: row.rate, courses: classCourses.length,
         materials: classCourses.reduce((sum, course) => sum + sectionCourseProgress(state, course).materials, 0), checkin: gradeClassStatuses[updates.find((item) => item.className === row.className)?.status] || "Not reviewed" };
     });
-    columns = [["className", "Class"], ["academic", "Sample subject average %"], ["attendance", "Sample attendance %"], ["courses", "Prototype courses"], ["materials", "Published materials"], ["checkin", "Class coordination"]];
+    columns = [["className", "Class"], ["academic", "Sample subject average %"], ["attendance", "Sample attendance %"], ["courses", "Prototype subjects"], ["materials", "Published materials"], ["checkin", "Class coordination"]];
   }
   const followups = gradeFollowups(state, context).filter((item) => f.className === "all" || item.className === f.className).map(({ name, className, due, status }) => ({ name, className, due, status }));
   return { id: "grade-report-" + crypto.randomUUID(), title: gradeReportTypes[f.reportType], type: f.reportType, sample: true, generatedAt: new Date().toISOString(),

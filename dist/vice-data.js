@@ -70,7 +70,7 @@ export function declineSectionCoverRequest(state, context, input) {
 export function saveTemporaryCover(state, context, input) {
   const branch = assignedSchool(state, context);
   const course = state.courses.find((course) => course.branch === branch.id && course.id === input.course);
-  if (!course) throw new Error("Choose a course from your assigned school.");
+  if (!course) throw new Error("Choose a subject from your assigned school.");
   if (input.date !== demoDate) throw new Error("Temporary cover is demonstrated for 20 Nov 2026.");
   const teacher = coverTeachers(state, branch, input.date).find((person) => person.id === input.teacher);
   if (!teacher || teacher.id === state.assignments[course.id]?.teacher) throw new Error("Choose another available teacher from your school.");
@@ -78,7 +78,7 @@ export function saveTemporaryCover(state, context, input) {
   const reason = String(input.reason || "").trim();
   if (!reason || reason.length > 500) throw new Error("Enter the reason for temporary cover.");
   const request = input.requestId ? incomingSectionCoverRequests(state, context).find((item) => item.id === input.requestId && item.course === course.id && item.date === input.date) : null;
-  if (input.requestId && !request) throw new Error("Choose a pending cover request for this school and course.");
+  if (input.requestId && !request) throw new Error("Choose a pending cover request for this school and subject.");
   const item = { id: "cover-" + crypto.randomUUID(), branch: branch.id, course: course.id, className: course.className, title: course.title,
     teacher: teacher.id, teacherName: teacher.name, originalTeacher: state.assignments[course.id]?.teacher, date: input.date, reason,
     status: "active", by: context.account.name, at: new Date().toISOString(), ...(request ? { requestId: request.id } : {}) };

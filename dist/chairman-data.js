@@ -123,7 +123,7 @@ export function branchStaff(state, branch, date = demoDate) {
     const assignedSubjects = [...new Set(assignedCourses.map((course) => course.title))];
     return { ...person, category: category(person), primaryRole, designation: staffRoles[primaryRole], status, leaveRequestEligible: requestStaff.has(person.id),
       assignedCourses,
-      subject: category(person) === "teachers" ? person.sample ? subjects[(index + branch.directoryIndex) % subjects.length].name : assignedSubjects.join(", ") || "No courses assigned" : "—",
+      subject: category(person) === "teachers" ? person.sample ? subjects[(index + branch.directoryIndex) % subjects.length].name : assignedSubjects.join(", ") || "No subjects assigned" : "—",
       email: person.sample ? "sample." + (index + 1) + "@school.example" : "demo." + person.id + "@school.example" };
   });
 }
@@ -301,11 +301,11 @@ export function reportCSV(report) {
   if (report.criteria.className && report.criteria.className !== "all") metadata.splice(-1, 0, ["Academic class", report.criteria.className]);
   if (report.criteria.attendanceClass && report.criteria.attendanceClass !== "all") metadata.splice(-1, 0, ["Attendance class", report.criteria.attendanceClass]);
   if (report.criteria.comparison) metadata.splice(-1, 0, ["Comparison", report.criteria.comparison]);
-  if (report.owner?.role === "teacher") metadata.splice(-1, 0, ["School", report.owner.school], ["Subject Teacher", report.owner.teacher], ["Assigned courses", report.criteria.courseLabels.join("; ")],
+  if (report.owner?.role === "teacher") metadata.splice(-1, 0, ["School", report.owner.school], ["Subject Teacher", report.owner.teacher], ["Assigned subjects", report.criteria.courseLabels.join("; ")],
     ...(report.type === "progress" ? [["Learning review filter", report.criteria.review], ["Student search", report.criteria.query || "All enrolled students"]] : []),
     ...(report.type === "plans" ? [["Plan status filter", report.criteria.planStatus], ["Planning window", "20 to 27 Nov 2026"]] : []));
   if (report.owner?.role === "admin") metadata.splice(-1, 0, ["School", report.owner.school], ["School Administrator", report.owner.by], ["Grade selection", report.criteria.grade], ["Class selection", report.criteria.className],
-    ["Record search", report.criteria.query || "All records"], ["Student record filter", report.criteria.studentStatus], ["Guardian link filter", report.criteria.guardianStatus], ["Course filter", report.criteria.courseStatus]);
+    ["Record search", report.criteria.query || "All records"], ["Student record filter", report.criteria.studentStatus], ["Guardian link filter", report.criteria.guardianStatus], ["Subject filter", report.criteria.courseStatus]);
   if (report.owner?.role === "transport") metadata.splice(-1, 0, ["School", report.owner.school], ["Transport Coordinator", report.owner.by], ["Operational bus filter", report.criteria.busFilter], ["Vehicle status filter", report.criteria.status],
     ["Record search", report.criteria.query || "All records"], ["Student allocation filter", report.criteria.allocation], ["Assigned issue status", report.criteria.taskStatus], ["Telemetry", "SIMULATED GPS / progress / arrival estimates"]);
   const rows = report.customRows || (report.type === "transport" ? report.buses : report.rows);

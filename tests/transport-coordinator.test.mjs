@@ -25,7 +25,7 @@ test("Fleet and people filters never include another school's buses, students or
  const {state,context}=setup();assert.ok(coordinatorStudents(state,context).every(row=>row.student.branch==="colombo"));assert.ok(coordinatorDrivers(state,context).every(row=>row.person.grants.some(grant=>grant.role==="driver"&&grant.branch==="colombo")));
  assert.equal(coordinatorRoutes(state,context,{status:"delayed"}).length,1);assert.equal(coordinatorStudents(state,context,{query:"SCN-1001"}).length,1);
  assert.ok(coordinatorStudents(state,context,{busFilter:"01"}).every(row=>row.student.bus==="01"));assert.equal(coordinatorFilters(state,context,{busId:"07",busFilter:"07"}).busFilter,"all");
- const data=coordinatorOverview(state,context);assert.equal(data.route+data.school+data.delayed,6);assert.equal(data.students.length,7);
+ const data=coordinatorOverview(state,context);assert.equal(data.route+data.school+data.delayed,6);assert.equal(data.students.length,9);
 });
 
 test("Bus writes are validated atomically for school, students, driver and school destination",()=>{
@@ -76,7 +76,7 @@ test("Five report types capture scoped operational records and exclude free-text
  for(const output of [JSON.stringify(report),reportCSV(report),coordinatorReportHTML(report)])assert.doesNotMatch(output,/PRIVATE_TRANSPORT_NOTE|Malabe|Students on board|Academic assessment|Attendance period|undefined/);
  assert.match(reportCSV(report),/SIMULATED GPS/);assert.match(coordinatorReportHTML(report),/School Transport Coordination/);
  if(type==="fleet"){assert.equal(report.customRows.length,6);assert.ok(report.customRows.every(row=>Number(row.lat)>5&&Number(row.lon)>79));}
- if(type==="students")assert.equal(report.customRows.length,7);}
+ if(type==="students")assert.equal(report.customRows.length,9);}
  assert.throws(()=>generateCoordinatorReport(state,context,{busFilter:"07"}),/operational fleet/);
 });
 

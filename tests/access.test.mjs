@@ -21,7 +21,7 @@ test("Section Heads and Grade Coordinators can access only their section or grad
   const primary = contextFor(state, "section_head", "asha");
   assert.deepEqual(visibleCourses(state, primary).map((course) => course.id), ["math4"]);
   const middle = contextFor(state, "section_head", "dilini");
-  assert.equal(visibleCourses(state, middle).length, 4);
+  assert.equal(visibleCourses(state, middle).length, 5);
   const coordinator = contextFor(state, "coordinator", "nuwan");
   assert.ok(visibleStudents(state, coordinator).every((student) => student.grade === 8));
   assert.equal(withinScope(coordinator, state.courses.find((course) => course.id === "english6")), false);

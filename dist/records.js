@@ -28,15 +28,21 @@ export function saveStudentRecord(state, context, input) {
   if (!guardians.every((id) => state.accounts.some((person) => person.id === id && person.grants.some((grant) => grant.role === "parent" && grant.branch === branch)))) throw new Error("Select guardian accounts from this branch.");
   const student = { ...existing, id: existing?.id || "student-" + crypto.randomUUID(), name, admissionNumber, initials: name.split(/\s+/).map((word) => word[0]).slice(0, 2).join(""), grade, className, branch, guardians, tone: existing?.tone || "green" };
   if (existing) state.students[state.students.findIndex((item) => item.id === existing.id)] = student; else state.students.push(student);
+  if (existing && (existing.grade !== grade || existing.className !== className)) {
+    state.studentSubjects ||= {};
+    state.studentSubjects[student.id] = { branch, grade, className, subjects: [], by: "Awaiting Class Teacher", source: "pending", at: new Date().toISOString() };
+  }
   for (const course of state.courses) if (course.branch !== branch || course.grade !== grade || course.className !== className) state.assignments[course.id].students = state.assignments[course.id].students.filter((id) => id !== student.id);
   return student;
 }
 export function saveCourseAssignment(state, context, input) {
   const ctx = recordContext(state, context), course = visibleCourses(state, ctx).find((course) => course.id === input.course);
-  if (!can(ctx, "courses.assign") || !course) throw new Error("Choose a course within your assigned academic scope.");
+  if (!can(ctx, "courses.assign") || !course) throw new Error("Choose a subject within your assigned academic scope.");
   const teacher = can(ctx, "courses.teacher") ? input.teacher : state.assignments[course.id].teacher, students = input.students || [];
   if (!branchTeachers(state, course.branch).some((person) => person.id === teacher)) throw new Error("Select a teacher assigned to this branch.");
-  if (!Array.isArray(students) || new Set(students).size !== students.length || !students.every((id) => state.students.some((student) => student.id === id && student.branch === course.branch && student.grade === course.grade && student.className === course.className))) throw new Error("Select matching-class students from this course’s school.");
+  if (!Array.isArray(students) || new Set(students).size !== students.length || !students.every((id) => state.students.some((student) => student.id === id && student.branch === course.branch && student.grade === course.grade && student.className === course.className))) throw new Error("Select matching-class students from this subject’s school.");
+  // Administrative enrolment alone does not approve a new parent-facing subject.
+  for (const [studentId, selection] of Object.entries(state.studentSubjects || {})) if (!students.includes(studentId)) selection.subjects = selection.subjects.filter((id) => id !== course.id);
   state.assignments[course.id] = { ...state.assignments[course.id], teacher, students: [...students] };
   return state.assignments[course.id];
 }

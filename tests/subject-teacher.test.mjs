@@ -16,7 +16,7 @@ const request = { course: "math8", type: "learning", note: "INTERNAL_SUPPORT_NOT
 
 test("Subject Teacher scope requires an actual active school appointment and current course assignment", () => {
   const { state, context } = setup();
-  assert.equal(roles.teacher.start, "overview"); assert.deepEqual(roles.teacher.pages, ["overview", "courses"]);
+  assert.equal(roles.teacher.start, "overview"); assert.deepEqual(roles.teacher.pages, ["overview", "courses", "homework"]);
   assert.deepEqual(subjectCourses(state, context).map((course) => course.id), ["math8", "ict6"]);
   assert.equal(subjectScope(state, { ...context, branch: "lakeside" }).branch.id, "colombo");
   assert.equal(subjectScope(state, { ...context, grant: { ...context.grant, branch: "lakeside" } }), null);

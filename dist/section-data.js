@@ -5,7 +5,7 @@ import { demoDate, studentRoster, studentStatus, attendanceResult, attendanceSum
 
 export const sectionViews = [
   { id: "summary", name: "Section Overview", short: "Overview", icon: "school" },
-  { id: "academic", name: "Academic & Courses", short: "Academic", icon: "book" },
+  { id: "academic", name: "Academic & Subjects", short: "Academic", icon: "book" },
   { id: "attendance", name: "Attendance", short: "Attendance", icon: "checkCircle" },
   { id: "teaching", name: "Teaching Coordination", short: "Teaching", icon: "users" },
   { id: "reports", name: "Section Reports", short: "Reports", icon: "file" },
@@ -80,7 +80,7 @@ export function sectionAcademic(state, context, filters = {}) {
     const className = grade + letter, result = assessmentResult(scope.branch, { ...f, grade, className });
     const course = courses.find((course) => course.grade === grade && course.className === className && course.title === subjectName);
     const teacher = course && state.accounts.find((person) => person.id === state.assignments[course.id]?.teacher);
-    return { ...result, grade, className, key: className, name: "Class " + className, detail: teacher?.name || "Sample class · No course assigned", teacher, course };
+    return { ...result, grade, className, key: className, name: "Class " + className, detail: teacher?.name || "Sample class · No subject assigned", teacher, course };
   })).filter((row) => f.className === "all" || row.className === f.className);
   let rows = classes;
   if (f.compare === "grades") rows = grades.map((grade) => ({ ...assessmentResult(scope.branch, { ...f, grade }), key: String(grade), name: "Grade " + grade }));
@@ -135,7 +135,7 @@ export function saveSectionFollowup(state, context, input) {
 
 export function saveSectionCourseReview(state, context, input) {
   const scope = requireSectionScope(state, context), course = sectionCourses(state, context).find((item) => item.id === input.course);
-  if (!course) throw new Error("Choose a course within your section.");
+  if (!course) throw new Error("Choose a subject within your section.");
   if (!["ready", "changes_requested"].includes(input.status)) throw new Error("Choose a review outcome.");
   const note = String(input.note || "").trim();
   if (!note || note.length > 1000) throw new Error("Enter a material review note.");
@@ -151,9 +151,9 @@ export function sectionCoverRequests(state, context) {
 
 export function requestSectionCover(state, context, input) {
   const scope = requireSectionScope(state, context), course = sectionCourses(state, context).find((item) => item.id === input.course);
-  if (!course) throw new Error("Choose a course within your section.");
+  if (!course) throw new Error("Choose a subject within your section.");
   if (input.date !== demoDate) throw new Error("The cover demonstration uses 20 Nov 2026.");
-  if (sectionCoverRequests(state, context).some((item) => item.course === course.id && item.date === input.date && item.status === "pending")) throw new Error("A pending cover request already exists for this course.");
+  if (sectionCoverRequests(state, context).some((item) => item.course === course.id && item.date === input.date && item.status === "pending")) throw new Error("A pending cover request already exists for this subject.");
   const reason = String(input.reason || "").trim();
   if (!reason || reason.length > 500) throw new Error("Enter a reason for the cover request.");
   const item = { id: "section-cover-" + crypto.randomUUID(), branch: scope.branch.id, section: scope.section.id, sectionName: scope.section.name,
@@ -192,13 +192,13 @@ export function generateSectionReport(state, context, filters) {
     columns = [["className", "Class"], ["rate", "Attendance %"], ["expected", "Expected attendance-days"], ["present", "Present attendance-days"], ["absent", "Absent attendance-days"], ["late", "Late arrivals"]];
   } else if (f.reportType === "teaching") {
     rows = courses.map((course) => ({ className: course.className, title: course.title, ...sectionCourseProgress(state, course), review: state.sectionCourseReviews?.[course.id]?.status || "Not reviewed" }));
-    columns = [["className", "Class"], ["title", "Course"], ["teacher", "Assigned teacher"], ["materials", "Materials"], ["enrolled", "Enrolled in course"], ["completed", "Completed material assignments"], ["expected", "Expected material assignments"], ["review", "Material review"]];
+    columns = [["className", "Class"], ["title", "Subject"], ["teacher", "Assigned teacher"], ["materials", "Materials"], ["enrolled", "Enrolled in subject"], ["completed", "Completed material assignments"], ["expected", "Expected material assignments"], ["review", "Material review"]];
   } else {
     rows = grades.map((grade) => {
       const a = sectionAcademic(state, context, { ...f, grade }), r = sectionAttendance(state, context, { ...f, grade }), c = sectionCourses(state, context, { ...f, grade });
       return { grade: grade === 0 ? "Preschool" : "Grade " + grade, academic: a.summary.count ? a.summary.mean : "No assessment data", attendance: r.summary.expected ? r.summary.rate : "No register data", courses: c.length, materials: c.reduce((sum, course) => sum + sectionCourseProgress(state, course).materials, 0) };
     });
-    columns = [["grade", "Grade"], ["academic", "Sample subject average %"], ["attendance", "Sample attendance %"], ["courses", "Prototype courses"], ["materials", "Published materials"]];
+    columns = [["grade", "Grade"], ["academic", "Sample subject average %"], ["attendance", "Sample attendance %"], ["courses", "Prototype subjects"], ["materials", "Published materials"]];
   }
   return { id: "section-report-" + crypto.randomUUID(), type: f.reportType, title: sectionReportTypes[f.reportType], sample: true, generatedAt: new Date().toISOString(),
     owner: { key: scope.key, role: "section_head", name: context.account.name, school: scope.branch.school, sectionName: scope.section.name },

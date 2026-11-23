@@ -130,8 +130,8 @@ test("Class Teacher requests reach only the correct Grade Coordinator without au
   const { state, context } = setup(), before = structuredClone(state.assignments);
   const request = requestClassSupport(state, context, { course: "math8", type: "materials", note: "Please coordinate lecture support." });
   assert.throws(() => requestClassSupport(state, context, { course: "math8", type: "materials", note: "Duplicate" }), /already exists/);
-  assert.throws(() => requestClassSupport(state, context, { course: "english6", type: "materials", note: "Foreign" }), /course from your class/);
-  assert.throws(() => requestClassSupport(state, context, { type: "cover", note: "No course" }), /Choose a class course/);
+  assert.throws(() => requestClassSupport(state, context, { course: "english6", type: "materials", note: "Foreign" }), /subject from your class/);
+  assert.throws(() => requestClassSupport(state, context, { type: "cover", note: "No course" }), /Choose a class subject/);
   assert.ok(requestClassSupport(state, context, { type: "attendance", note: "Class-level concern." }));
   const coordinator = contextFor(state, "coordinator", "nuwan"), wrongGrade = contextFor(state, "coordinator", "coordinator6_c"), wrongSchool = contextFor(state, "coordinator", "coordinator8_l");
   assert.equal(gradeClassRequests(state, coordinator).length, 2);

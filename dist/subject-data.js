@@ -8,7 +8,7 @@ export const subjectViews = [
   { id: "support", name: "Teaching Support", short: "Support", icon: "users" },
   { id: "reports", name: "Subject Reports", short: "Reports", icon: "file" },
 ];
-export const subjectReportTypes = { brief: "Teaching summary", materials: "Course materials register", progress: "Student learning progress", plans: "Lesson plan register" };
+export const subjectReportTypes = { brief: "Teaching summary", materials: "Subject materials register", progress: "Student learning progress", plans: "Lesson plan register" };
 export const subjectPlanStatuses = { planned: "Planned", in_progress: "In progress", completed: "Completed" };
 export const subjectReviewStatuses = { on_track: "On track", needs_practice: "Needs practice", reviewed: "Reviewed" };
 export const subjectSupportTypes = { learning: "Learning support", materials: "Lecture materials", attendance: "Attendance concern", cover: "Teaching cover" };
@@ -55,7 +55,7 @@ export function subjectEnrolments(state, context, input = {}) {
     (!query || [row.student.name, row.student.admissionNumber, row.course.title, row.course.className].join(" ").toLowerCase().includes(query)));
 }
 export function subjectCourseProgress(state, context, course) {
-  if (!requireSubject(state, context).courses.some((item) => item.id === course.id)) throw new Error("Choose an assigned teaching course.");
+  if (!requireSubject(state, context).courses.some((item) => item.id === course.id)) throw new Error("Choose an assigned teaching subject.");
   const rows = subjectEnrolments(state, context, { course: course.id });
   const materials = state.materials.filter((item) => item.course === course.id).length;
   return { enrolled: rows.length, materials, completed: rows.reduce((sum, row) => sum + row.completed, 0), expected: rows.length * materials };
@@ -66,7 +66,7 @@ export function subjectPlans(state, context, input = {}) {
 }
 function ownedCourse(state, context, id) {
   const course = requireSubject(state, context).courses.find((course) => course.id === id);
-  if (!course) throw new Error("Choose a course currently assigned to you.");
+  if (!course) throw new Error("Choose a subject currently assigned to you.");
   return course;
 }
 function noteText(value) {
@@ -76,7 +76,7 @@ function noteText(value) {
 }
 export function saveSubjectPlan(state, context, input) {
   const previous = input.id ? subjectPlans(state, context).find((item) => item.id === input.id) : null;
-  if (input.id && !previous) throw new Error("This lesson plan is outside your teaching courses.");
+  if (input.id && !previous) throw new Error("This lesson plan is outside your teaching subjects.");
   const course = ownedCourse(state, context, previous?.course || input.course), topic = String(input.topic || "").trim(), note = noteText(input.note);
   if (!topic || topic.length > 120) throw new Error("Enter a lesson topic of up to 120 characters.");
   if (!/^2026-11-(?:20|2[1-7])$/.test(input.date)) throw new Error("Choose a lesson date from 20 to 27 Nov 2026.");
@@ -89,7 +89,7 @@ export function saveSubjectPlan(state, context, input) {
 export function saveSubjectReview(state, context, input) {
   ownedCourse(state, context, input.course);
   const row = subjectEnrolments(state, context, { course: input.course }).find((row) => row.student.id === input.student);
-  if (!row) throw new Error("Choose a student currently enrolled in your assigned course and class.");
+  if (!row) throw new Error("Choose a student currently enrolled in your assigned subject and class.");
   if (!Object.hasOwn(subjectReviewStatuses, input.status)) throw new Error("Choose a learning review status.");
   const note = noteText(input.note), previous = row.review;
   const item = { course: row.course.id, student: row.student.id, branch: row.course.branch, status: input.status,
@@ -104,7 +104,7 @@ export function subjectSupportRequests(state, context, input = {}) {
 export function requestSubjectSupport(state, context, input) {
   const course = ownedCourse(state, context, input.course);
   if (!Object.hasOwn(subjectSupportTypes, input.type)) throw new Error("Choose a support topic.");
-  if (subjectSupportRequests(state, context).some((item) => item.course === course.id && item.type === input.type && item.status !== "resolved")) throw new Error("An open request already exists for this course and topic.");
+  if (subjectSupportRequests(state, context).some((item) => item.course === course.id && item.type === input.type && item.status !== "resolved")) throw new Error("An open request already exists for this subject and topic.");
   const item = { id: "subject-support-" + crypto.randomUUID(), course: course.id, branch: course.branch, grade: course.grade, className: course.className,
     title: course.title, type: input.type, note: noteText(input.note), status: "open", by: context.account.name, at: new Date().toISOString(), responses: [] };
   state.subjectSupportRequests = [item, ...(state.subjectSupportRequests || [])];
@@ -144,22 +144,22 @@ export function visibleSubjectReports(state, context) {
 }
 export function generateSubjectReport(state, context, input = {}) {
   const scope = requireSubject(state, context), f = subjectFilters(state, context, input);
-  if (input.course && input.course !== "all" && !scope.courses.some((course) => course.id === input.course)) throw new Error("Reports must stay within your assigned teaching courses.");
+  if (input.course && input.course !== "all" && !scope.courses.some((course) => course.id === input.course)) throw new Error("Reports must stay within your assigned teaching subjects.");
   if (input.reportType && !Object.hasOwn(subjectReportTypes, input.reportType)) throw new Error("Choose a valid subject report type.");
   const courses = subjectCourses(state, context, f), data = subjectOverview(state, context, f);
   let rows, columns;
   if (f.reportType === "progress") {
     rows = subjectEnrolments(state, context, f).map((row) => ({ course: row.course.title, className: row.course.className, student: row.student.name, admission: row.student.admissionNumber, completed: row.completed, materials: row.materials, review: subjectReviewStatuses[row.review?.status] || "Not reviewed" }));
-    columns = [["course", "Course"], ["className", "Class"], ["student", "Student"], ["admission", "Admission number"], ["completed", "Materials done"], ["materials", "Materials assigned"], ["review", "Staff learning review"]];
+    columns = [["course", "Subject"], ["className", "Class"], ["student", "Student"], ["admission", "Admission number"], ["completed", "Materials done"], ["materials", "Materials assigned"], ["review", "Staff learning review"]];
   } else if (f.reportType === "plans") {
     rows = subjectPlans(state, context, f).map((item) => ({ course: courses.find((course) => course.id === item.course).title, className: courses.find((course) => course.id === item.course).className, topic: item.topic, date: item.date, status: subjectPlanStatuses[item.status] }));
-    columns = [["course", "Course"], ["className", "Class"], ["topic", "Lesson topic"], ["date", "Planned date"], ["status", "Plan status"]];
+    columns = [["course", "Subject"], ["className", "Class"], ["topic", "Lesson topic"], ["date", "Planned date"], ["status", "Plan status"]];
   } else if (f.reportType === "materials") {
     rows = courses.flatMap((course) => state.materials.filter((item) => item.course === course.id).map((item) => ({ course: course.title, className: course.className, title: item.title, type: item.type, date: item.date })));
-    columns = [["course", "Course"], ["className", "Class"], ["title", "Material"], ["type", "Type"], ["date", "Published label"]];
+    columns = [["course", "Subject"], ["className", "Class"], ["title", "Material"], ["type", "Type"], ["date", "Published label"]];
   } else {
     rows = courses.map((course) => ({ course: course.title, className: course.className, ...subjectCourseProgress(state, context, course), plans: subjectPlans(state, context, { course: course.id }).length, openRequests: subjectSupportRequests(state, context, { course: course.id }).filter((item) => item.status !== "resolved").length }));
-    columns = [["course", "Course"], ["className", "Class"], ["enrolled", "Enrolled students"], ["materials", "Published materials"], ["completed", "Completed material assignments"], ["expected", "Expected material assignments"], ["plans", "Lesson plans"], ["openRequests", "Open support requests"]];
+    columns = [["course", "Subject"], ["className", "Class"], ["enrolled", "Enrolled students"], ["materials", "Published materials"], ["completed", "Completed material assignments"], ["expected", "Expected material assignments"], ["plans", "Lesson plans"], ["openRequests", "Open support requests"]];
   }
   const generatedAt = new Date().toISOString(), date = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Colombo", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(generatedAt));
   return { id: "subject-report-" + crypto.randomUUID(), type: f.reportType, title: subjectReportTypes[f.reportType], generatedAt,

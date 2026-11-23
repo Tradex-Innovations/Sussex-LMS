@@ -46,7 +46,7 @@ function branchDetail(state, context, result, network) {
   const metrics = [
     ["Students in demo", state.students.filter((student) => student.branch === branch.id).length],
     ["Assigned teachers", state.accounts.filter((person) => person.grants.some((grant) => ["teacher", "class_teacher"].includes(grant.role) && grant.branch === branch.id)).length],
-    ["Course classes", state.courses.filter((course) => course.branch === branch.id).length],
+    ["Subject classes", state.courses.filter((course) => course.branch === branch.id).length],
     ["Buses in demo", networkFleet(state, [branch]).length],
     ["Library orders", state.orders.filter((order) => order.branch === branch.id).length],
     ["Lessons completed", state.students.filter((student) => student.branch === branch.id).reduce((sum, student) => sum + (state.completed[student.id]?.length || 0), 0)],

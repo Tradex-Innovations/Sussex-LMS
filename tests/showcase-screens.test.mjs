@@ -7,11 +7,11 @@ import { roles } from '../dist/data.js';
 
 test('Every screenshot is an actual captured PNG with matching dimensions and route metadata',()=>{
  const provenance=JSON.parse(fs.readFileSync(new URL('../showcase/public/assets/screens/captures.json',import.meta.url)));
- assert.equal(Object.keys(screenshots).length,32);assert.equal(provenance.captures.length,32);assert.match(provenance.sourceCommit,/^[a-f0-9]{40}$/);
+ assert.equal(Object.keys(screenshots).length,38);assert.equal(provenance.captures.length,38);assert.match(provenance.sourceCommit,/^[a-f0-9]{40}$/);
  for(const [id,shot]of Object.entries(screenshots)){
   const file=fs.readFileSync(new URL('../showcase/public/assets/screens/'+shot.file,import.meta.url));assert.deepEqual([...file.subarray(0,8)],[137,80,78,71,13,10,26,10]);
   const record=provenance.captures.find(item=>item.id===id);assert.ok(record,id);assert.equal(record.route,shot.route);assert.equal(file.readUInt32BE(16),record.width);assert.equal(file.readUInt32BE(20),record.height);
-  const [role,page]=shot.route.split('/');assert.ok(roles[role].pages.includes(page));assert.equal(screenshotSource(id),'./assets/screens/'+shot.file);
+  const [role,page]=shot.route.split('/');assert.ok(roles[role].pages.includes(page === "subjects" ? "courses" : page));assert.equal(screenshotSource(id),'./assets/screens/'+shot.file);
  }
 });
 test('Each story chapter and all thirteen roles have valid screenshot coverage',()=>{

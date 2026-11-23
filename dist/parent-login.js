@@ -56,11 +56,11 @@ export function loginPage(state) {
       <div class="login-intro">
         <span class="login-eyebrow">PARENT PORTAL</span>
         <h1>Stay close to their school day.</h1>
-        <p>Follow the school bus, keep up with class materials, and order books for your child.</p>
+        <p>Follow the school bus, check subjects, homework and class notices, and reserve school essentials.</p>
         <div class="login-benefits">
           <div>${icon("bus", 22)}<span><strong>Follow their journey</strong><span>See the assigned bus and its latest location.</span></span></div>
-          <div>${icon("book", 22)}<span><strong>Keep learning on track</strong><span>Download notes and mark lessons complete.</span></span></div>
-          <div>${icon("library", 22)}<span><strong>Get ready for class</strong><span>Browse books and order for school collection.</span></span></div>
+          <div>${icon("book", 22)}<span><strong>Keep learning on track</strong><span>View assigned subjects, download notes and track homework.</span></span></div>
+          <div>${icon("library", 22)}<span><strong>Get ready for class</strong><span>Reserve pupil’s books and uniforms for school collection.</span></span></div>
         </div>
       </div>
       <div class="login-card">

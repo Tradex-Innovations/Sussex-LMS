@@ -98,7 +98,7 @@ function NfcStage({ demo, paused, reduced }) {
   </group>;
 }
 function LearningStage({ demo }) {
-  const tex = useLabel(['SUSSEX / LEARNING', 'A shared lesson.', demo.published ? 'Algebra lecture notes' : 'Teacher prepares materials', demo.completed ? 'PARENT: COMPLETED' : 'PARENT: READY TO LEARN'], '#e9efe8', '#163f40');
+  const tex = useLabel(['SUSSEX / LEARNING', 'A shared lesson.', demo.published ? 'Science lecture notes' : 'Teacher prepares materials', demo.completed ? 'PARENT: COMPLETED' : 'PARENT: READY TO LEARN'], '#e9efe8', '#163f40');
   return <group position={[.15, .2, -1]} rotation={[0, -.25, -.08]}><Round size={[4.5, 3.05, .18]} position={[0, 2.05, 0]} radius={.12} castShadow><meshStandardMaterial color="#192c3a" metalness={.5} roughness={.35}/></Round><mesh position={[0, 2.05, .105]}><planeGeometry args={[4.23, 2.68]}/><meshBasicMaterial map={tex}/></mesh>{[0, 1, 2].map(index => <Round key={index} size={[2.4, .23, 1.7]} position={[-2.1, .22 + index * .25, .5]} rotation={[0, index * .11, 0]} radius={.035} castShadow><meshStandardMaterial color={['#d7ad5a', '#326262', '#e1d8bd'][index]} roughness={.6}/></Round>)}</group>;
 }
 function SuppliesStage({ demo }) {

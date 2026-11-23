@@ -1,3 +1,4 @@
+import { migrateAcademicPortal } from "./academic-seed.js";
 import { storesSeed, storeOfficerAccounts } from "./stores-seed.js";
 import { boardingSeed } from "./boarding-seed.js";
 import { branchDirectory } from "./network-data.js";
@@ -8,14 +9,14 @@ export const roles = {
   vice_principal: { name: "Vice Principal", icon: "badge", start: "overview", pages: ["overview", "transport", "courses", "people", "library", "uniforms", "boarding"] },
   section_head: { name: "Section Head", icon: "users", start: "overview", pages: ["overview", "courses", "people"] },
   coordinator: { name: "Grade Coordinator", icon: "users", start: "overview", pages: ["overview", "courses", "people"] },
-  class_teacher: { name: "Class Teacher", icon: "book", start: "overview", pages: ["overview", "courses", "people"] },
-  teacher: { name: "Subject Teacher", icon: "book", start: "overview", pages: ["overview", "courses"] },
+  class_teacher: { name: "Class Teacher", icon: "book", start: "overview", pages: ["overview", "courses", "homework", "notices", "people"] },
+  teacher: { name: "Subject Teacher", icon: "book", start: "overview", pages: ["overview", "courses", "homework"] },
   admin: { name: "School Administrator", icon: "settings", start: "overview", pages: ["overview", "people", "courses", "boarding"] },
   transport: { name: "Transport Coordinator", icon: "route", start: "overview", pages: ["overview", "transport", "boarding"] },
   driver: { name: "Driver", icon: "bus", start: "overview", pages: ["overview", "transport", "boarding"] },
   librarian: { name: "Book Store Officer", icon: "library", start: "overview", pages: ["overview", "library"] },
   uniform_store: { name: "Uniform Store Officer", icon: "package", start: "overview", pages: ["overview", "uniforms"] },
-  parent: { name: "Parent", icon: "user", start: "transport", pages: ["transport", "courses", "library", "uniforms", "boarding"] },
+  parent: { name: "Parent", icon: "user", start: "transport", pages: ["transport", "courses", "homework", "notices", "library", "uniforms", "boarding"] },
 };
 
 export const sections = [
@@ -158,7 +159,7 @@ export function freshState() {
   );
   const scopedAssignments = { ...structuredClone(assignments), math4: { teacher: "asha", students: ["anuki"] } };
   for (const course of courses) scopedAssignments["lake-" + course.id] = { teacher: "lakshmi", students: [course.grade === 8 ? "meera" : "thevin"] };
-  return {
+  return migrateAcademicPortal({
     version: 2,
     ...storesSeed(),
     driverRuns: [],
@@ -190,7 +191,7 @@ export function freshState() {
       { id: "08", name: "Nugegoda Link", driver: "Ashan Mendis", driverId: "driver_08", branch: "lakeside", registration: "WP NF-3172", status: "route", color: "#277c96", start: 0.42, stops: ["Nugegoda Junction", "Nawala Junction", "Rajagiriya", "Diyatha Uyana", "Sussex College Malabe"] },
     ],
     books: branches.flatMap((branch) => books.map((book) => ({ ...book, id: branch.id === "colombo" ? book.id : "lake-" + book.id, branch: branch.id, available: true }))),
-  };
+  });
 }
 
 function migrateSchoolLabel(label) {
@@ -207,7 +208,7 @@ function migratedDemoAccounts(saved, defaults) {
   return accounts;
 }
 
-export function loadState() {
+function loadStoredState() {
   const defaults = freshState();
   try {
     const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
@@ -216,6 +217,7 @@ export function loadState() {
       return {
         ...defaults,
         ...saved,
+        academicPortalVersion: saved.academicPortalVersion || 0,
         ...(!saved.storesVersion ? storesSeed() : {}),
         ...(!saved.nfcVersion ? boardingSeed(saved.students || defaults.students, saved.buses || defaults.buses) : {}),
         networkVersion: 1,
@@ -232,6 +234,7 @@ export function loadState() {
     }
     return {
       ...defaults,
+      academicPortalVersion: 0,
       assignments: { ...defaults.assignments, ...saved.assignments },
       materials: [...defaults.materials.filter((item) => item.course === "math4" || item.course.startsWith("lake-")), ...(saved.materials || materials)],
       completed: { ...defaults.completed, ...saved.completed },
@@ -244,6 +247,8 @@ export function loadState() {
     return defaults;
   }
 }
+
+export function loadState() { return migrateAcademicPortal(loadStoredState()); }
 
 export function saveState(state) {
   try {

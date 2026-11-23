@@ -51,7 +51,7 @@ function principalAcademicPage(options, branch) {
       button("View materials", "principal-course", { value: course.id, variant: "secondary compact" }) + (options.context.role === "vice_principal" ? button("Assign cover", "vice-cover", { value: course.id, variant: "secondary compact" }) : "") + '</td></tr>';
   }).join("");
   return header("Academic Performance", "Compare classes, subjects, grades and teachers within your school.",
-      button("Assign courses", "assign", { variant: "secondary", iconName: "edit" }) + button("Comparison CSV", "chairman-export", { value: "academic", variant: "secondary", iconName: "download" })) +
+      button("Assign subjects", "assign", { variant: "secondary", iconName: "edit" }) + button("Comparison CSV", "chairman-export", { value: "academic", variant: "secondary", iconName: "download" })) +
     '<div class="chairman-filters">' + select("Subject", "network-subject", subjects.map((subject) => [subject.id, subject.name]), n.subject) +
     select("Grade", "network-grade", [6, 8, 10, 11].map((grade) => [grade, "Grade " + grade]), n.grade) +
     select("Assessment", "network-term", [1, 2, 3].map((term) => [term, "Term " + term]), n.term) +
@@ -64,9 +64,9 @@ function principalAcademicPage(options, branch) {
       '<div class="chairman-panel-filter">' + select("Compare by", "principal-compare", [["classes", "Classes"], ["subjects", "Subjects"], ["grades", "Grades"], ["teachers", "Teachers"]], c.academicCompare) + '</div>' + table(heads, rows, "School academic comparison")) +
     '<div class="chairman-two-columns">' + panel("Assessment trend", subject + " · Grade " + n.grade + " · Selected class scope", sparkline(academicTrend([branch], n), "School academic term trend")) +
     panel("Mark distribution", "Selected class scope · Pass mark 50%", histogram(academicDistribution([branch], n))) + '</div>' +
-    panel("Teaching and lecture materials", "Prototype course assignments and completion recorded through the parent portal",
+    panel("Teaching and lecture materials", "Prototype subject assignments and completion recorded through the parent portal",
       courseRows ? table(["Class", "Assigned teacher", "Materials", "Completed / assigned", "Action"], courseRows, "School teaching progress") :
-      emptyState("book", "No course materials for this selection", "Choose another grade or subject to review published materials."));
+      emptyState("book", "No subject materials for this selection", "Choose another grade or subject to review published materials."));
 }
 
 export function principalOverviewPage(options) {

@@ -1,6 +1,6 @@
 # Sussex College Network
 
-A browser-only school portal prototype for a client walkthrough. Official Sussex school names and approximate locations are paired with sample academic, attendance, staffing, fleet, course and school-reservation data. Bus positions and trip statuses are simulated. Demo changes are saved in the current browser.
+A browser-only school portal prototype for a client walkthrough. Official Sussex school names and approximate locations are paired with sample academic, attendance, staffing, fleet, subject and school-reservation data. Bus positions and trip statuses are simulated. Demo changes are saved in the current browser.
 
 ## Run locally
 
@@ -18,7 +18,7 @@ Open [the local demo](http://127.0.0.1:4183/). No install or build is required.
 
 ## Interactive client presentation
 
-Open [A Connected School Day](https://campusway-school-demo.manusara.chatgpt.site/showcase/) or the [local showcase](http://127.0.0.1:4183/showcase/). This separate seven-chapter presentation combines cinematic 3D scenes with **32 actual prototype screenshots**, four guided role tours and links to all 13 LMS roles. Chapters open in **Screens** view; click a screenshot to enlarge it, then choose **Actual size** to inspect the original. **Try demo** opens the interactive sample workflow. It does not change LMS records.
+Open [A Connected School Day](https://campusway-school-demo.manusara.chatgpt.site/showcase/) or the [local showcase](http://127.0.0.1:4183/showcase/). This separate seven-chapter presentation combines cinematic 3D scenes with **38 actual prototype screenshots**, four guided role tours and links to all 13 LMS roles. Chapters open in **Screens** view; click a screenshot to enlarge it, then choose **Actual size** to inspect the original. **Try demo** opens the interactive sample workflow. It does not change LMS records.
 
 Use **Present** for the guided story or **Explore** for client browsing. The presentation keeps large headlines and functional controls; supporting explanations and prototype limits are in presenter notes. Left/right keys move chapters, **N** opens notes and **M** opens the chapter menu. The menu includes reduced motion, simpler graphics, reset, fullscreen and a short backup video. Load once online until **Presentation available offline** appears before using it without a connection; screenshots and video are included. Prototype links still require internet/Site access.
 
@@ -32,6 +32,17 @@ npm run build
 
 The build writes only `dist/showcase/`. Read [the meeting guide](showcase/PRESENTATION_GUIDE.md), [asset provenance](showcase/ASSETS.md) and [presentation access/limits](ROLE_FEATURES_ACCESS.md#interactive-client-presentation). GPS, NFC, results and collection examples remain simulated; there is no online payment.
 
+## Subjects, homework and class notices
+
+- **Class Teacher → Subjects:** select **Assign subjects** beside a student. Only the selected subjects appear to that student’s parent; teaching appointments stay with school administration.
+- **Parent:** the admission login displays Parent, Student, Admission number, Class/Grade and School. **Subjects**, **Homework** and **Notices** are separate mobile-friendly workspaces.
+- **Class Teacher → Notices:** publish a common notice for every parent in the appointed class. Parents can mark it read; edits become unread, and withdrawn notices disappear from parents. Notices stay inside this demo portal.
+- **Class Teacher / Subject Teacher → Homework:** choose a subject/class, enter instructions and a due date, then publish. Parents download and mark homework done separately from lecture notes or attendance.
+- **Subject Teacher → Subjects:** classes are grouped by subject with separate **Open class** and **Give homework** controls. Preview Nuwan Gamage to compare Science 8A and 8B; their pupils, materials and homework stay separate.
+- Existing demo enrolments are retained as imported selections by a one-time migration. Newly registered/admin-enrolled pupils need the Class Teacher’s subject selection before parents gain subject access. Class changes clear those selections. Old `/courses` links remain compatible with `/subjects`.
+
+The presentation’s **The classroom → Prototype view** selector shows these actual screens. **Try demo** demonstrates class separation, subject visibility, homework, notices and attendance. See [the complete access reference](ROLE_FEATURES_ACCESS.md#student-subjects-homework-and-class-notices).
+
 ## Parent demo login
 
 Open [Parent login](http://127.0.0.1:4183/#parent/login). Use a student's admission number and the temporary demo password `1234`.
@@ -43,7 +54,7 @@ Open [Parent login](http://127.0.0.1:4183/#parent/login). Use a student's admiss
 | Meera Fernando | SCN-1008 |
 | Thevin Fernando | SCN-1009 |
 
-The account cards fill in demo credentials. Sign in to open that student's bus, courses, pupil’s books and school uniform portals. Log out to choose another admission number. The session survives a tab refresh. Student admission numbers appear in the staff directory and can be edited by authorized branch staff.
+The account cards fill in demo credentials. Sign in to open that student's bus, subjects, pupil’s books and school uniform portals. Log out to choose another admission number. The session survives a tab refresh. Student admission numbers appear in the staff directory and can be edited by authorized branch staff.
 
 ## Walkthrough
 
@@ -54,7 +65,7 @@ The Chairman's Overview has five views. Transport Activity opens first with the 
 - [Transport Activity](http://127.0.0.1:4183/#chairman/overview/transport): all 20 branches and 44 simulated buses, status filters, branch and vehicle drill-downs, next stops, route progress and pause/resume.
 - [Academic Performance](http://127.0.0.1:4183/#chairman/overview/academic): subject, grade and term filters; weighted averages and pass rates; branch rankings; changes against the previous term; distribution and trend charts; branch results and CSV export.
 - [Attendance](http://127.0.0.1:4183/#chairman/overview/attendance): student or staff registers, grade and reporting-date filters, one/five/twenty-school-day periods, weighted branch comparisons, trends, repeated absence watchlists, searchable student records and a personal 20-day calendar. Late arrivals are included in present totals; period totals count attendance-days.
-- [Staffing Overview](http://127.0.0.1:4183/#chairman/overview/staffing): branch headcounts, teaching capacity, coverage and vacancies; available/absent/on-leave filters; searchable and paginated staff profiles; leadership drill-downs; persistent vacancy review and links to branch appointments. Existing prototype accounts appear once per school alongside labelled illustrative staff. Assigned subjects come from actual prototype course assignments.
+- [Staffing Overview](http://127.0.0.1:4183/#chairman/overview/staffing): branch headcounts, teaching capacity, coverage and vacancies; available/absent/on-leave filters; searchable and paginated staff profiles; leadership drill-downs; persistent vacancy review and links to branch appointments. Existing prototype accounts appear once per school alongside labelled illustrative staff. Assigned subjects come from actual prototype subject assignments.
 - [Executive Reports](http://127.0.0.1:4183/#chairman/overview/reports): executive brief or individual transport/academic/attendance/staffing reports; selectable branch scope and relevant filters; generated previews; CSV and standalone HTML downloads with embedded logo; browser Print / Save PDF; latest eight saved report snapshots. Editing filters does not alter an already captured report.
 
 The shared School branch filter controls scope throughout the Chairman views. All data and actions remain a browser-only demonstration. Sample registers use 20 November 2026 by default and support dates from 12 October through 20 November. Academic cohorts are capped by the same illustrative grade enrolment used by attendance and staffing.
@@ -64,7 +75,7 @@ The shared School branch filter controls scope throughout the Chairman views. Al
 The Principal role now opens [its assigned-school overview](http://127.0.0.1:4183/#principal/overview/transport), with the same five main tabs and a daily school pulse. Use **Demo Principal** to preview Malini Senanayake at Nugegoda or Suresh Jayawardena at Malabe. Changing the demo account changes the assigned school and resets the view filters; the Principal does not have a branch selector.
 
 - **Transport Activity** opens centred on the assigned school's routes. Principals can filter their own fleet, inspect buses, manage existing bus/driver/student assignments and start or end demo trips. Resetting the map returns to the school routes.
-- **Academic Performance** compares classes, subjects, grades and teachers within the school. Class cohorts reconcile with grade totals. Prototype teacher assignments and published materials appear for matching course records. Principals can open lecture materials, assign courses and export the selected comparison.
+- **Academic Performance** compares classes, subjects, grades and teachers within the school. Class cohorts reconcile with grade totals. Prototype teacher assignments and published materials appear for matching subject records. Principals can open lecture materials, assign subjects and export the selected comparison.
 - **Attendance** includes school and class registers, student calendars, grade/class/date/period filters, staff attendance and repeated absence views.
 - **Staffing Overview** includes leadership, staff capacity, directory filters, profiles, vacancies and sample leave requests. Leave approval/decline is saved in the browser and updates the school pulse, staff availability, attendance and newly generated reports. Appointment management uses the existing branch-scoped role forms; Principal and Chairman appointments remain excluded from the Principal's assignable roles.
 - **Executive Reports** generates one-school briefs and transport/academic/attendance/staffing exports. CSV, standalone HTML with embedded logo, and Print / Save PDF are available. Principal report history is separated by school and from Chairman report history; each workspace retains its latest eight snapshots.
@@ -76,24 +87,24 @@ All Principal records, actions and exports use the assigned Principal grant's sc
 Open [Vice Principal → Overview](http://127.0.0.1:4183/#vice_principal/overview/transport). **Demo Vice Principal** switches between Roshani Fernando at Nugegoda and Dilan Mendis at Malabe. The five views use the appointed school, with no branch selector or permanent staff appointments.
 
 - **Transport Activity:** assigned-school street map, fleet and signal filters, bus routes, next stops and simulated GPS. A bus's **Record transport issue** action creates a follow-up with its bus reference.
-- **Academic Performance:** school classes, subjects, grades and teacher comparisons; course assignments, lecture materials and completion; comparison CSV. **Assign cover** records one-day teaching cover for 20 November without changing the permanent course teacher or granting extra access. Available teachers include clearly labelled illustrative staff; cover can be cancelled and is also visible alongside course teaching details to the Principal.
+- **Academic Performance:** school classes, subjects, grades and teacher comparisons; subject assignments, lecture materials and completion; comparison CSV. **Assign cover** records one-day teaching cover for 20 November without changing the permanent subject teacher or granting extra access. Available teachers include clearly labelled illustrative staff; cover can be cancelled and is also visible alongside subject teaching details to the Principal.
 - **Attendance:** student and staff registers, class/grade/date/period filters, 20-day personal calendars and repeated absences. Student details can open a named attendance follow-up.
 - **Staffing Overview:** school leadership, staff availability and capacity, vacancy follow-up, temporary cover and **Leave recommendations**. A Vice Principal adds a recommendation and note; the request stays pending and availability remains unchanged. The Principal sees the recommendation in **Leave requests** and makes the final approval/decline decision.
 - **School Reports:** school operational briefs plus transport, academic, attendance and staffing snapshots, CSV/HTML exports and Print / Save PDF. The operational brief also captures follow-ups, active cover and leave recommendations pending Principal decision. The latest eight reports are retained per school and role, separate from Principal and Chairman histories.
 
-The daily school pulse links into the relevant filtered view. **Follow-up board** contains three initial sample tasks and any added items, with a school owner, due date, status and note history. Use **Review follow-up** to record progress or resolve an item. All changes persist only in the current browser; assigning an owner or recommending leave does not send a message. The source and browser checks cover both demo schools, foreign-school action rejection, preserved course assignments, separate recommendation/final decisions and 320px/390px layouts.
+The daily school pulse links into the relevant filtered view. **Follow-up board** contains three initial sample tasks and any added items, with a school owner, due date, status and note history. Use **Review follow-up** to record progress or resolve an item. All changes persist only in the current browser; assigning an owner or recommending leave does not send a message. The source and browser checks cover both demo schools, foreign-school action rejection, preserved subject assignments, separate recommendation/final decisions and 320px/390px layouts.
 
 ### Section Head workspace
 
 Open [Section Head → Section Overview](http://127.0.0.1:4183/#section_head/overview/summary). **Demo Section Head** previews Dilini Silva (Nugegoda/Middle School), Asha Wickramasinghe (Nugegoda/Primary) or Lakshmi Fernando (Malabe/Middle School). The school and section come from the appointment; the five views are:
 
 - **Section Overview:** daily sample attendance, actual prototype student/course/material counts, teaching priorities, grade summary, trend and recorded follow-ups.
-- **Academic & Courses:** section-grade/class/subject/term comparisons; course teacher/enrolment assignment, lecture materials/progress, material readiness/update reviews and comparison CSV.
+- **Academic & Courses:** section-grade/class/subject/term comparisons; subject teacher/enrolment assignment, lecture materials/progress, material readiness/update reviews and comparison CSV.
 - **Attendance:** section and class registers, date/period filters, search/watchlists, 20-day calendars and owned follow-ups with due dates, status and note history.
 - **Teaching Coordination:** teachers serving the section, their in-section workloads and availability, missing materials/review feedback, temporary-cover requests and Vice Principal outcomes.
 - **Section Reports:** scoped management/academic/attendance/teaching snapshots, CSV/HTML downloads and Print / Save PDF. Each school/section retains its own latest eight reports.
 
-A Section Head requests cover; the school's Vice Principal assigns or declines it from Staffing Overview. Linked cover cancellation reopens the request. Course material review notes appear in staff course details and are hidden from parents. Active Section Head access does not grant material publication, staff appointments, leave decisions or school-wide data. See the full [role reference](ROLE_FEATURES_ACCESS.md#section-head) for boundaries and sample-data details.
+A Section Head requests cover; the school's Vice Principal assigns or declines it from Staffing Overview. Linked cover cancellation reopens the request. Subject material review notes appear in staff subject details and are hidden from parents. Active Section Head access does not grant material publication, staff appointments, leave decisions or school-wide data. See the full [role reference](ROLE_FEATURES_ACCESS.md#section-head) for boundaries and sample-data details.
 
 ### Grade Coordinator workspace
 
@@ -112,7 +123,7 @@ The Section Head sees coordinator requests in **Teaching Coordination → Reques
 Open [Class Teacher → Class Overview](http://127.0.0.1:4183/#class_teacher/overview/summary). **Demo Class Teacher** previews Dilini Silva (Nugegoda/8A), Sanduni Rathnayake (Nugegoda/6A) or Chamodi Senanayake (Malabe/8A). School, grade and exact class come from the appointment. Five views are available:
 
 - **Class Overview:** daily sample attendance/marked counts, actual class student/course/material counts, parent completion, subject results and follow-up priorities.
-- **Learning & Materials:** read all class courses/progress; publish/edit only on courses assigned to that teacher account; parent downloads/completion continue through the existing portal.
+- **Learning & Materials:** read all class courses/progress; publish/edit only on subjects assigned to that teacher account; parent downloads/completion continue through the existing portal.
 - **Attendance:** mark single or full illustrative class registers using large Present/Absent/Late choices beside each student, with name/admission search, All present, live totals and Save controls that stay visible. Selections remain drafts until Save; Cancel discards them. Inspect calendars/watchlists, keep class follow-up history and restore the generated sample for that class/day. Saved entries update related leadership attendance views and new reports; earlier snapshots stay unchanged.
 - **Student Support:** actual admission/guardian and completion records, private planned/completed discussion notes, coordinator requests and responses. No messages are sent; private discussion notes are excluded from exports and parent portals.
 - **Class Reports:** management/subject/attendance/learning-progress snapshots; day registers show each sample status/source, multi-day reports show daily totals; CSV/HTML/print; eight saved reports per school/grade/class.
@@ -123,25 +134,25 @@ The Grade Coordinator sees requests in **Class Coordination → Requests from Cl
 
 Open [Subject Teacher → Subject Overview](http://127.0.0.1:4183/#teacher/overview/summary). **Demo Subject Teacher** previews Dilini Silva (Mathematics 8A and ICT 6A), Nuwan Gamage (Science 8A), Rihana Farook (English 6A), Asha Wickramasinghe (Mathematics 4A) in Nugegoda, or Lakshmi Fernando in Malabe. Current teacher assignments and matching-class enrolments control visibility.
 
-- **Subject Overview:** current courses, distinct enrolled students, materials/completion, lesson plans and teaching priorities.
+- **Subject Overview:** current subjects, distinct enrolled students, materials/completion, lesson plans and teaching priorities.
 - **Teaching & Materials:** own-course publication/edit/download, parent-completion progress and internal lesson plans with status and note history.
-- **Student Progress:** enrolled student/admission search, course/review filters and internal on-track/needs-practice/reviewed learning records. Notes are available to current course staff and hidden from parents; they do not change completion or assessment marks.
-- **Teaching Support:** course-specific coordinator requests and responses, plus Section Head material feedback. Coordinators respond through **Class Coordination → Requests from Subject Teachers** in the course’s school/grade.
+- **Student Progress:** enrolled student/admission search, course/review filters and internal on-track/needs-practice/reviewed learning records. Notes are available to current subject staff and hidden from parents; they do not change completion or assessment marks.
+- **Teaching Support:** course-specific coordinator requests and responses, plus Section Head material feedback. Coordinators respond through **Class Coordination → Requests from Subject Teachers** in the subject’s school/grade.
 - **Subject Reports:** teaching summary, materials, student progress and lesson plans; scoped CSV/standalone HTML/print, with eight snapshots per teacher/school. Internal free-text notes are excluded, and snapshots losing current course/student access are hidden.
 
-Class Teachers mark attendance only for their appointed class while that role is active. The Subject Teacher workspace records attendance concerns through coordinator requests. Course plans/reviews/requests follow teaching reassignment; the former teacher loses access. All changes remain in this browser. Full boundaries are in the maintained [role reference](ROLE_FEATURES_ACCESS.md#subject-teacher).
+Class Teachers mark attendance only for their appointed class while that role is active. The Subject Teacher workspace records attendance concerns through coordinator requests. Subject plans/reviews/requests follow teaching reassignment; the former teacher loses access. All changes remain in this browser. Full boundaries are in the maintained [role reference](ROLE_FEATURES_ACCESS.md#subject-teacher).
 
 ### School Administrator workspace
 
 Open [School Administrator → Administration Overview](http://127.0.0.1:4183/#admin/overview/summary). **Demo School Administrator** previews Anjali Fernando (Nugegoda) or Shanika Dias (Malabe), with access fixed to the appointed school.
 
-- **Administration Overview:** actual admissions, guardian access, courses, record-readiness priorities, class coverage and recent student/course updates.
+- **Administration Overview:** actual admissions, guardian access, subjects, record-readiness priorities, class coverage and recent student/course updates.
 - **Admissions & Students:** register/edit students, validate unique admission numbers and matching grade/class, link existing school guardians, search/filter records and inspect enrolment/completion.
 - **Guardians & Access:** school parent-account directory, linked student/admission profiles, missing-link records and parent demo-login guidance. Principal/Chairman manages guardian appointments.
-- **Courses & Enrolment:** assign eligible school teachers and matching-class students, filter courses needing attention, read/download materials and review parent-recorded completion.
-- **Administration Reports:** school summary, admission register, guardian directory and course enrolment snapshots; CSV/standalone HTML/print, with eight reports per school. Passwords and private note text are excluded.
+- **Subjects & Enrolment:** assign eligible school teachers and matching-class students, filter subjects needing attention, read/download materials and review parent-recorded completion.
+- **Administration Reports:** school summary, admission register, guardian directory and subject enrolment snapshots; CSV/standalone HTML/print, with eight reports per school. Passwords and private note text are excluded.
 
-Changing a student's grade/class removes incompatible course enrolments; matching-course enrolment is then assigned separately. Staff appointments, lecture publication, attendance marking and transport/store operations stay with their authorised roles. All changes remain in the browser. See the maintained [role reference](ROLE_FEATURES_ACCESS.md#school-administrator) for complete access, workflow and report rules.
+Changing a student's grade/class removes incompatible subject enrolments; matching-course enrolment is then assigned separately. Staff appointments, lecture publication, attendance marking and transport/store operations stay with their authorised roles. All changes remain in the browser. See the maintained [role reference](ROLE_FEATURES_ACCESS.md#school-administrator) for complete access, workflow and report rules.
 
 ### Transport Coordinator workspace
 
@@ -197,8 +208,8 @@ All taps, readers and synchronisation are simulated in this browser. Physical re
 1. Start in **Chairman → Overview**. An interactive OpenStreetMap street map shows Sri Lanka and a simulated network fleet of 44 buses across all 20 branches. Nearby vehicles form bus-count groups; click a group to zoom in and see individual buses. Branch-name bubbles appear near their geographic positions where space permits. Use **View all buses** to find every branch's vehicles, or filter by On route, At school and Signal delayed. Pan, zoom, pause or resume the simulation, or choose **View whole island** to reset. Street tiles require an internet connection; a notice appears if they cannot load.
 2. Select a branch bubble for **Bus activity** and **Performance** tabs. Selecting a bus shows its illustrative route, animated position, next stop, school arrival estimate, sample occupancy, driver and trip progress. The mobile details sheet keeps the route map and attribution visible above it. In **Performance**, use **Compare schools** to compare sample results by subject, grade and term. Closing the panel or pressing Escape restores the full map. A Principal stays within their assigned school. The overview preserves the eight existing operational demo records for Nugegoda and Malabe and adds two illustrative buses for each of the other 18 branches; these additional vehicles do not create student, staff or assignment records.
 3. Open **Roles & access** as Chairman or Principal. Appoint staff, assign sections, grades, classes or buses, and remove appointments. The Chairman appoints Principals. A Principal appoints lower roles inside their branch. Existing people can receive multiple scoped roles.
-4. Use **Section Head**, **Grade Coordinator**, **Class Teacher**, and **Subject Teacher** views to demonstrate the different academic scopes. Course assignments support teachers from the same branch and students from the matching class. Grade Coordinators can update enrollment.
-5. In an assigned Teacher view, publish or edit a handout. Open the enrolled child's course in **Parent → Courses**, download the handout, and mark it done. Teaching staff and leadership can review completion.
+4. Use **Section Head**, **Grade Coordinator**, **Class Teacher**, and **Subject Teacher** views to demonstrate the different academic scopes. Subject assignments support teachers from the same branch and students from the matching class. Grade Coordinators can update enrollment.
+5. In an assigned Teacher view, publish or edit a handout. Open the enrolled child's subject in **Parent → Subjects**, download the handout, and mark it done. Teaching staff and leadership can review completion.
 6. In **School Administrator → Students & guardians**, create a student or update a record and link a guardian. Parent accounts are appointed through **Roles & access**.
 7. Open **Transport Coordinator → Bus tracking**, select a bus, and choose **Manage bus** to update its driver, stop names, and assigned students. In **Driver** view, use Daily Overview to prepare/start a checked trip and Route & Stops to confirm school arrival and complete it. The linked Parent view reflects the assignment and trip status.
 8. Open **Parent → Pupil’s books** or **School uniforms**, submit a student reservation, then preview **Book Store Officer** or **Uniform Store Officer** to confirm stock, mark it ready and record collection. There are no additional-book sales, prices or payment portal. Each school/store handles its own queue; Parent sees only their own selected-child reservations.
@@ -226,7 +237,7 @@ Network bus routes follow local OpenStreetMap road geometry with a schematic fin
 
 Use **Find a school** to open any branch directly, including when its label is hidden by map crowding. Each branch panel retains both bus activity and academic performance.
 
-Earlier sample branch IDs are retained internally so existing admission logins, course assignments, orders, and trip state continue to resolve to their associated records. Their display names now identify Nugegoda and Malabe.
+Earlier sample branch IDs are retained internally so existing admission logins, subject assignments, orders, and trip state continue to resolve to their associated records. Their display names now identify Nugegoda and Malabe.
 
 ## Assets
 

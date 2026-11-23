@@ -55,7 +55,10 @@ export function visibleStudents(state, context) {
 export function visibleCourses(state, context, child) {
   return state.courses.filter((course) => {
     const assignment = state.assignments[course.id];
-    if (context.role === "parent") return linkedChildren(state, context).some((student) => student.id === child?.id) && assignment.students.includes(child.id) && course.branch === child.branch;
+    if (context.role === "parent") {
+      const student = linkedChildren(state, context).find((student) => student.id === child?.id), selection = state.studentSubjects?.[student?.id];
+      return Boolean(student && selection && selection.branch === student.branch && selection.grade === student.grade && selection.className === student.className && selection.subjects.includes(course.id) && assignment?.students.includes(student.id) && course.branch === student.branch && course.grade === student.grade && course.className === student.className);
+    }
     if (!withinScope(context, course)) return false;
     return context.role !== "teacher" || assignment.teacher === context.account.id;
   });

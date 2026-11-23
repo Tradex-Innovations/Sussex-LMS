@@ -5,13 +5,13 @@ export const adminViews = [
   { id: "summary", name: "Administration Overview", short: "Overview", icon: "school" },
   { id: "students", name: "Admissions & Students", short: "Students", icon: "users" },
   { id: "guardians", name: "Guardians & Access", short: "Guardians", icon: "badge" },
-  { id: "courses", name: "Courses & Enrolment", short: "Courses", icon: "book" },
+  { id: "courses", name: "Subjects & Enrolment", short: "Subjects", icon: "book" },
   { id: "reports", name: "Administration Reports", short: "Reports", icon: "file" },
 ];
-export const adminReportTypes = { brief: "Administration summary", students: "Student admission register", guardians: "Guardian access directory", courses: "Course enrolment register" };
-export const adminStudentStatuses = { all: "All student records", missing_guardian: "No valid guardian linked", no_courses: "No course enrolment" };
+export const adminReportTypes = { brief: "Administration summary", students: "Student admission register", guardians: "Guardian access directory", courses: "Subject enrolment register" };
+export const adminStudentStatuses = { all: "All student records", missing_guardian: "No valid guardian linked", no_courses: "No subject enrolment" };
 export const adminGuardianStatuses = { all: "All guardian accounts", linked: "With linked students", unlinked: "No linked students" };
-export const adminCourseStatuses = { all: "All school courses", unassigned: "No eligible teacher", no_students: "No enrolled students", no_materials: "No materials published" };
+export const adminCourseStatuses = { all: "All school subjects", unassigned: "No eligible teacher", no_students: "No enrolled students", no_materials: "No materials published" };
 export const adminDefaults = () => ({ grade: "all", className: "all", query: "", studentStatus: "all", guardianStatus: "all", courseStatus: "all", page: 1, reportType: "brief", reportId: "", reportFormat: "csv" });
 export function adminScope(state, context) {
   if (context?.role !== "admin" || context.grant?.role !== "admin") return null;
@@ -57,7 +57,7 @@ export function adminGuardians(state, context, input = {}) {
 export function adminCourseDetail(state, context, course) {
   const scope = requireAdmin(state, context);
   course = state.courses.find((item) => item.id === course.id && item.branch === scope.branch.id);
-  if (!course) throw new Error("Choose a course from your appointed school.");
+  if (!course) throw new Error("Choose a subject from your appointed school.");
   const assignment = state.assignments[course.id], teacher = branchTeachers(state, scope.branch.id).find((person) => person.id === assignment.teacher);
   const students = state.students.filter((student) => student.branch === course.branch && student.grade === course.grade && student.className === course.className && assignment.students.includes(student.id));
   const materials = state.materials.filter((item) => item.course === course.id);
@@ -72,7 +72,7 @@ export function adminCourses(state, context, input = {}) {
 export function adminOverview(state, context) {
   const scope = requireAdmin(state, context), students = adminStudents(state, context), guardians = adminGuardians(state, context), courses = adminCourses(state, context);
   const classes = adminClasses(state, context).map((className) => { const rows = students.filter((row) => row.student.className === className); return { className, students: rows.length, guardians: rows.filter((row) => row.loginReady).length, enrolled: rows.filter((row) => row.courses.length).length, courses: courses.filter((row) => row.course.className === className).length }; });
-  const activity = (state.activity || []).filter((item) => item.branch === scope.branch.id && ["Student record updated.", "New student added.", "Course assignments updated."].includes(item.message)).slice(0, 8);
+  const activity = (state.activity || []).filter((item) => item.branch === scope.branch.id && ["Student record updated.", "New student added.", "Subject assignments updated."].includes(item.message)).slice(0, 8);
   return { scope, students, guardians, courses, classes, missingGuardians: students.filter((row) => !row.loginReady).length, noCourses: students.filter((row) => !row.courses.length).length, unassigned: courses.filter((row) => !row.teacher).length, activity };
 }
 export function visibleAdminReports(state, context) {
@@ -103,10 +103,10 @@ export function generateAdminReport(state, context, input = {}) {
       courses = courses.filter((row) => ids.has(row.course.id));
     }
   }
-  const labels = { brief: [["className", "Class"], ["students", "Admission records"], ["guardians", "With guardian access"], ["enrolled", "With course enrolment"], ["courses", "School courses"]],
-    students: [["name", "Student"], ["admission", "Admission number"], ["className", "Class"], ["guardians", "Linked guardians"], ["courses", "Enrolled courses"], ["completed", "Materials done"], ["materials", "Materials assigned"]],
+  const labels = { brief: [["className", "Class"], ["students", "Admission records"], ["guardians", "With guardian access"], ["enrolled", "With subject enrolment"], ["courses", "School subjects"]],
+    students: [["name", "Student"], ["admission", "Admission number"], ["className", "Class"], ["guardians", "Linked guardians"], ["courses", "Enrolled subjects"], ["completed", "Materials done"], ["materials", "Materials assigned"]],
     guardians: [["guardian", "Guardian account"], ["name", "Linked student"], ["admission", "Admission number"], ["className", "Class"], ["access", "Parent demo access"]],
-    courses: [["title", "Course"], ["code", "Code"], ["className", "Class"], ["teacher", "Assigned teacher"], ["students", "Matching-class enrolment"], ["materials", "Published materials"], ["completed", "Materials done"], ["expected", "Material assignments"]] };
+    courses: [["title", "Subject"], ["code", "Code"], ["className", "Class"], ["teacher", "Assigned teacher"], ["students", "Matching-class enrolment"], ["materials", "Published materials"], ["completed", "Materials done"], ["expected", "Material assignments"]] };
   let rows;
   if (f.reportType === "students") rows = students.map((row) => ({ name: row.student.name, admission: row.student.admissionNumber, className: row.student.className, guardians: row.guardians.map((person) => person.name).join("; ") || "None linked", courses: row.courses.length, completed: row.completed, materials: row.materials }));
   else if (f.reportType === "guardians") rows = guardians.flatMap((row) => row.students.length ? row.students.map((student) => ({ guardian: row.person.name, name: student.name, admission: student.admissionNumber, className: student.className, access: "Admission login linked" })) : [{ guardian: row.person.name, name: "No linked student", access: "Awaiting student link" }]);

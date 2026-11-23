@@ -21,9 +21,14 @@ test('NFC offline capture requires sync and repeat taps do not duplicate boardin
 test('A missing scan creates review without marking classroom absence or learning completion',()=>{
  const state=reduce(initialDemo,{type:'missed'});assert.equal(state.boarding,'review');assert.equal(state.attendance,'');assert.equal(state.completed,false);assert.equal(state.published,false);
 });
-test('Course publication gates completion and attendance stays a distinct class-teacher example',()=>{
+test('Subject publication gates completion and attendance stays a distinct class-teacher example',()=>{
  let state=reduce(initialDemo,{type:'complete'});assert.equal(state.completed,false);state=reduce(state,{type:'publish'});state=reduce(state,{type:'complete'});assert.equal(state.completed,true);
  state=reduce(state,{type:'attendance',value:'late'});assert.equal(state.attendance,'late');assert.equal(state.boarding,'pending');assert.equal(reduce(state,{type:'attendance',value:'bogus'}),state);
+});
+test('Presentation keeps teaching classes, selected subjects, homework and common notices distinct',()=>{
+ let state=reduce(initialDemo,{type:'teaching-class',value:'8B'});state=reduce(state,{type:'publish'});state=reduce(state,{type:'give-homework'});assert.equal(state.classWork['8B'].notes,true);assert.equal(state.published,false);assert.equal(state.homeworkPublished,false);
+ state=reduce(state,{type:'teaching-class',value:'8A'});state=reduce(state,{type:'give-homework'});state=reduce(state,{type:'homework-done'});assert.equal(state.homeworkDone,true);assert.equal(state.completed,false);assert.equal(state.attendance,'');
+ state=reduce(state,{type:'student-subject'});assert.equal(reduce(state,{type:'homework-done'}).homeworkDone,true);state=reduce(state,{type:'class-notice'});assert.equal(state.noticePublished,true);assert.equal(state.subjectEnabled,false);assert.deepEqual(reduce(state,{type:'reset'}),initialDemo);
 });
 test('Reservation example preserves ordered confirmation and collection with separate item types and no payment',()=>{
  let state={...initialDemo};for(const stage of ['requested','confirmed','ready','collected']){state=reduce(state,{type:'reserve'});assert.equal(state.reservation,stage);}

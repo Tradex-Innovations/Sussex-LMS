@@ -23,7 +23,7 @@ test("School Administrator views require a current school appointment and preser
 });
 
 test("Administrator filters, guardian links and enrolment counts stay inside the appointed school",()=>{
- const {state,context}=setup();assert.equal(adminOverview(state,context).students.length,7);assert.equal(adminOverview(state,context).guardians.length,1);assert.equal(adminOverview(state,context).courses.length,5);
+ const {state,context}=setup();assert.equal(adminOverview(state,context).students.length,9);assert.equal(adminOverview(state,context).guardians.length,1);assert.equal(adminOverview(state,context).courses.length,6);
  state.students.find(student=>student.id==="sara").guardians=["parent_l"];
  assert.equal(adminStudents(state,context,{query:"sara"})[0].guardians.length,0);
  assert.equal(adminGuardians(state,context).some(row=>row.person.id==="parent_l"),false);
@@ -64,7 +64,7 @@ test("Course assignment rejects other schools, classes and teachers without part
 test("Shared assignment writer retains Grade Coordinator teacher protection and Section Head section scope",()=>{
  const {state}=setup();saveCourseAssignment(state,contextFor(state,"coordinator","nuwan"),{course:"math8",teacher:"rihana",students:["amaya"]});assert.equal(state.assignments.math8.teacher,"dilini");
  assert.throws(()=>saveCourseAssignment(state,contextFor(state,"section_head","asha"),{course:"math8",teacher:"asha",students:["amaya"]}),/scope/);
- const principal=contextFor(state,"principal","principal_c");saveStudentRecord(state,principal,{...admission,admissionNumber:"SCN-PRINCIPAL-NEW"});assert.equal(adminStudents(state,contextFor(state,"admin","admin_c")).length,8);
+ const principal=contextFor(state,"principal","principal_c");saveStudentRecord(state,principal,{...admission,admissionNumber:"SCN-PRINCIPAL-NEW"});assert.equal(adminStudents(state,contextFor(state,"admin","admin_c")).length,10);
 });
 
 test("Four administration reports include applied filters and omit private notes, passwords and synthetic metrics",()=>{
