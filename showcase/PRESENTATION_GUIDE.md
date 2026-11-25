@@ -2,7 +2,7 @@
 
 Sussex College Network client presentation. Open `/showcase/` on the existing prototype site, or `http://127.0.0.1:4183/showcase/` when running the static server.
 
-The prepared GitHub Pages layout adds the repository prefix: `/Sussex-LMS/showcase/` for this presentation and `/Sussex-LMS/` for the prototype. **Open prototype** stays on the current host. The user approved the repository becoming public to enable Pages; use the hosted Pages link after a successful deployment, or the original private Site/localhost. A new host has its own browser-local demo state and offline cache.
+The published [GitHub Pages presentation](https://tradex-innovations.github.io/Sussex-LMS/showcase/) uses the repository prefix: `/Sussex-LMS/showcase/` for this presentation and `/Sussex-LMS/` for the prototype. **Open prototype** stays on the current host. The user approved the repository becoming public to enable Pages; the Pages deployment and live route checks passed on 25 November 2026. The original private Site and localhost remain available. A new host has its own browser-local demo state and offline cache.
 
 ## Before the meeting
 

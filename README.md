@@ -16,10 +16,10 @@ Open [the local demo](http://127.0.0.1:4183/). No install or build is required.
 
 The prototype and presentation share one deployment, with separate routes:
 
-- Prototype: `/Sussex-LMS/`
-- Presentation: `/Sussex-LMS/showcase/`
+- [Prototype](https://tradex-innovations.github.io/Sussex-LMS/)
+- [Presentation](https://tradex-innovations.github.io/Sussex-LMS/showcase/)
 
-The prepared workflow in [.github/workflows/pages.yml](.github/workflows/pages.yml) tests the prototype, builds the presentation and publishes only `dist/`. It runs on pushes to `main` and can also be started manually from Actions. Enable **Settings → Pages → Build and deployment → Source → GitHub Actions** first. The user approved making `Tradex-Innovations/Sussex-LMS` public on 25 November 2026 so it can use GitHub Pages. Publication is confirmed by a successful deployment workflow; the repository’s source and commit history are public.
+The prepared workflow in [.github/workflows/pages.yml](.github/workflows/pages.yml) tests the prototype, builds the presentation and publishes only `dist/`. It runs on pushes to `main` and can also be started manually from Actions. Enable **Settings → Pages → Build and deployment → Source → GitHub Actions** first. The user approved making `Tradex-Innovations/Sussex-LMS` public on 25 November 2026 so it can use GitHub Pages. The first deployment succeeded on 25 November 2026 ([Actions run](https://github.com/Tradex-Innovations/Sussex-LMS/actions/runs/45555471117)); both URLs were checked live. The repository’s source and commit history are public.
 
 All presentation **Open prototype** links retain the current host and repository prefix. The same build therefore works on localhost, the original hosted Site and GitHub Pages. Role pages continue to use hash routes, so they do not require server rewrites.
 
@@ -31,9 +31,9 @@ GitHub Pages serves the demonstration’s frontend. Browser-local records and de
 
 ## Interactive client presentation
 
-Open [the original private presentation](https://campusway-school-demo.manusara.chatgpt.site/showcase/) or the [local showcase](http://127.0.0.1:4183/showcase/). The same `/showcase/` route is included in the prepared GitHub Pages deployment. This separate seven-chapter presentation combines cinematic 3D scenes with **38 actual prototype screenshots**, four guided role tours and links to all 13 LMS roles. Chapters open in **Screens** view; click a screenshot to enlarge it, then choose **Actual size** to inspect the original. **Try demo** opens the interactive sample workflow. It does not change LMS records.
+Open [the GitHub Pages presentation](https://tradex-innovations.github.io/Sussex-LMS/showcase/), [the original private presentation](https://campusway-school-demo.manusara.chatgpt.site/showcase/) or the [local showcase](http://127.0.0.1:4183/showcase/). The same `/showcase/` route is included in the prepared GitHub Pages deployment. This separate seven-chapter presentation combines cinematic 3D scenes with **38 actual prototype screenshots**, four guided role tours and links to all 13 LMS roles. Chapters open in **Screens** view; click a screenshot to enlarge it, then choose **Actual size** to inspect the original. **Try demo** opens the interactive sample workflow. It does not change LMS records.
 
-Use **Present** for the guided story or **Explore** for client browsing. The presentation keeps large headlines and functional controls; supporting explanations and prototype limits are in presenter notes. Left/right keys move chapters, **N** opens notes and **M** opens the chapter menu. The menu includes reduced motion, simpler graphics, reset, fullscreen and a short backup video. Load once online until **Presentation available offline** appears before using it without a connection; screenshots and video are included. Prototype links still require internet/Site access.
+Use **Present** for the guided story or **Explore** for client browsing. The presentation keeps large headlines and functional controls; supporting explanations and prototype limits are in presenter notes. Left/right keys move chapters, **N** opens notes and **M** opens the chapter menu. The menu includes reduced motion, simpler graphics, reset, fullscreen and a short backup video. Load once online until **Presentation available offline** appears before using it without a connection; screenshots and video are included. Prototype links need connectivity; the original private Site also requires its existing access.
 
 The built presentation is included in `dist/showcase/`, so the same static server runs both experiences. To develop/rebuild only the presentation:
 

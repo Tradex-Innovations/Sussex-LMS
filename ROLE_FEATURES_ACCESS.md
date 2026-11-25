@@ -5,7 +5,7 @@
 
 **Application:** `dist/`; start locally with `python3 -m http.server 4183 --bind 127.0.0.1 --directory dist`.
 
-**Hosting preparation:** GitHub Pages is prepared to serve the prototype at the repository root and the presentation at `showcase/` on the same host. The user explicitly approved making `Tradex-Innovations/Sussex-LMS` public on 25 November 2026; the repository is now public. GitHub Pages publication is confirmed separately by a successful deployment. The existing private Site remains separate.
+**Hosting:** GitHub Pages is prepared to serve the prototype at the repository root and the presentation at `showcase/` on the same host. The user explicitly approved making `Tradex-Innovations/Sussex-LMS` public on 25 November 2026; the repository is now public. GitHub Pages is published at `https://tradex-innovations.github.io/Sussex-LMS/` and its `showcase/` route; deployment and live browser checks passed. The existing private Site remains separate.
 
 This is the maintained reference for the **current implementation**, covering all 13 roles, and for user-requested features awaiting implementation. A feature appears as available only when the prototype implements it. Record new user feature ideas in **Proposed features and requirements** with their status, affected roles and scope; keep recommendations distinct from requested requirements. Proposed features do not grant current permissions. Update this file alongside future implementation; the maintenance checklist is at the end.
 
@@ -809,9 +809,9 @@ The suite covers access, migration, parent admission selection, network/director
 
 ### GitHub Pages with two routes
 
-**Feature ID:** `HOSTING-GITHUB-001`. **Requested:** 25 November 2026. **Status:** **Deployment configuration implemented; public repository approved and enabled; Pages publication pending.**
+**Feature ID:** `HOSTING-GITHUB-001`. **Requested:** 25 November 2026. **Status:** **Implemented and published.**
 
-**User requirement:** host the prototype and presentation under one GitHub-hosted URL with different routes, using the newly connected remote. Prepared `.github/workflows/pages.yml` to check all role/model tests, build the presentation into `dist/showcase/`, upload only `dist/` and deploy through the GitHub Pages environment on `main` pushes or manual dispatch. Added host-relative prototype links so the repository path is preserved. GitHub initially blocked Pages on the private repository. The user explicitly chose “Make Sussex-LMS public and publish from this repository” and completed GitHub access confirmation. Repository visibility was changed to public; no subscription change was made. No role permissions, production integrations or existing Site audience are changed.
+**User requirement:** host the prototype and presentation under one GitHub-hosted URL with different routes, using the newly connected remote. Prepared `.github/workflows/pages.yml` to check all role/model tests, build the presentation into `dist/showcase/`, upload only `dist/` and deploy through the GitHub Pages environment on `main` pushes or manual dispatch. Added host-relative prototype links so the repository path is preserved. GitHub initially blocked Pages on the private repository. The user explicitly chose “Make Sussex-LMS public and publish from this repository” and completed GitHub access confirmation. Repository visibility was changed to public; no subscription change was made. The Pages frontend is public; the original private Site audience is unchanged. No LMS role permissions or production integrations are added.
 
 This section captures user-requested features before implementation. Keep their status explicit, distinguish the request from recommended additions, and move implemented details into the relevant role/workflow sections only when the system actually supports them. These entries do not change current permissions or imply deployment.
 
@@ -878,7 +878,7 @@ For **every new user feature idea or future implementation**:
 
 - Prepared one Pages deployment with the prototype at the repository root and the presentation at `showcase/`. Added GitHub Actions build/test/deploy configuration and portable presentation links that preserve the current host and project prefix. Added standard local dependency/environment ignores.
 - Kept the original private Site identity and all school/academic/role boundaries. The user approved the repository becoming public to resolve the Pages plan restriction; source and commit history are public. Updated the README and this feature/access reference.
-- Validation: **188 Node tests passed**, including root-host, localhost and GitHub project-prefix link resolution; presentation build passed with 51 local offline assets. Browser checks passed for the presentation screenshots and Subject Teacher prototype loaded under `/Sussex-LMS/`; Open prototype retained that prefix and used the current host. Repository visibility is now public with explicit user approval; Pages publication is verified after deployment.
+- Validation: **188 Node tests passed**, including root-host, localhost and GitHub project-prefix link resolution; presentation build passed with 51 local offline assets. Browser checks passed for the presentation screenshots and Subject Teacher prototype loaded under `/Sussex-LMS/`; Open prototype retained that prefix and used the current host. Repository visibility is public with explicit user approval. GitHub Actions run `45555471117` succeeded for source `70ba399651ff620bec7c37cebc92d9fd8a6a0be4`; both live routes, parent demo login/identity/subjects/homework/notices, presentation screenshots and same-host prototype links were verified without browser errors.
 
 ### 22 November 2026
 
