@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { branches, chapters, initialDemo, demoReducer as reduce, comparison, chapterFromHash, prototypeURL, roleTours, focusedTours, tourDetails } from '../showcase/src/data.js';
+import { branches, chapters, initialDemo, demoReducer as reduce, comparison, chapterFromHash, prototypeURL, prototypeBase, prototypeBaseFor, roleTours, focusedTours, tourDetails } from '../showcase/src/data.js';
 import { roles } from '../dist/data.js';
 import { assessmentResult } from '../dist/network-analytics.js';
 
@@ -10,8 +10,13 @@ test('Showcase keeps seven addressable chapters, the verified 20 branches and al
  for(const chapter of chapters)assert.equal(chapterFromHash('#'+chapter.id),chapters.indexOf(chapter));assert.equal(chapterFromHash('#invalid'),0);
 });
 test('Presentation route targets stay on the prototype and use valid role pages',()=>{
- for(const role of roleTours){const url=new URL(prototypeURL(role.id));assert.equal(url.origin,'https://campusway-school-demo.manusara.chatgpt.site');const [id,page]=url.hash.slice(1).split('/');assert.equal(id,role.id);assert.ok(page==='login'||roles[id].pages.includes(page));}
- for(const id of focusedTours)assert.equal(tourDetails[id].length,3);assert.equal(prototypeURL('https://evil.example'),'https://campusway-school-demo.manusara.chatgpt.site/');
+ for(const role of roleTours){const url=new URL(prototypeURL(role.id));assert.equal(url.origin,new URL(prototypeBase).origin);const [id,page]=url.hash.slice(1).split('/');assert.equal(id,role.id);assert.ok(page==='login'||roles[id].pages.includes(page));}
+ for(const id of focusedTours)assert.equal(tourDetails[id].length,3);assert.equal(prototypeURL('https://evil.example'),prototypeBase);
+});
+test('Presentation links preserve the host and GitHub Pages repository prefix',()=>{
+ for(const path of ['showcase/','showcase','showcase/index.html'])assert.equal(prototypeBaseFor('https://tradex-innovations.github.io/Sussex-LMS/'+path+'?mode=explore#learning'),'https://tradex-innovations.github.io/Sussex-LMS/');
+ assert.equal(prototypeBaseFor('http://127.0.0.1:4183/showcase/#roles'),'http://127.0.0.1:4183/');
+ assert.equal(prototypeBaseFor('https://campusway-school-demo.manusara.chatgpt.site/showcase/#network'),'https://campusway-school-demo.manusara.chatgpt.site/');
 });
 test('NFC offline capture requires sync and repeat taps do not duplicate boarding',()=>{
  let state=reduce(initialDemo,{type:'reader'});state=reduce(state,{type:'tap'});assert.equal(state.queued,true);assert.equal(state.boarding,'pending');

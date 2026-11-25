@@ -12,13 +12,26 @@ python3 -m http.server 4183 --bind 127.0.0.1 --directory dist
 
 Open [the local demo](http://127.0.0.1:4183/). No install or build is required.
 
+## GitHub Pages hosting
+
+The prototype and presentation share one deployment, with separate routes:
+
+- Prototype: `/Sussex-LMS/`
+- Presentation: `/Sussex-LMS/showcase/`
+
+The prepared workflow in [.github/workflows/pages.yml](.github/workflows/pages.yml) tests the prototype, builds the presentation and publishes only `dist/`. It runs on pushes to `main` and can also be started manually from Actions. Enable **Settings → Pages → Build and deployment → Source → GitHub Actions** first. The user approved making `Tradex-Innovations/Sussex-LMS` public on 25 November 2026 so it can use GitHub Pages. Publication is confirmed by a successful deployment workflow; the repository’s source and commit history are public.
+
+All presentation **Open prototype** links retain the current host and repository prefix. The same build therefore works on localhost, the original hosted Site and GitHub Pages. Role pages continue to use hash routes, so they do not require server rewrites.
+
+GitHub Pages serves the demonstration’s frontend. Browser-local records and demo login remain unchanged; there is no server authentication or live GPS/NFC integration. A different host uses separate browser storage. The existing private Site identity and access settings are retained.
+
 ## Features and access reference
 
 [ROLE_FEATURES_ACCESS.md](ROLE_FEATURES_ACCESS.md) documents all 13 roles, their implemented views, read/write scope, approvals, cross-role workflows, demo accounts and prototype limits. Project instructions in [AGENTS.md](AGENTS.md) require this reference to be updated alongside future feature and permission changes. New user feature ideas are also recorded as proposed requirements before implementation. The [NFC boarding prototype](ROLE_FEATURES_ACCESS.md#nfc-boarding-prototype) demonstrates cards, reader taps and boarding registers; physical NFC hardware and notifications remain future integration work.
 
 ## Interactive client presentation
 
-Open [A Connected School Day](https://campusway-school-demo.manusara.chatgpt.site/showcase/) or the [local showcase](http://127.0.0.1:4183/showcase/). This separate seven-chapter presentation combines cinematic 3D scenes with **38 actual prototype screenshots**, four guided role tours and links to all 13 LMS roles. Chapters open in **Screens** view; click a screenshot to enlarge it, then choose **Actual size** to inspect the original. **Try demo** opens the interactive sample workflow. It does not change LMS records.
+Open [the original private presentation](https://campusway-school-demo.manusara.chatgpt.site/showcase/) or the [local showcase](http://127.0.0.1:4183/showcase/). The same `/showcase/` route is included in the prepared GitHub Pages deployment. This separate seven-chapter presentation combines cinematic 3D scenes with **38 actual prototype screenshots**, four guided role tours and links to all 13 LMS roles. Chapters open in **Screens** view; click a screenshot to enlarge it, then choose **Actual size** to inspect the original. **Try demo** opens the interactive sample workflow. It does not change LMS records.
 
 Use **Present** for the guided story or **Explore** for client browsing. The presentation keeps large headlines and functional controls; supporting explanations and prototype limits are in presenter notes. Left/right keys move chapters, **N** opens notes and **M** opens the chapter menu. The menu includes reduced motion, simpler graphics, reset, fullscreen and a short backup video. Load once online until **Presentation available offline** appears before using it without a connection; screenshots and video are included. Prototype links still require internet/Site access.
 

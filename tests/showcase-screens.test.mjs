@@ -20,5 +20,5 @@ test('Each story chapter and all thirteen roles have valid screenshot coverage',
  for(const role of roleTours)assert.ok(screenshots[roleScreenshot(role.id)],role.id);
  for(const role of ['chairman','principal','parent','driver'])for(let step=0;step<3;step++)assert.ok(screenshots[roleScreenshot(role,step)]);
  assert.equal(roleScreenshot('uniform_store'),'uniform_store');assert.equal(roleScreenshot('parent',1),'parent-courses');assert.equal(roleScreenshot('driver',2),'driver-issues');
- for(const shot of Object.values(screenshots))assert.equal(new URL(prototypeBase+'#'+shot.route).origin,'https://campusway-school-demo.manusara.chatgpt.site');
+ for(const shot of Object.values(screenshots))assert.equal(new URL(prototypeBase+'#'+shot.route).origin,new URL(prototypeBase).origin);
 });

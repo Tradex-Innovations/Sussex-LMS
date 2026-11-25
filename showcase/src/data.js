@@ -12,7 +12,13 @@ export const chapters = [
   { id: 'collection', label: 'School essentials', kicker: '02:00 PM · PARENT CONVENIENCE', title: ['Reserve online.', 'Collect at school.'], accent: 1, description: 'Pupil’s books go to the Book Store. Sized uniforms go to the Uniform Store. Parents follow each request through to collection.', note: 'Choose pupil’s books or uniforms, then walk the request through confirmation, ready and collected. Requested stock is not held until the store confirms it. There is no buying or online payment.', time: '1 min' },
   { id: 'roles', label: 'Your next chapter', kicker: 'ONE PRODUCT · THIRTEEN ROLES', title: ['The right view.', 'For every role.'], accent: 1, description: 'One connected school day, with access that follows each person’s responsibility. Start with a focused pilot, then build towards the network.', note: 'Explore the four guided role tours, or open any of the thirteen role previews in the existing prototype. Close with the proposed pilot: one school, one bus and a small card group before expanding.', time: '2 min' },
 ];
-export const prototypeBase = 'https://campusway-school-demo.manusara.chatgpt.site/';
+export function prototypeBaseFor(href) {
+  const page = new URL(href);
+  if (page.pathname.endsWith('/showcase')) page.pathname += '/';
+  return new URL('../', page).href;
+}
+// Retain the current host and project prefix, including GitHub Pages subpaths.
+export const prototypeBase = prototypeBaseFor(globalThis.location?.href || 'http://localhost/showcase/');
 export const roleTours = [
   { id: 'chairman', label: 'Chairman', category: 'Leadership', scope: 'All 20 branches or a selected school', icon: 'network', route: 'chairman/overview/transport', tour: ['See network transport activity', 'Compare sample Mathematics results', 'Open an executive report'], detail: 'Transport, academic performance, attendance, staffing and executive reports across the school network.' },
   { id: 'principal', label: 'Principal', category: 'Leadership', scope: 'The assigned school', icon: 'school', route: 'principal/overview/transport', tour: ['Inspect the school’s transport', 'Review attendance and staffing', 'Coordinate school operations'], detail: 'School oversight, staff appointments and school-level coordination within the assigned branch.' },

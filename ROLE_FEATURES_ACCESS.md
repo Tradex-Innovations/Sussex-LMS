@@ -1,9 +1,11 @@
 # Sussex College Network — Role Features and Access Reference
 
-**Last updated:** 23 November 2026 (Asia/Colombo).
+**Last updated:** 25 November 2026 (Asia/Colombo).
 **Status:** Implemented browser-only demonstration, plus separately labelled proposed requirements; limitations are listed below.
 
 **Application:** `dist/`; start locally with `python3 -m http.server 4183 --bind 127.0.0.1 --directory dist`.
+
+**Hosting preparation:** GitHub Pages is prepared to serve the prototype at the repository root and the presentation at `showcase/` on the same host. The user explicitly approved making `Tradex-Innovations/Sussex-LMS` public on 25 November 2026; the repository is now public. GitHub Pages publication is confirmed separately by a successful deployment. The existing private Site remains separate.
 
 This is the maintained reference for the **current implementation**, covering all 13 roles, and for user-requested features awaiting implementation. A feature appears as available only when the prototype implements it. Record new user feature ideas in **Proposed features and requirements** with their status, affected roles and scope; keep recommendations distinct from requested requirements. Proposed features do not grant current permissions. Update this file alongside future implementation; the maintenance checklist is at the end.
 
@@ -624,6 +626,8 @@ Also sees the parent/student identity panel, Class Teacher-selected subjects, co
 
 **Entry:** `/showcase/` on the existing private Site; local `http://127.0.0.1:4183/showcase/`. **Title:** Sussex College Network — A Connected School Day. **Source:** `showcase/`; **built output:** `dist/showcase/`. The main LMS remains at `/` with its existing role routes and browser data.
 
+On GitHub Pages the repository prefix applies to both routes: `/Sussex-LMS/` for the prototype and `/Sussex-LMS/showcase/` for the presentation. The presentation resolves prototype links from its current location instead of returning to a hardcoded host. Screenshot, role-tour and pilot links retain their fixed role hashes. No LMS permissions or data migrations change. Presentation offline caching remains confined to that host’s `showcase/` route; browser storage is separate between hosts.
+
 ### Story and interaction scope
 
 **Default view:** each chapter opens in **Screens**, showing actual prototype screenshots inside browser/phone frames. There are 38 unaltered captures covering all 13 roles and the shared transport, academic, attendance and collection workflows. Screen tabs choose related views; clicking the image opens a labelled enlargement dialog with **Actual size** scrolling and **Fit to view**. **Open prototype** uses that screen's fixed LMS route. **Try demo** switches to the existing interactive presentation examples described below. Changing chapters restores Screens view. The screenshots retain the actual application's text, while the surrounding presentation removes small captions, descriptive paragraphs, fact rows, time labels, scene annotations and repeated footer explanations. Large headlines and functional controls remain; narration and limitations stay in Notes and this reference.
@@ -803,6 +807,12 @@ The suite covers access, migration, parent admission selection, network/director
 
 ## Proposed features and requirements
 
+### GitHub Pages with two routes
+
+**Feature ID:** `HOSTING-GITHUB-001`. **Requested:** 25 November 2026. **Status:** **Deployment configuration implemented; public repository approved and enabled; Pages publication pending.**
+
+**User requirement:** host the prototype and presentation under one GitHub-hosted URL with different routes, using the newly connected remote. Prepared `.github/workflows/pages.yml` to check all role/model tests, build the presentation into `dist/showcase/`, upload only `dist/` and deploy through the GitHub Pages environment on `main` pushes or manual dispatch. Added host-relative prototype links so the repository path is preserved. GitHub initially blocked Pages on the private repository. The user explicitly chose “Make Sussex-LMS public and publish from this repository” and completed GitHub access confirmation. Repository visibility was changed to public; no subscription change was made. No role permissions, production integrations or existing Site audience are changed.
+
 This section captures user-requested features before implementation. Keep their status explicit, distinguish the request from recommended additions, and move implemented details into the relevant role/workflow sections only when the system actually supports them. These entries do not change current permissions or imply deployment.
 
 ### Subjects, parent identity, notices, homework and separate teaching classes
@@ -863,6 +873,12 @@ For **every new user feature idea or future implementation**:
 8. Update README links and relevant demo account examples. Do not broaden site sharing or role permissions just to expose a view.
 
 ## Change log
+
+### 25 November 2026 — GitHub Pages preparation
+
+- Prepared one Pages deployment with the prototype at the repository root and the presentation at `showcase/`. Added GitHub Actions build/test/deploy configuration and portable presentation links that preserve the current host and project prefix. Added standard local dependency/environment ignores.
+- Kept the original private Site identity and all school/academic/role boundaries. The user approved the repository becoming public to resolve the Pages plan restriction; source and commit history are public. Updated the README and this feature/access reference.
+- Validation: **188 Node tests passed**, including root-host, localhost and GitHub project-prefix link resolution; presentation build passed with 51 local offline assets. Browser checks passed for the presentation screenshots and Subject Teacher prototype loaded under `/Sussex-LMS/`; Open prototype retained that prefix and used the current host. Repository visibility is now public with explicit user approval; Pages publication is verified after deployment.
 
 ### 22 November 2026
 
