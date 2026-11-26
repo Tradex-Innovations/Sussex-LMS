@@ -64,3 +64,5 @@ Examples: `#mind-map/parent`, `#mind-map/class_teacher/attendance`, `#mind-map/a
 GPS update (26 November 2026): Driver is retired. Bus-mounted GPS is the 24/7 source; management sees in-scope buses continuously, Parents only inside coordinator-set windows. The mind map shows GPS as hardware, not an account role. Device signals and locations remain simulated.
 
 Card payment update (26 November 2026): the fee checkout offers Debit/Credit card with Visa/Mastercard badges, fixture card details, demo verification code 123456, processing and a receipt. Bank transfers and receipt uploads are absent. Fees are simulated; book/uniform collection remains payment-free.
+
+System mind map language (26 November 2026): explain this view as the planned product. Role scopes, capabilities and access notes use product language, without demo/prototype labels, sample credentials or simulation instructions. The linked prototype and technical readiness reference remain separate; this wording does not claim that production integrations are already connected.

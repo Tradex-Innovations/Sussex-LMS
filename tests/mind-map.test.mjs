@@ -41,8 +41,8 @@ test('Role maps remain inside their canvas; fit and cursor-anchored zoom work at
 test('Sensitive distinctions are explained without expanding actual role permissions',()=>{
  const find=(role,id)=>mindMapRoles[role].features.find(f=>f.id===id);
  for(const id of ['chairman','principal']){assert.match(find(id,'fees').note,/Read-only/);assert.ok(!find(id,'fees').actions.some(text=>/Issue|Record.*payment|Send.*reminder/.test(text)));}
- assert.match(find('admin','fees').actions.join(' '),/Issue demo fee invoices/);assert.match(find('coordinator','academic').note,/teacher is retained/);
- assert.match(mindMapRoles.class_teacher.limits.join(' '),/Lecture publication requires/);assert.match(find('parent','transport').note,/position is hidden/);assert.match(find('parent','fees').note,/No real card/);
+ assert.match(find('admin','fees').actions.join(' '),/Issue school fee invoices/);assert.match(find('coordinator','academic').note,/teacher is retained/);
+ assert.match(mindMapRoles.class_teacher.limits.join(' '),/Lecture publication requires/);assert.match(find('parent','transport').note,/position is hidden/);assert.match(find('parent','fees').note,/Visa and Mastercard/);
  for(const id of ['librarian','uniform_store'])assert.doesNotMatch(find(id,'reports').actions.join(' '),/HTML|Print/);
  assert.match(mindMapRoles.parent.scopeDetail,/valid linked children/);assert.doesNotMatch(JSON.stringify(mindMapRoles),/real payment processing|enter exam marks/);
 });

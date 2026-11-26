@@ -664,9 +664,10 @@ The capture manifest records each image’s actual source date and dimensions. G
 
 **Implemented 26 November 2026 — `PRESENTATION-MINDMAP-001`.** Open **System map** from the presentation header, **Explore the role mind map** in the final role chapter, or Presentation menu → **Explore the system role mind map**.
 
-- **Full architecture:** `/showcase/#mind-map` shows all 12 implemented roles and the recommended network/school/academic/operational reporting structure. Chairman spans 20 schools; Principal and Vice Principal are school-scoped; Section Head → Grade Coordinator → Class/Subject Teacher shows academic coordination; school administration, the two stores, transport coordination have separate responsibilities; bus GPS is a device rather than a role. The structure illustrates prototype responsibilities, not a verified official Sussex organisational chart.
+- **Full architecture:** `/showcase/#mind-map` presents the planned product through all 12 roles and the recommended network/school/academic/operational reporting structure. Chairman spans 20 schools; Principal and Vice Principal are school-scoped; Section Head → Grade Coordinator → Class/Subject Teacher shows academic coordination; school administration, the two stores, transport coordination have separate responsibilities; bus GPS is a device rather than a role. The structure is the proposed system access architecture, not a verified official Sussex organisational chart.
 - **Family connection:** Parent is a separate linked-student role, not a subordinate staff appointment. Dashed overview lines illustrate learning/consent, journey updates and school collection. Role-scope panels also link all relevant collaborating roles, including class notices/alerts, guardian/fee administration and Book Store collection. A reporting or collaboration line does not inherit permissions or broaden access.
 - **Role drill-through:** select a role node or use **Find a role**. `/showcase/#mind-map/<role>` opens that role at the centre of a feature mind map. Every existing navigation workspace and every overview module is represented. Labels come from the current LMS role definitions; the explanatory feature catalogue is maintained against this reference and validated by tests.
+- **Planning language:** role scopes, features and notes describe the intended system, without demo/prototype/sample/simulation wording, temporary credentials or fabricated fleet counts. This changes explanation copy, not the implementation or permissions of linked prototype workspaces.
 - **Feature drill-through:** select a capability branch. `/showcase/#mind-map/<role>/<feature>` opens a **Can view / Can do** panel with applicable limits and fixed links into that role’s actual prototype workspaces. Select the central role card, or `.../<role>/scope`, for school/section/grade/class/subject/bus/family scope, explicit permission limits and related roles. External workspace links retain the current host and repository prefix and open the ordinary prototype/demo login in a separate tab.
 - Coverage includes bus/GPS privacy and alerts, NFC boarding/cards, academic comparisons, attendance, staffing/appointments/leave/temporary cover, student/guardian records, subject selection and lectures/homework, teacher communication/event consent, school fee demo workflows, separate book/uniform collections, scoped reports and request/recommendation/approval hand-offs. Read-only leadership fees, Class Teacher publication limits, coordinator enrolment-only writes and school/subject/student scope stay explicit.
 - **Navigation:** breadcrumbs, Full architecture, per-role selector, browser Back/Forward, and direct-link refresh. **← Presentation** returns to the previously active chapter in the same visit; opening a mind-map URL directly defaults the return chapter to the network introduction. The eight story chapters and 50 actual prototype screenshots remain available.
@@ -831,6 +832,12 @@ The suite covers access, migration, parent admission selection, network/director
 
 ## Proposed features and requirements
 
+### Planned-system wording in the role mind map
+
+**Feature ID:** `PRESENTATION-MINDMAP-COPY-002`. **Requested:** 26 November 2026. **Status:** Implemented presentation copy update.
+
+**User requirement:** the system mind map explains the planned product. Remove words such as demo/prototype and related implementation wording from its client-facing architecture, role scopes, feature explanations and access notes. The map now describes planned school workflows, live GPS/device operations, communication and card payments without sample counts, temporary logins or simulation instructions. Existing role responsibilities, school/class/family boundaries, fee oversight, Parent GPS hours and reserve-and-collect supplies remain explicit. This is a presentation narrative change only: actual prototype screens, payment safeguards, role permissions and connected-integration status are unchanged. Technical implementation limits remain documented in this reference and the main presentation notes, separately from the planning map.
+
 ### Card-only school fee checkout
 
 **Feature ID:** `SCHOOL-FEES-CARDS-002`. **Requested:** 26 November 2026. **Status:** Implemented prototype UI.
@@ -927,6 +934,12 @@ For **every new user feature idea or future implementation**:
 8. Update README links and relevant demo account examples. Do not broaden site sharing or role permissions just to expose a view.
 
 ## Change log
+
+### 26 November 2026 — Planned-system mind map language
+
+- Rewrote the system mind map as a planned-product explanation across all 12 roles. Removed demo/prototype/sample/simulation labels, temporary login examples and hardware/payment/email implementation disclaimers from the map’s visible copy.
+- Preserved role scopes, reporting relationships, school fee ownership, Parent bus visibility and school collection rules. Actual prototype payment notices and safeguards remain unchanged.
+- Updated related presenter guidance and scoped regression expectations. **202 Node tests passed**. All role/feature catalogue text was checked for demo/prototype/sample/simulation language; browser checks passed for Parent fees, Chairman transport, Transport Coordinator privacy, Class Teacher scope and map-specific presenter/menu notes, with no observed browser errors.
 
 ### 26 November 2026 — Card-only online fee checkout
 
