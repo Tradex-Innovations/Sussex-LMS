@@ -9,6 +9,7 @@ import ScreenshotGallery from './ScreenshotGallery.jsx';
 import RoleMindMap from './RoleMindMap.jsx';
 import { parseMindMapHash, mindMapRoles } from './mind-map-data.js';
 import { screenshots, screenshotSource } from './screens.js';
+import { shouldReloadForRelease } from './release-updates.js';
 import './style.css';
 const Scene = lazy(() => import('./Scene.jsx'));
 class SceneBoundary extends React.Component {
@@ -42,7 +43,17 @@ function App() {
  useEffect(()=>{const handler=event=>{if(mindMapRoute||modal||event.altKey||event.metaKey||event.ctrlKey||event.target.closest('input,select,textarea,dialog,[role="tab"]'))return;if(['ArrowRight','PageDown'].includes(event.key)){event.preventDefault();go(chapter+1);}else if(['ArrowLeft','PageUp'].includes(event.key)){event.preventDefault();go(chapter-1);}else if(event.key===' '&&!event.target.closest('button,a')){event.preventDefault();setPaused(value=>!value);}else if(event.key.toLowerCase()==='n')setModal('notes');else if(event.key.toLowerCase()==='m')setModal('chapters');};window.addEventListener('keydown',handler);return()=>window.removeEventListener('keydown',handler);},[chapter,modal,go,mindMapRoute]);
  useEffect(()=>{const handler=event=>{if(mindMapRoute||mode!=='explore'||modal||Math.abs(event.deltaY)<40||event.target.closest('.chapter-interaction,dialog,.story-header,.story-footer,.chapter-copy'))return;if(Date.now()-lastWheel.current<1100)return;lastWheel.current=Date.now();go(chapter+(event.deltaY>0?1:-1));};window.addEventListener('wheel',handler,{passive:true});return()=>window.removeEventListener('wheel',handler);},[chapter,mode,modal,go,mindMapRoute]);
  useEffect(()=>{const change=()=>setFullscreen(Boolean(document.fullscreenElement)),lost=()=>{setGpuFailed(true);notify('Simplified graphics enabled. Every chapter remains available.');};document.addEventListener('fullscreenchange',change);window.addEventListener('showcase-context-lost',lost);return()=>{document.removeEventListener('fullscreenchange',change);window.removeEventListener('showcase-context-lost',lost);};},[notify]);
- useEffect(()=>{if(!('serviceWorker'in navigator)){setOffline('unavailable');return;}let live=true;navigator.serviceWorker.register('./sw.js',{scope:'./'}).then(()=>navigator.serviceWorker.ready).then(()=>{if(live)setOffline('ready');}).catch(()=>{if(live)setOffline('unavailable');});return()=>{live=false;};},[]);
+ useEffect(()=>{
+  if(!('serviceWorker'in navigator)){setOffline('unavailable');return;}
+  let live=true,registration,refreshing=false;
+  const receiveRelease=event=>{if(!refreshing&&shouldReloadForRelease(event.data,location.hash)){refreshing=true;location.reload();}};
+  navigator.serviceWorker.addEventListener('message',receiveRelease);
+  const checkUpdate=()=>{if(document.visibilityState==='visible')registration?.update().catch(()=>{});};
+  navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'}).then(value=>{registration=value;return navigator.serviceWorker.ready;}).then(()=>{if(live)setOffline('ready');}).catch(()=>{if(live)setOffline('unavailable');});
+  const timer=setInterval(checkUpdate,60000);
+  window.addEventListener('focus',checkUpdate);document.addEventListener('visibilitychange',checkUpdate);
+  return()=>{live=false;clearInterval(timer);navigator.serviceWorker.removeEventListener('message',receiveRelease);window.removeEventListener('focus',checkUpdate);document.removeEventListener('visibilitychange',checkUpdate);};
+ },[]);
  const enterFullscreen=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{notify('Fullscreen is unavailable in this browser. The presentation still works in the tab.');}};
  const reset=()=>{dispatch({type:'reset'});go(0);notify('Presentation examples reset. LMS records are untouched.');};
  return <div className={'showcase mode-'+mode+' chapter-'+current.id+(reduced?' reduced-motion':'')+(fallback?' simple-view':'')+(mindMapRoute?' is-mind-map':'')} data-chapter={mindMapRoute?'mind-map':current.id} data-mode={mode}>

@@ -66,3 +66,5 @@ GPS update (26 November 2026): Driver is retired. Bus-mounted GPS is the 24/7 so
 Card payment update (26 November 2026): the fee checkout offers Debit/Credit card with Visa/Mastercard badges, fixture card details, demo verification code 123456, processing and a receipt. Bank transfers and receipt uploads are absent. Fees are simulated; book/uniform collection remains payment-free.
 
 System mind map language (26 November 2026): explain this view as the planned product. Role scopes, capabilities and access notes use product language, without demo/prototype labels, sample credentials or simulation instructions. The linked prototype and technical readiness reference remain separate; this wording does not claim that production integrations are already connected.
+
+Mind-map releases refresh open role/feature maps when a new version becomes active. Visible presentation tabs check for updates every minute and on focus; chapter examples and LMS pages are preserved. An older tab may need one reload to adopt this update behavior.

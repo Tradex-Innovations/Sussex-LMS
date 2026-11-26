@@ -674,6 +674,7 @@ The capture manifest records each image’s actual source date and dimensions. G
 - **Interaction:** drag/pinch, wheel zoom, +/−, Fit and zoom percentage. With the canvas focused, arrow keys pan and Home/0 fits; +/− zoom. Normal chapter shortcuts and Explore swipes/wheel do not change chapters while explaining a mind map. Semantic HTML role/feature buttons are rendered over SVG connectors; map and outline controls have accessible names, visible focus and headings.
 - **Small screens:** an optional Outline view lists the staff hierarchy or role features with large buttons. Feature details form a separately scrolling lower panel; desktop uses a side panel. The role picker, breadcrumbs, map controls and workspace links remain reachable. The header uses a compact logo on narrow phones.
 - **Persistence and limits:** selected role/feature is represented in the URL; zoom/pan and outline mode are in presentation memory. Reload retains the direct role/feature but resets the camera/outline. It does not access or mutate LMS localStorage/sessionStorage, users, enrolments, GPS, payments, consent or messages. This is a presenter/explanation view, not a new authenticated role or a permission management interface. All current prototype integrations remain simulations.
+- **Release updates:** online navigation fetches fresh HTML; visible tabs check releases every minute and on focus. A new release refreshes open mind-map tabs at the same role/feature URL. Existing LMS pages and chapter interactions are not reloaded. Offline navigation uses the active release cache.
 - **Offline and maintenance:** bundled SVG/HTML/CSS and role metadata use existing assets/icons/fonts and the showcase’s generated offline cache; no graph service, external graph dependency or generated raster mind-map asset is required. `showcase/src/mind-map-data.js` and this role reference must be updated together when role capabilities/navigation change. The backup video still covers the eight narrative chapters; this additional explorer is used interactively.
 
 ### Access, state, production limits and maintenance
@@ -832,6 +833,12 @@ The suite covers access, migration, parent admission selection, network/director
 
 ## Proposed features and requirements
 
+### Mind-map release freshness
+
+**Feature ID:** `PRESENTATION-MINDMAP-UPDATES-003`. **Requested:** 26 November 2026, after the user showed the previous School fee demo payments label still visible. **Status:** Implemented presentation update handling.
+
+The planned-system label remains School fee payments. Presentation navigation now bypasses stale HTML; installation refreshes cached assets from the network. Visible presentation tabs check for releases every minute and when focused. When an updated showcase worker activates, open mind-map tabs reload the same role/feature URL. Narrative chapter interactions and LMS pages are not automatically reloaded; LMS storage and permissions are untouched. Offline map navigation continues using the active release’s cached HTML/assets. Existing old tabs may need one reload to install this update handler.
+
 ### Planned-system wording in the role mind map
 
 **Feature ID:** `PRESENTATION-MINDMAP-COPY-002`. **Requested:** 26 November 2026. **Status:** Implemented presentation copy update.
@@ -934,6 +941,12 @@ For **every new user feature idea or future implementation**:
 8. Update README links and relevant demo account examples. Do not broaden site sharing or role permissions just to expose a view.
 
 ## Change log
+
+### 26 November 2026 — Prevent stale mind-map wording
+
+- Confirmed the source and hosted label is School fee payments. Added cache-bypassing navigation/install requests and periodic/focus release checks so older wording does not remain in open mind-map tabs after updates.
+- New worker activation refreshes only map URLs in the showcase scope, retaining role/feature routes. Other presentation chapters, other caches and LMS pages/storage are preserved; offline fallback stays available.
+- **207 Node tests passed**, covering fresh installation, cache bypass, offline fallback, cache/school-portal isolation and map-only release handling. A browser test loaded the old fee label, published a new release to an isolated local server and observed the open map automatically change to School fee payments without manual reload; the Parent route was preserved and no browser errors were observed.
 
 ### 26 November 2026 — Planned-system mind map language
 
