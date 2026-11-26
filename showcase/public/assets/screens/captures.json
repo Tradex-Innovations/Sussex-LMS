@@ -1,15 +1,8 @@
 {
-  "sourceCommit": "271449937ee64b5a0c2fd23979e927a42a658c37",
-  "source": "Actual Sussex LMS demo. Family, fees, communications, consent and GPS privacy captures refreshed 26 November 2026. Unchanged store/boarding captures retain their original dates. Source hash covers the current uncommitted working tree.",
-  "prototypeSha256": "1d2d2805a19e93bcde3fd0275bd6710ffdbe3f0be38e998c22c2a825d70d23dd",
+  "sourceCommit": "59ec2f5120bffdee8e26001b49dd79ac0724ac7d",
+  "source": "Actual Sussex LMS UI captures. GPS management, tracker, privacy and boarding views refreshed 26 November 2026. Unchanged screens retain original capture dates. Device telemetry is simulated.",
+  "prototypeSha256": "8107d2009a69a886b7a78c3892a01aa2ddcfdf572c7c69f7b5719f75076c2ca3",
   "captures": [
-    {
-      "id": "vice_principal",
-      "route": "vice_principal/overview/transport",
-      "width": 1440,
-      "height": 960,
-      "capturedAt": "2026-11-23T09:34:02.619Z"
-    },
     {
       "id": "section_head",
       "route": "section_head/overview/summary",
@@ -23,20 +16,6 @@
       "width": 1440,
       "height": 960,
       "capturedAt": "2026-11-23T09:34:03.645Z"
-    },
-    {
-      "id": "driver",
-      "route": "driver/overview/summary",
-      "width": 1440,
-      "height": 960,
-      "capturedAt": "2026-11-23T09:34:07.650Z"
-    },
-    {
-      "id": "driver-issues",
-      "route": "driver/overview/issues",
-      "width": 1440,
-      "height": 960,
-      "capturedAt": "2026-11-23T09:34:08.155Z"
     },
     {
       "id": "librarian",
@@ -58,20 +37,6 @@
       "width": 1440,
       "height": 960,
       "capturedAt": "2026-11-23T09:34:10.721Z"
-    },
-    {
-      "id": "boarding",
-      "route": "transport/boarding",
-      "width": 1440,
-      "height": 960,
-      "capturedAt": "2026-11-23T09:34:12.920Z"
-    },
-    {
-      "id": "driver-boarding",
-      "route": "driver/boarding",
-      "width": 1440,
-      "height": 960,
-      "capturedAt": "2026-11-23T09:34:13.434Z"
     },
     {
       "id": "book-requests",
@@ -159,14 +124,6 @@
       "source": "Family workflows working tree, 26 November 2026; actual browser capture"
     },
     {
-      "id": "transport-privacy",
-      "route": "transport/tracking",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:15:30.966Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
       "id": "admin-unpaid",
       "route": "admin/fees",
       "width": 1425,
@@ -191,14 +148,6 @@
       "source": "Family workflows working tree, 26 November 2026; actual browser capture"
     },
     {
-      "id": "network",
-      "route": "chairman/overview/transport",
-      "width": 1440,
-      "height": 900,
-      "capturedAt": "2026-11-26T05:29:38.374Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
       "id": "chairman-academic",
       "route": "chairman/overview/academic",
       "width": 1425,
@@ -215,27 +164,11 @@
       "source": "Family workflows working tree, 26 November 2026; actual browser capture"
     },
     {
-      "id": "chairman-staffing",
-      "route": "chairman/overview/staffing",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:29:38.827Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
       "id": "chairman-reports",
       "route": "chairman/overview/reports",
       "width": 1425,
       "height": 891,
       "capturedAt": "2026-11-26T05:29:38.891Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "principal",
-      "route": "principal/overview/transport",
-      "width": 1440,
-      "height": 900,
-      "capturedAt": "2026-11-26T05:29:38.962Z",
       "source": "Family workflows working tree, 26 November 2026; actual browser capture"
     },
     {
@@ -327,14 +260,6 @@
       "source": "Family workflows working tree, 26 November 2026; actual browser capture"
     },
     {
-      "id": "transport",
-      "route": "transport/overview/fleet",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:29:39.740Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
       "id": "parent-courses",
       "route": "parent/subjects",
       "width": 1440,
@@ -375,28 +300,88 @@
       "source": "Family workflows working tree, 26 November 2026; actual browser capture"
     },
     {
+      "id": "network",
+      "route": "chairman/overview/transport",
+      "capturedAt": "2026-11-26T09:35:25.527Z",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "id": "principal",
+      "route": "principal/overview/transport",
+      "capturedAt": "2026-11-26T09:35:25.569Z",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "id": "vice_principal",
+      "route": "vice_principal/overview/transport",
+      "capturedAt": "2026-11-26T09:35:25.618Z",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "id": "chairman-staffing",
+      "route": "chairman/overview/staffing",
+      "capturedAt": "2026-11-26T09:35:25.687Z",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "id": "transport",
+      "route": "transport/overview/fleet",
+      "capturedAt": "2026-11-26T09:35:25.737Z",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "id": "admin-transport",
+      "route": "admin/transport",
+      "capturedAt": "2026-11-26T09:38:02.862593+00:00",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "id": "gps-trackers",
+      "route": "transport/overview/assignments",
+      "capturedAt": "2026-11-26T09:35:32.828Z",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "id": "boarding",
+      "route": "transport/boarding",
+      "capturedAt": "2026-11-26T09:36:04.607Z",
+      "width": 1265,
+      "height": 712
+    },
+    {
       "id": "parent-bus",
       "route": "parent/transport",
+      "capturedAt": "2026-11-26T09:36:12.022Z",
       "width": 375,
-      "height": 234,
-      "capturedAt": "2026-11-26T05:16:27.947Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
+      "height": 211
     },
     {
       "id": "parent-boarding",
       "route": "parent/boarding",
+      "capturedAt": "2026-11-26T09:36:22.361Z",
       "width": 375,
-      "height": 812,
-      "capturedAt": "2026-11-26T05:16:27.992Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
+      "height": 812
+    },
+    {
+      "id": "transport-privacy",
+      "route": "transport/tracking",
+      "width": 1265,
+      "height": 712,
+      "capturedAt": "2026-11-26T09:35:11.270390+00:00"
     },
     {
       "id": "parent-gps-hidden",
       "route": "parent/transport",
-      "width": 1440,
-      "height": 900,
-      "capturedAt": "2026-11-26T05:16:47.430Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
+      "width": 1265,
+      "height": 712,
+      "capturedAt": "2026-11-26T09:35:03.148981+00:00"
     }
   ]
 }

@@ -2,14 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { freshState, roles, saveState, loadState } from "../dist/data.js";
 import { contextFor, visibleBuses, can } from "../dist/access.js";
-import { assignDriver, saveBusAssignment } from "../dist/transport-records.js";
-import { coordinatorScope, coordinatorBuses, coordinatorFleet, coordinatorFilters, coordinatorDrivers, coordinatorStudents, coordinatorRoutes, coordinatorTasks, coordinatorOverview, saveCoordinatorTask, saveCoordinatorAllocation, generateCoordinatorReport, visibleCoordinatorReports } from "../dist/coordinator-data.js";
+import { saveTrackerSignal, saveBusAssignment } from "../dist/transport-records.js";
+import { coordinatorScope, coordinatorBuses, coordinatorFleet, coordinatorFilters, coordinatorTrackers, coordinatorStudents, coordinatorRoutes, coordinatorTasks, coordinatorOverview, saveCoordinatorTask, saveCoordinatorAllocation, generateCoordinatorReport, visibleCoordinatorReports } from "../dist/coordinator-data.js";
 import { schoolFollowups, saveSchoolFollowup } from "../dist/vice-data.js";
 import { coordinatorReportHTML, transportCoordinatorPage } from "../dist/transport-coordinator.js";
 import { reportCSV } from "../dist/chairman-data.js";
 
 const setup=()=>{const state=freshState(),context=contextFor(state,"transport","transport_c");return{state,context};};
-const busInput=(state,id="01")=>{const bus=state.buses.find(bus=>bus.id===id);return{id,name:bus.name,driver:bus.driverId,stops:[...bus.stops],students:state.students.filter(student=>student.branch===bus.branch&&student.bus===id).map(student=>student.id)};};
+const busInput=(state,id="01")=>{const bus=state.buses.find(bus=>bus.id===id);return{id,name:bus.name,trackerId:bus.trackerId,stops:[...bus.stops],students:state.students.filter(student=>student.branch===bus.branch&&student.bus===id).map(student=>student.id)};};
 const issue={busId:"01",title:"Review pickup delay",due:"2026-11-23",status:"open",note:"PRIVATE_TRANSPORT_NOTE"};
 
 test("Coordinator scope follows the real active school appointment and excludes synthetic vehicles",()=>{
@@ -22,37 +22,34 @@ test("Coordinator scope follows the real active school appointment and excludes 
 });
 
 test("Fleet and people filters never include another school's buses, students or drivers",()=>{
- const {state,context}=setup();assert.ok(coordinatorStudents(state,context).every(row=>row.student.branch==="colombo"));assert.ok(coordinatorDrivers(state,context).every(row=>row.person.grants.some(grant=>grant.role==="driver"&&grant.branch==="colombo")));
+ const {state,context}=setup();assert.ok(coordinatorStudents(state,context).every(row=>row.student.branch==="colombo"));assert.ok(coordinatorTrackers(state,context).every(row=>row.bus.branch==="colombo"));
  assert.equal(coordinatorRoutes(state,context,{status:"delayed"}).length,1);assert.equal(coordinatorStudents(state,context,{query:"SCN-1001"}).length,1);
  assert.ok(coordinatorStudents(state,context,{busFilter:"01"}).every(row=>row.student.bus==="01"));assert.equal(coordinatorFilters(state,context,{busId:"07",busFilter:"07"}).busFilter,"all");
  const data=coordinatorOverview(state,context);assert.equal(data.route+data.school+data.delayed,6);assert.equal(data.students.length,9);
 });
 
-test("Bus writes are validated atomically for school, students, driver and school destination",()=>{
+test("Bus writes are validated atomically for school, students, tracker and school destination",()=>{
  const {state,context}=setup(),input=busInput(state),before=JSON.stringify(state);
  for(const invalid of [{id:"07"},{id:"demo-galle-1"},{driver:"driver_07"},{students:["meera"]},{students:["amaya","amaya"]},{name:""},{stops:input.stops.slice(0,-1)},{stops:[...input.stops.slice(0,-1),"Other school"]}]){assert.throws(()=>saveBusAssignment(state,context,{...input,...invalid}));assert.equal(JSON.stringify(state),before);}
- for(const role of ["admin","teacher","driver"])assert.throws(()=>saveBusAssignment(state,contextFor(state,role),input),/operational bus/);
+ for(const role of ["admin","teacher","driver"])assert.throws(()=>saveBusAssignment(state,contextFor(state,role),input),/appointment|operational bus/);
  const saved=saveBusAssignment(state,context,{...input,name:"Updated school pickup",stops:["Updated pickup",...input.stops.slice(1)]});assert.equal(saved.name,"Updated school pickup");assert.equal(saved.stops[0],"Updated pickup");
 });
 
-test("Driver movement preserves an unassigned appointment and synchronises Driver portal access",()=>{
- const {state,context}=setup(),input=busInput(state),foreign=structuredClone(state.buses.filter(bus=>bus.branch==="lakeside"));
- saveBusAssignment(state,context,{...input,driver:"driver_02"});assert.equal(state.buses.find(bus=>bus.id==="02").driverId,"");assert.equal(state.buses.find(bus=>bus.id==="01").driverId,"driver_02");
- assert.deepEqual(visibleBuses(state,contextFor(state,"driver","driver_02")).map(bus=>bus.id),["01"]);assert.deepEqual(visibleBuses(state,contextFor(state,"driver","driver_01")),[]);
- assert.equal(coordinatorDrivers(state,context,{driverStatus:"unassigned"}).some(row=>row.person.id==="driver_01"),true);assert.deepEqual(state.buses.filter(bus=>bus.branch==="lakeside"),foreign);
- saveBusAssignment(state,context,{...busInput(state),driver:""});assert.equal(state.buses.find(bus=>bus.id==="01").driver,"Unassigned");assert.deepEqual(visibleBuses(state,contextFor(state,"driver","driver_02")),[]);
- saveCoordinatorAllocation(state,context,{kind:"driver",person:"driver_01",busId:"01"});assert.deepEqual(visibleBuses(state,contextFor(state,"driver","driver_01")).map(bus=>bus.id),["01"]);
-});
-
-test("A school coordinator cannot move an eligible multi-school driver away from another school",()=>{
- const {state,context}=setup();state.accounts.find(person=>person.id==="driver_07").grants.push({role:"driver",branch:"colombo",bus:""});const before=JSON.stringify(state);
- assert.throws(()=>saveBusAssignment(state,context,{...busInput(state),driver:"driver_07"}),/Chairman/);assert.equal(JSON.stringify(state),before);
+test("Tracker IDs are unique across schools and signal simulation does not affect admissions",()=>{
+ const {state,context}=setup(),before=structuredClone(state.students);
+ assert.throws(()=>saveBusAssignment(state,context,{...busInput(state),trackerId:state.buses[6].trackerId}),/already paired/);
+ saveBusAssignment(state,context,{...busInput(state),trackerId:"NEW-GPS-001"});
+ assert.equal(coordinatorTrackers(state,context).find(row=>row.bus.id==="01").trackerId,"NEW-GPS-001");
+ saveTrackerSignal(state,context,{id:"01",status:"offline"});assert.equal(state.buses[0].trackerStatus,"offline");assert.equal(state.buses[0].status,"delayed");
+ saveTrackerSignal(state,context,{id:"01",status:"online"});assert.equal(state.buses[0].trackerStatus,"online");assert.deepEqual(state.students,before);
+ const snapshot=JSON.stringify(state);assert.throws(()=>saveTrackerSignal(state,context,{id:"07",status:"offline"}));assert.equal(JSON.stringify(state),snapshot);
+ assert.throws(()=>saveCoordinatorAllocation(state,context,{kind:"driver",person:"driver_01",busId:"01"}));
 });
 
 test("Student allocation moves only the transport assignment, preserving admissions and learning records",()=>{
  const {state,context}=setup(),student=structuredClone(state.students.find(student=>student.id==="amaya")),assignments=structuredClone(state.assignments),completed=structuredClone(state.completed);
  saveCoordinatorAllocation(state,context,{kind:"student",person:"amaya",busId:"02"});const moved=state.students.find(student=>student.id==="amaya");assert.equal(moved.bus,"02");assert.deepEqual({...moved,bus:student.bus},student);assert.deepEqual(state.assignments,assignments);assert.deepEqual(state.completed,completed);
- assert.throws(()=>saveCoordinatorAllocation(state,context,{kind:"student",person:"meera",busId:"01"}),/appointed school/);assert.throws(()=>saveCoordinatorAllocation(state,context,{kind:"student",person:"amaya",busId:"07"}),/operational bus/);
+ assert.throws(()=>saveCoordinatorAllocation(state,context,{kind:"student",person:"meera",busId:"01"}),/appointed school/);assert.throws(()=>saveCoordinatorAllocation(state,context,{kind:"student",person:"amaya",busId:"07"}),/school bus/);
  const input=busInput(state,"02");saveBusAssignment(state,context,{...input,students:input.students.filter(id=>id!=="amaya")});assert.equal(state.students.find(student=>student.id==="amaya").bus,undefined);
 });
 
@@ -106,13 +103,4 @@ test("A newly appointed empty school never borrows synthetic network buses or ot
  const {state}=setup(),branch=state.branches.find(branch=>!["colombo","lakeside"].includes(branch.id));state.accounts.push({id:"empty_transport",name:"New Coordinator",grants:[{role:"transport",branch:branch.id}]});const context=contextFor(state,"transport","empty_transport");
  assert.equal(coordinatorFleet(state,context).length,0);assert.equal(coordinatorBuses(state,context).length,0);assert.equal(coordinatorStudents(state,context).length,0);for(const view of ["fleet","routes","assignments","issues","reports"]){const html=transportCoordinatorPage({state,context,transportCoordinator:{...coordinatorFilters(state,context),view},paused:true,progress:()=>0,networkElapsed:0});assert.match(html,/TRANSPORT COORDINATOR/);assert.doesNotMatch(html,/Nugegoda Loop|Meera Fernando|Kasun Dias/);}
  assert.equal(generateCoordinatorReport(state,context,{reportType:"fleet"}).customRows.length,0);
-});
-
-test("Authorised role appointment can provision a new driver while bus management requires an existing appointment",()=>{
- const {state,context}=setup();state.accounts.push({id:"new_driver",name:"New Driver",grants:[]});
- assert.throws(()=>saveBusAssignment(state,context,{...busInput(state),driver:"new_driver"}),/appointed/);
- assert.throws(()=>assignDriver(state,"01","new_driver",context),/appointed/);
- assignDriver(state,"01","new_driver",contextFor(state,"principal","principal_c"));assert.deepEqual(state.accounts.find(person=>person.id==="new_driver").grants,[{role:"driver",branch:"colombo",bus:"01"}]);
- assert.deepEqual(visibleBuses(state,contextFor(state,"driver","new_driver")).map(bus=>bus.id),["01"]);
- assert.equal(coordinatorDrivers(state,context,{driverStatus:"unassigned"}).some(row=>row.person.id==="driver_01"),true);
 });

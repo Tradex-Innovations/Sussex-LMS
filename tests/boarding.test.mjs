@@ -7,16 +7,16 @@ import { boardingScope, boardingStudents, activeStudentCard, studentCards, visib
 import { boardingPage } from "../dist/boarding.js";
 import { reportCSV } from "../dist/chairman-data.js";
 
-const setup=()=>{const state=freshState(),transport=contextFor(state,"transport","transport_c"),admin=contextFor(state,"admin","admin_c"),driver=contextFor(state,"driver","driver_01");return{state,transport,admin,driver};};
+const setup=()=>{const state=freshState(),transport=contextFor(state,"transport","transport_c"),admin=contextFor(state,"admin","admin_c"),operator=transport;return{state,transport,admin,operator};};
 const open=(state,ctx,busId="01",direction="to_school")=>createBoardingTrip(state,ctx,{busId,date:"2026-11-20",direction});
 const tap=(state,ctx,trip,student="amaya")=>simulateBoardingTap(state,ctx,{tripId:trip.id,token:activeStudentCard(state,student).token});
 const parent=(state,admission="SCN-1001")=>parentContext(state,authenticateParent(state,admission,"1234"));
 
 test("NFC navigation and permissions follow the actual appointment and active role",()=>{
- const{state,transport,admin,driver}=setup();for(const role of ["chairman","principal","vice_principal","transport","driver","admin","parent"])assert.ok(roles[role].pages.includes("boarding"));
+ const{state,transport,admin,operator}=setup();for(const role of ["chairman","principal","vice_principal","transport","admin","parent"])assert.ok(roles[role].pages.includes("boarding"));
  for(const role of ["teacher","class_teacher","coordinator","section_head","librarian"])assert.equal(boardingScope(state,contextFor(state,role)),null);
  assert.equal(boardingScope(state,{...transport,branch:"lakeside"}).branches[0].id,"colombo");assert.equal(boardingScope(state,{...transport,grant:{...transport.grant,branch:"lakeside"}}),null);
- assert.deepEqual(boardingScope(state,driver).buses.map(bus=>bus.id),["01"]);assert.equal(boardingScope(state,admin).canOperate,false);assert.equal(boardingScope(state,transport).canCards,false);
+ assert.equal(boardingScope(state,operator).buses.length,6);assert.equal(boardingScope(state,admin).canOperate,false);assert.equal(boardingScope(state,transport).canCards,false);
  assert.equal(boardingScope(state,contextFor(state,"parent","parent")),null);assert.ok(boardingScope(state,parent(state)));
  state.accounts.find(person=>person.id==="transport_c").grants=[];assert.equal(boardingScope(state,transport),null);
 });
@@ -43,30 +43,30 @@ test("Replacement deactivates the old card, preserves past boarding and cannot r
 });
 
 test("Opening a trip snapshots actual allocated students and validates duplicate and concurrent trips",()=>{
- const{state,transport,driver,admin}=setup(),trip=open(state,driver);assert.deepEqual(trip.expected.map(row=>row.studentId),["amaya"]);
+ const{state,transport,operator,admin}=setup(),trip=open(state,operator);assert.deepEqual(trip.expected.map(row=>row.studentId),["amaya"]);
  state.students.find(student=>student.id==="lohith").bus="01";assert.equal(boardingRows(state,transport,trip.id).length,1);
  assert.throws(()=>open(state,transport),/already has a roster/);assert.throws(()=>open(state,transport,"01","from_school"),/Close this bus/);
- assert.throws(()=>open(state,driver,"02"),/assigned operational bus/);assert.throws(()=>open(state,admin),/assigned operational bus/);
+ assert.throws(()=>open(state,contextFor(state,"transport","transport_l"),"02"),/assigned operational bus/);assert.throws(()=>open(state,admin),/assigned operational bus/);
  assert.throws(()=>createBoardingTrip(state,transport,{busId:"01",date:"2026-11-32",direction:"to_school"}),/demo trip/);
- closeBoardingTrip(state,transport,{tripId:trip.id});const afternoon=open(state,transport,"01","from_school");assert.equal(afternoon.expected.length,2);assert.deepEqual(visibleBoardingTrips(state,driver).map(trip=>trip.id),[afternoon.id]);
+ closeBoardingTrip(state,transport,{tripId:trip.id});const afternoon=open(state,transport,"01","from_school");assert.equal(afternoon.expected.length,2);assert.equal(visibleBoardingTrips(state,operator).length,2);
 });
 
 test("NFC taps create one boarding state, repeated taps stay boarding-only and classroom attendance is untouched",()=>{
- const{state,transport,driver}=setup(),trip=open(state,transport);state.classAttendance={sentinel:{status:"absent"}};const attendance=structuredClone(state.classAttendance),assignments=structuredClone(state.assignments),completed=structuredClone(state.completed);
- assert.equal(tap(state,driver,trip).code,"boarded");assert.equal(tap(state,driver,trip).code,"duplicate");assert.equal(boardingSummary(boardingRows(state,transport,trip.id)).boarded,1);assert.equal(state.nfcEvents.filter(event=>event.kind==="boarded").length,1);assert.equal(state.nfcEvents.filter(event=>event.kind==="duplicate").length,1);
+ const{state,transport,operator}=setup(),trip=open(state,transport);state.classAttendance={sentinel:{status:"absent"}};const attendance=structuredClone(state.classAttendance),assignments=structuredClone(state.assignments),completed=structuredClone(state.completed);
+ assert.equal(tap(state,operator,trip).code,"boarded");assert.equal(tap(state,operator,trip).code,"duplicate");assert.equal(boardingSummary(boardingRows(state,transport,trip.id)).boarded,1);assert.equal(state.nfcEvents.filter(event=>event.kind==="boarded").length,1);assert.equal(state.nfcEvents.filter(event=>event.kind==="duplicate").length,1);
  assert.deepEqual(state.classAttendance,attendance);assert.deepEqual(state.assignments,assignments);assert.deepEqual(state.completed,completed);
 });
 
 test("Unknown, wrong-school, wrong-bus and inactive scans are explicit exceptions without foreign identity leakage",()=>{
- const{state,transport,admin,driver}=setup(),trip=open(state,transport);
- for(const[token,code]of[["UNKNOWN-001","unknown_card"],[activeStudentCard(state,"meera").token,"wrong_school"],[activeStudentCard(state,"kavin").token,"wrong_bus"]]){const result=simulateBoardingTap(state,driver,{tripId:trip.id,token});assert.equal(result.code,code);assert.ok(!result.studentId);assert.doesNotMatch(result.message,/Meera|Kavin|SCN-1008|SCN-1002/);}
- disableBoardingCard(state,admin,{cardId:activeStudentCard(state,"amaya").id,status:"inactive",reason:"Card retired"});assert.equal(simulateBoardingTap(state,driver,{tripId:trip.id,token:studentCards(state,"amaya")[0].token}).code,"inactive_card");assert.equal(boardingSummary(boardingRows(state,transport,trip.id)).boarded,0);
+ const{state,transport,admin,operator}=setup(),trip=open(state,transport);
+ for(const[token,code]of[["UNKNOWN-001","unknown_card"],[activeStudentCard(state,"meera").token,"wrong_school"],[activeStudentCard(state,"kavin").token,"wrong_bus"]]){const result=simulateBoardingTap(state,operator,{tripId:trip.id,token});assert.equal(result.code,code);assert.ok(!result.studentId);assert.doesNotMatch(result.message,/Meera|Kavin|SCN-1008|SCN-1002/);}
+ disableBoardingCard(state,admin,{cardId:activeStudentCard(state,"amaya").id,status:"inactive",reason:"Card retired"});assert.equal(simulateBoardingTap(state,operator,{tripId:trip.id,token:studentCards(state,"amaya")[0].token}).code,"inactive_card");assert.equal(boardingSummary(boardingRows(state,transport,trip.id)).boarded,0);
 });
 
 test("Offline taps remain pending, then reconcile once after closure without double counting",()=>{
- const{state,transport,driver}=setup(),trip=open(state,transport),reader=tripReader(state,trip);setBoardingReader(state,driver,{readerId:reader.id,online:false});assert.equal(tap(state,driver,trip).code,"queued");assert.equal(tap(state,driver,trip).code,"queued");assert.equal(boardingRows(state,transport,trip.id)[0].status,"pending");const captured=reader.queue[0].capturedAt;
+ const{state,transport,operator}=setup(),trip=open(state,transport),reader=tripReader(state,trip);setBoardingReader(state,operator,{readerId:reader.id,online:false});assert.equal(tap(state,operator,trip).code,"queued");assert.equal(tap(state,operator,trip).code,"queued");assert.equal(boardingRows(state,transport,trip.id)[0].status,"pending");const captured=reader.queue[0].capturedAt;
  closeBoardingTrip(state,transport,{tripId:trip.id});assert.equal(boardingRows(state,transport,trip.id)[0].status,"unverified");assert.throws(()=>correctBoardingRecord(state,transport,{tripId:trip.id,studentId:"amaya",status:"not_boarded",reason:"Not seen"}),/synchronise/);
- const results=syncBoardingReader(state,driver,{readerId:reader.id});assert.deepEqual(results.map(result=>result.code),["boarded","duplicate"]);assert.equal(reader.queue.length,0);assert.equal(boardingRows(state,transport,trip.id)[0].at,captured);assert.equal(boardingSummary(boardingRows(state,transport,trip.id)).boarded,1);const count=state.nfcEvents.length;assert.deepEqual(syncBoardingReader(state,driver,{readerId:reader.id}),[]);assert.equal(state.nfcEvents.length,count);
+ const results=syncBoardingReader(state,operator,{readerId:reader.id});assert.deepEqual(results.map(result=>result.code),["boarded","duplicate"]);assert.equal(reader.queue.length,0);assert.equal(boardingRows(state,transport,trip.id)[0].at,captured);assert.equal(boardingSummary(boardingRows(state,transport,trip.id)).boarded,1);const count=state.nfcEvents.length;assert.deepEqual(syncBoardingReader(state,operator,{readerId:reader.id}),[]);assert.equal(state.nfcEvents.length,count);
 });
 
 test("Offline reconciliation respects card validity at capture, including same-millisecond replacement",()=>{
@@ -76,17 +76,17 @@ test("Offline reconciliation respects card validity at capture, including same-m
 });
 
 test("Pickup closure produces needs-review, and only the coordinator can explicitly confirm non-boarding",()=>{
- const{state,transport,driver}=setup(),trip=open(state,transport);
- assert.throws(()=>correctBoardingRecord(state,transport,{tripId:trip.id,studentId:"amaya",status:"not_boarded",reason:"Early"}),/Close pickup/);assert.throws(()=>closeBoardingTrip(state,driver,{tripId:trip.id}),/access/);
- closeBoardingTrip(state,transport,{tripId:trip.id});assert.equal(boardingRows(state,transport,trip.id)[0].status,"unverified");assert.throws(()=>tap(state,driver,trip),/pickup window is closed/);assert.throws(()=>correctBoardingRecord(state,driver,{tripId:trip.id,studentId:"amaya",status:"boarded",reason:"Forbidden"}),/access/);
+ const{state,transport,operator}=setup(),trip=open(state,transport);
+ assert.throws(()=>correctBoardingRecord(state,transport,{tripId:trip.id,studentId:"amaya",status:"not_boarded",reason:"Early"}),/Close pickup/);assert.throws(()=>closeBoardingTrip(state,contextFor(state,"admin","admin_c"),{tripId:trip.id}),/access/);
+ closeBoardingTrip(state,transport,{tripId:trip.id});assert.equal(boardingRows(state,transport,trip.id)[0].status,"unverified");assert.throws(()=>tap(state,operator,trip),/pickup window is closed/);assert.throws(()=>correctBoardingRecord(state,contextFor(state,"admin","admin_c"),{tripId:trip.id,studentId:"amaya",status:"boarded",reason:"Forbidden"}),/access/);
  assert.throws(()=>correctBoardingRecord(state,transport,{tripId:trip.id,studentId:"amaya",status:"not_boarded",reason:""}),/reason/);
- correctBoardingRecord(state,transport,{tripId:trip.id,studentId:"amaya",status:"not_boarded",reason:"Confirmed with driver and family"});assert.equal(boardingRows(state,transport,trip.id)[0].status,"not_boarded");assert.equal(state.classAttendance,undefined);
+ correctBoardingRecord(state,transport,{tripId:trip.id,studentId:"amaya",status:"not_boarded",reason:"Confirmed with operator and family"});assert.equal(boardingRows(state,transport,trip.id)[0].status,"not_boarded");assert.equal(state.classAttendance,undefined);
 });
 
-test("Driver concerns are recorded for review and staff corrections retain all original events",()=>{
- const{state,transport,driver}=setup(),trip=open(state,transport);tap(state,driver,trip);const original=structuredClone(state.nfcEvents[0]);flagBoardingException(state,driver,{tripId:trip.id,studentId:"amaya",reason:"Check incorrect tap"});assert.equal(boardingRows(state,transport,trip.id)[0].status,"boarded");
+test("Coordinator concerns are recorded for review and staff corrections retain all original events",()=>{
+ const{state,transport,operator}=setup(),trip=open(state,transport);tap(state,operator,trip);const original=structuredClone(state.nfcEvents[0]);flagBoardingException(state,operator,{tripId:trip.id,studentId:"amaya",reason:"Check incorrect tap"});assert.equal(boardingRows(state,transport,trip.id)[0].status,"boarded");
  correctBoardingRecord(state,transport,{tripId:trip.id,studentId:"amaya",status:"unverified",reason:"Staff checking record"});assert.equal(boardingRows(state,transport,trip.id)[0].status,"unverified");assert.ok(state.nfcEvents.some(event=>JSON.stringify(event)===JSON.stringify(original)));
- assert.throws(()=>flagBoardingException(state,driver,{tripId:trip.id,studentId:"kavin",reason:"Other trip student"}),/trip student/);
+ assert.throws(()=>flagBoardingException(state,operator,{tripId:trip.id,studentId:"kavin",reason:"Other trip student"}),/trip student/);
 });
 
 test("Excused students are not silently marked boarded, and double boarding across buses needs review",()=>{
@@ -101,10 +101,10 @@ test("Parents receive only the admission-selected child's status and history, in
  state.students.find(student=>student.id==="amaya").bus="02";assert.equal(parentBoardingRows(state,ctx)[0].busId,"01");assert.equal(parentBoardingRows(state,parent(state,"SCN-1002"))[0].busId,"02");
 });
 
-test("Cross-school and stale-driver trip/reader/card writes are rejected without partial updates",()=>{
- const{state,transport,admin,driver}=setup(),trip=open(state,transport),foreign=contextFor(state,"transport","transport_l"),before=JSON.stringify(state);
- assert.throws(()=>boardingRows(state,foreign,trip.id),/access/);assert.throws(()=>simulateBoardingTap(state,contextFor(state,"driver","driver_02"),{tripId:trip.id,token:activeStudentCard(state,"amaya").token}),/access/);assert.throws(()=>setBoardingReader(state,foreign,{readerId:tripReader(state,trip).id,online:false}),/assigned bus/);assert.throws(()=>disableBoardingCard(state,contextFor(state,"admin","admin_l"),{cardId:activeStudentCard(state,"amaya").id,status:"lost",reason:"Foreign card"}),/active card/);assert.equal(JSON.stringify(state),before);
- state.accounts.find(person=>person.id==="driver_01").grants[0].bus="02";assert.throws(()=>simulateBoardingTap(state,driver,{tripId:trip.id,token:activeStudentCard(state,"amaya").token}),/appointment|access/);
+test("Cross-school, retired-role and stale-coordinator trip/reader/card writes are rejected without partial updates",()=>{
+ const{state,transport,admin,operator}=setup(),trip=open(state,transport),foreign=contextFor(state,"transport","transport_l"),before=JSON.stringify(state);
+ assert.throws(()=>boardingRows(state,foreign,trip.id),/access/);assert.throws(()=>simulateBoardingTap(state,{role:"driver",account:{id:"driver_02"},grant:{role:"driver",branch:"colombo",bus:"01"}},{tripId:trip.id,token:activeStudentCard(state,"amaya").token}),/appointment|access/);assert.throws(()=>setBoardingReader(state,foreign,{readerId:tripReader(state,trip).id,online:false}),/assigned bus/);assert.throws(()=>disableBoardingCard(state,contextFor(state,"admin","admin_l"),{cardId:activeStudentCard(state,"amaya").id,status:"lost",reason:"Foreign card"}),/active card/);assert.equal(JSON.stringify(state),before);
+ state.accounts.find(person=>person.id==="transport_c").grants=[];assert.throws(()=>simulateBoardingTap(state,operator,{tripId:trip.id,token:activeStudentCard(state,"amaya").token}),/appointment|access/);
 });
 
 test("Manifests use scoped statuses and formula-safe CSV without card tokens or private reasons",()=>{

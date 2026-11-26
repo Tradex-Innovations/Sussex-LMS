@@ -85,7 +85,7 @@ test("Bus identities, statuses and sample occupancy do not change when the fleet
       const full = all.find((item) => item.id === bus.id);
       assert.equal(bus.status, full.status);
       assert.equal(bus.studentsOnBoard, full.studentsOnBoard);
-      assert.equal(bus.driver, full.driver);
+      assert.equal(bus.trackerId, full.trackerId);
     }
   }
 });

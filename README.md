@@ -27,11 +27,11 @@ GitHub Pages serves the demonstration’s frontend. Browser-local records and de
 
 ## Features and access reference
 
-[ROLE_FEATURES_ACCESS.md](ROLE_FEATURES_ACCESS.md) documents all 13 roles, their implemented views, read/write scope, approvals, cross-role workflows, demo accounts and prototype limits. Project instructions in [AGENTS.md](AGENTS.md) require this reference to be updated alongside future feature and permission changes. New user feature ideas are also recorded as proposed requirements before implementation. The [NFC boarding prototype](ROLE_FEATURES_ACCESS.md#nfc-boarding-prototype) demonstrates cards, reader taps and boarding registers; physical NFC hardware and external notifications remain future integration work; in-portal alerts are implemented.
+[ROLE_FEATURES_ACCESS.md](ROLE_FEATURES_ACCESS.md) documents all 12 roles, their implemented views, read/write scope, approvals, cross-role workflows, demo accounts and prototype limits. Project instructions in [AGENTS.md](AGENTS.md) require this reference to be updated alongside future feature and permission changes. New user feature ideas are also recorded as proposed requirements before implementation. The [NFC boarding prototype](ROLE_FEATURES_ACCESS.md#nfc-boarding-prototype) demonstrates cards, reader taps and boarding registers; physical NFC hardware and external notifications remain future integration work; in-portal alerts are implemented.
 
 ## Interactive client presentation
 
-Open [the GitHub Pages presentation](https://tradex-innovations.github.io/Sussex-LMS/showcase/), [the original private presentation](https://campusway-school-demo.manusara.chatgpt.site/showcase/) or the [local showcase](http://127.0.0.1:4183/showcase/). The same `/showcase/` route is included in the prepared GitHub Pages deployment. This separate eight-chapter presentation combines cinematic 3D scenes with **51 actual prototype screenshots**, four guided role tours and links to all 13 LMS roles. Chapters open in **Screens** view; click a screenshot to enlarge it, then choose **Actual size** to inspect the original. **Try demo** opens the interactive sample workflow. It does not change LMS records.
+Open [the GitHub Pages presentation](https://tradex-innovations.github.io/Sussex-LMS/showcase/), [the original private presentation](https://campusway-school-demo.manusara.chatgpt.site/showcase/) or the [local showcase](http://127.0.0.1:4183/showcase/). The same `/showcase/` route is included in the prepared GitHub Pages deployment. This separate eight-chapter presentation combines cinematic 3D scenes with **50 actual prototype screenshots**, four guided role tours and links to all 12 LMS roles. Chapters open in **Screens** view; click a screenshot to enlarge it, then choose **Actual size** to inspect the original. **Try demo** opens the interactive sample workflow. It does not change LMS records.
 
 The presentation also includes a [drill-through system mind map](https://tradex-innovations.github.io/Sussex-LMS/showcase/#mind-map). Choose **System map** in the header (or the final role chapter) to see the 13-role architecture, then select a role → capability branch for **Can view / Can do**, scope limits and links to the actual prototype workspace. Try [Parent](https://tradex-innovations.github.io/Sussex-LMS/showcase/#mind-map/parent), [Class Teacher](https://tradex-innovations.github.io/Sussex-LMS/showcase/#mind-map/class_teacher) or [Transport privacy](https://tradex-innovations.github.io/Sussex-LMS/showcase/#mind-map/transport/privacy). Pan/zoom and Fit explore the canvas; Outline offers a mobile/keyboard alternative. Reporting lines explain responsibilities and do not grant permissions. This separate presenter view does not change LMS records. See [the maintained access contract](ROLE_FEATURES_ACCESS.md#interactive-system-role-mind-map).
 
@@ -74,7 +74,7 @@ The account cards fill in demo credentials. Sign in to the Family dashboard and 
 ## Family, communications and fee walkthrough
 
 - [Family dashboard](http://127.0.0.1:4183/#parent/family): one family login, child cards and to-do list. Mobile uses Family / Buses / Inbox / Fees / More.
-- [Transport alerts and tracking hours](http://127.0.0.1:4183/#transport/tracking): send a late/breakdown/other update to allocated families and Class Teachers. Change demo time from 07:15 to 18:00 to show GPS hidden, or complete a current trip. Defaults: weekdays 06:00–08:30 and 13:00–16:00, Asia/Colombo; presenter defaults are illustrative.
+- [Transport alerts and tracking hours](http://127.0.0.1:4183/#transport/tracking): send a late/breakdown/other update to allocated families and Class Teachers. Change demo time from 07:15 to 18:00 to show Parent GPS hidden while management stays visible, or complete a current Parent trip. Defaults: weekdays 06:00–08:30 and 13:00–16:00, Asia/Colombo; presenter defaults are illustrative.
 - [Teacher letters/email](http://127.0.0.1:4183/#class_teacher/communications) and [events/consent](http://127.0.0.1:4183/#class_teacher/events): preview whole-class or selected-student recipients, publish portal copies, download printable letters, review responses and remind pending guardians. Subject Teachers have equivalent pages separated by assigned teaching class.
 - [Parent inbox](http://127.0.0.1:4183/#parent/inbox), [events](http://127.0.0.1:4183/#parent/events) and [fees](http://127.0.0.1:4183/#parent/fees): read transport updates, respond per child and try fee Review → Method → Confirm → Success/decline, then download a demo receipt.
 - [School Administrator fees](http://127.0.0.1:4183/#admin/fees): issue invoices, record partial office payments, inspect one-row-per-unpaid-student register, preview reminders and export CSV. Principal/Chairman have scoped read-only fee oversight.
@@ -99,7 +99,7 @@ The shared School branch filter controls scope throughout the Chairman views. Al
 
 The Principal role now opens [its assigned-school overview](http://127.0.0.1:4183/#principal/overview/transport), with the same five main tabs and a daily school pulse. Use **Demo Principal** to preview Malini Senanayake at Nugegoda or Suresh Jayawardena at Malabe. Changing the demo account changes the assigned school and resets the view filters; the Principal does not have a branch selector.
 
-- **Transport Activity** opens centred on the assigned school's routes. Principals can filter their own fleet, inspect buses, manage existing bus/driver/student assignments and start or end demo trips. Resetting the map returns to the school routes.
+- **Transport Activity** opens centred on the assigned school's routes. Principals can filter their own fleet, inspect buses, manage existing bus/GPS tracker/student assignments and view GPS 24/7. Resetting the map returns to the school routes.
 - **Academic Performance** compares classes, subjects, grades and teachers within the school. Class cohorts reconcile with grade totals. Prototype teacher assignments and published materials appear for matching subject records. Principals can open lecture materials, assign subjects and export the selected comparison.
 - **Attendance** includes school and class registers, student calendars, grade/class/date/period filters, staff attendance and repeated absence views.
 - **Staffing Overview** includes leadership, staff capacity, directory filters, profiles, vacancies and sample leave requests. Leave approval/decline is saved in the browser and updates the school pulse, staff availability, attendance and newly generated reports. Appointment management uses the existing branch-scoped role forms; Principal and Chairman appointments remain excluded from the Principal's assignable roles.
@@ -184,24 +184,18 @@ Changing a student's grade/class removes incompatible subject enrolments; matchi
 Open [Transport Coordinator → Fleet Activity](http://127.0.0.1:4183/#transport/overview/fleet). **Demo Transport Coordinator** previews Nimal Rathnayake (Nugegoda’s six operational buses) or Chamara Silva (Malabe’s two). Access stays within the appointed school.
 
 - **Fleet Activity:** the school fleet on an OpenStreetMap street map, vehicle/status selection, pause/resume, route progress and clearly labelled simulated telemetry. Assigned-student counts use saved records.
-- **Routes & Stops:** review ordered pickups; edit existing route/stop labels, drivers and students; retain the school destination and illustrative map paths.
-- **Drivers & Students:** separate searchable allocation views, quick student/driver allocation and full bus management. Driver moves leave the former bus unassigned; replaced drivers remain available for a later bus allocation.
+- **Routes & Stops:** review ordered pickups; edit existing route/stop labels, GPS trackers and students; retain the school destination and illustrative map paths.
+- **Trackers & Students:** searchable student allocations and paired GPS devices; configure a unique ID and simulate device signal loss/recovery.
 - **Issues & Coordination:** create bus issues and update transport follow-ups assigned to you. They share the Vice Principal’s **Follow-up board**, including status/note history; reassignment removes former-coordinator access.
 - **Transport Reports:** coordination brief, fleet snapshot, stop register, student allocations and assigned issues; CSV/standalone HTML/print, with eight snapshots per coordinator/school and free-text notes excluded.
 
-Driver and Parent portals follow the same bus assignments and trip status. Trip start/end remains with Driver/Principal; recording an issue does not dispatch a bus or send a message. The existing [Bus tracking workspace](http://127.0.0.1:4183/#transport/transport) remains available. Full scope, persistence and prototype limits are in the maintained [role reference](ROLE_FEATURES_ACCESS.md#transport-coordinator).
+Management and Parent maps follow current allocations; management retains 24/7 viewing while Parent GPS is time-gated by the Transport Coordinator.
 
-### Driver workspace
+### Bus-mounted GPS trackers
 
-Open [Driver → Daily Overview](http://127.0.0.1:4183/#driver/overview/summary). Kasun Dias (`driver_01`) previews Nugegoda Bus 01; Nalin De Silva (`driver_07`) previews Malabe Bus 07. The role has **Daily Overview, Route & Stops, Assigned Students, Safety & Issues and Trip History**, plus the existing map and NFC reader.
+Open [Transport Coordinator → Trackers & Students](http://127.0.0.1:4183/#transport/overview/assignments), then choose GPS trackers. Pair a unique tracker ID, inspect signal status and simulate signal loss/recovery. No Driver login or manual trip start is needed.
 
-1. Choose **Prepare a trip**, select a demo date (20–27 November), check the five safety items and save. Incomplete drafts are allowed; all five checks are required to **Start trip**. A route or assigned-student change before start requires another review.
-2. In **Route & Stops**, confirm each stop in sequence and the final school arrival, then **Complete trip**. Parent and school fleet screens reflect the bus's status. Stop confirmations do not scan cards or mark student attendance.
-3. **Assigned Students** searches the current bus's actual allocation and shows active-card readiness/latest NFC status. **Bus boarding** retains the reader simulation, latest-roster manifest and concern flags.
-4. In **Safety & Issues**, report a concern to a same-school Transport Coordinator. Switch to that coordinator's **Issues & Coordination** to update it, then return to Driver to see its status. Internal staff notes stay private; no message/dispatch is sent.
-5. **Trip History** shows your current-bus run snapshots and UTC CSV downloads. Reassignment removes former-bus access. The initial seeded map simulation can still end without fabricating a recorded trip.
-
-These are browser-local morning-trip demonstrations. Full access, persistence and scope are in the [Driver reference](ROLE_FEATURES_ACCESS.md#driver).
+Chairman sees selected network/schools; Principal, Vice Principal, School Administrator and Transport Coordinator see their school’s buses 24/7. Administrator access is read-only. Parents see only their selected child’s allocated bus within the coordinator’s weekday pickup/drop-off windows. Closing a Parent trip window does not stop the management GPS view. Hardware ingestion is simulated, pending production integration.
 
 ### Pupil’s book and school uniform reservations
 
@@ -218,25 +212,25 @@ Inventories are **sample 2027 book lists and uniform designs/sizes**, not offici
 
 ### NFC transport cards and boarding
 
-Open [Transport Coordinator → Bus boarding](http://127.0.0.1:4183/#transport/boarding). This workspace is separate from the five existing overview tabs and is also available to Driver, School Administrator, Parent and school/network leadership.
+Open [Transport Coordinator → Bus boarding](http://127.0.0.1:4183/#transport/boarding). This workspace is separate from the five existing overview tabs and is also available to School Administrator, Parent and school/network leadership.
 
-1. Existing allocated sample students start with demo cards/readers. Use [School Administrator → Bus boarding](http://127.0.0.1:4183/#admin/boarding) to issue, replace, mark lost or deactivate a card. To demonstrate several passengers on one bus, allocate additional students through Drivers & Students, then issue their cards.
-2. As Transport Coordinator or assigned Driver, **Open trip roster**, select the bus/date/direction, then type a demo card code or expand **Choose an expected student’s active card**. Valid taps mark Boarded; repeated taps are ignored for counts.
+1. Existing allocated sample students start with demo cards/readers. Use [School Administrator → Bus boarding](http://127.0.0.1:4183/#admin/boarding) to issue, replace, mark lost or deactivate a card. To demonstrate several passengers on one bus, allocate additional students through Trackers & Students, then issue their cards.
+2. As Transport Coordinator, **Open trip roster**, select the bus/date/direction, then type a demo card code or expand **Choose an expected student’s active card**. Valid taps mark Boarded; repeated taps are ignored for counts.
 3. **Simulate offline**, record a tap, then **Reconnect & sync** to demonstrate queued events. Wrong-school/bus, unknown and inactive cards create exceptions. Lost/replaced-card history stays attached to the student.
 4. The Transport Coordinator **closes pickup** and reviews untapped students. Missing scans become Needs review. Confirmed not boarded requires an online, synchronised reader, a closed window and a reason; NFC does not mark classroom attendance.
-5. Sign in with `SCN-1001` / `1234` and open [Parent → Bus boarding](http://127.0.0.1:4183/#parent/boarding) to see only Amaya's status/history. Leadership sees scoped coverage/rosters, while Driver access is restricted to the assigned bus’s latest roster. Manifest CSV omits card codes and private staff reasons.
+5. Sign in with `SCN-1001` / `1234` and open [Parent → Bus boarding](http://127.0.0.1:4183/#parent/boarding) to see only Amaya's status/history. Leadership sees scoped coverage/rosters. Manifest CSV omits card codes and private staff reasons.
 
 All taps, readers and synchronisation are simulated in this browser. Physical reader integration, alighting and notifications are not connected. See the complete [NFC feature/access reference](ROLE_FEATURES_ACCESS.md#nfc-boarding-prototype).
 
 ### School portal
 
 1. Start in **Chairman → Overview**. An interactive OpenStreetMap street map shows Sri Lanka and a simulated network fleet of 44 buses across all 20 branches. Nearby vehicles form bus-count groups; click a group to zoom in and see individual buses. Branch-name bubbles appear near their geographic positions where space permits. Use **View all buses** to find every branch's vehicles, or filter by On route, At school and Signal delayed. Pan, zoom, pause or resume the simulation, or choose **View whole island** to reset. Street tiles require an internet connection; a notice appears if they cannot load.
-2. Select a branch bubble for **Bus activity** and **Performance** tabs. Selecting a bus shows its illustrative route, animated position, next stop, school arrival estimate, sample occupancy, driver and trip progress. The mobile details sheet keeps the route map and attribution visible above it. In **Performance**, use **Compare schools** to compare sample results by subject, grade and term. Closing the panel or pressing Escape restores the full map. A Principal stays within their assigned school. The overview preserves the eight existing operational demo records for Nugegoda and Malabe and adds two illustrative buses for each of the other 18 branches; these additional vehicles do not create student, staff or assignment records.
+2. Select a branch bubble for **Bus activity** and **Performance** tabs. Selecting a bus shows its illustrative route, animated position, next stop, school arrival estimate, sample occupancy, GPS tracker and trip progress. The mobile details sheet keeps the route map and attribution visible above it. In **Performance**, use **Compare schools** to compare sample results by subject, grade and term. Closing the panel or pressing Escape restores the full map. A Principal stays within their assigned school. The overview preserves the eight existing operational demo records for Nugegoda and Malabe and adds two illustrative buses for each of the other 18 branches; these additional vehicles do not create student, staff or assignment records.
 3. Open **Roles & access** as Chairman or Principal. Appoint staff, assign sections, grades, classes or buses, and remove appointments. The Chairman appoints Principals. A Principal appoints lower roles inside their branch. Existing people can receive multiple scoped roles.
 4. Use **Section Head**, **Grade Coordinator**, **Class Teacher**, and **Subject Teacher** views to demonstrate the different academic scopes. Subject assignments support teachers from the same branch and students from the matching class. Grade Coordinators can update enrollment.
 5. In an assigned Teacher view, publish or edit a handout. Open the enrolled child's subject in **Parent → Subjects**, download the handout, and mark it done. Teaching staff and leadership can review completion.
 6. In **School Administrator → Students & guardians**, create a student or update a record and link a guardian. Parent accounts are appointed through **Roles & access**.
-7. Open **Transport Coordinator → Bus tracking**, select a bus, and choose **Manage bus** to update its driver, stop names, and assigned students. In **Driver** view, use Daily Overview to prepare/start a checked trip and Route & Stops to confirm school arrival and complete it. The linked Parent view reflects the assignment and trip status.
+7. Open **Transport Coordinator → Trackers & Students → GPS trackers** to pair a bus device and simulate signal loss/recovery. Use **Tracking hours & alerts** to set Parent viewing windows. Management keeps 24/7 scoped access.
 8. Open **Parent → Pupil’s books** or **School uniforms**, submit a student reservation, then preview **Book Store Officer** or **Uniform Store Officer** to confirm stock, mark it ready and record collection. There are no additional-book sales, prices or payment portal. Each school/store handles its own queue; Parent sees only their own selected-child reservations.
 9. Select **Reset demo** in the role menu before a fresh walkthrough.
 
@@ -250,7 +244,7 @@ Run from this directory:
 node --test tests/*.test.mjs
 ```
 
-The checks cover branch and academic scope, teacher publishing, parent and driver assignments, role delegation, book/uniform reservation and stock scope, legacy order visibility, and migration of existing demo data.
+The checks cover branch and academic scope, teacher publishing, parent transport scope and tracker configuration, role delegation, book/uniform reservation and stock scope, legacy order visibility, and migration of existing demo data.
 
 ## Branch locations and performance data
 
@@ -258,7 +252,7 @@ School names, addresses, and approximate branch positions were verified against 
 
 Assessment marks, term comparisons, and seeded activity entries are illustrative data. They demonstrate comparison of the same subject, grade, and term. Actions inside the prototype also appear in the relevant school's activity feed. Branch workspace totals come from the records in the browser.
 
-Network bus routes follow local OpenStreetMap road geometry with a schematic final approach to each school. They are demonstration routes, not verified Sussex operating routes. Existing vehicle status and driver edits are reflected in the overview; additional branch vehicles, occupancy and arrival estimates are sample data. Bus-count groups account for every visible-scope vehicle. Crowded branch labels appear as you zoom in rather than being moved to unrelated locations.
+Network bus routes follow local OpenStreetMap road geometry with a schematic final approach to each school. They are demonstration routes, not verified Sussex operating routes. Existing vehicle status and tracker edits are reflected in the overview; additional branch vehicles, occupancy and arrival estimates are sample data. Bus-count groups account for every visible-scope vehicle. Crowded branch labels appear as you zoom in rather than being moved to unrelated locations.
 
 Use **Find a school** to open any branch directly, including when its label is hidden by map crowding. Each branch panel retains both bus activity and academic performance.
 

@@ -53,12 +53,8 @@ test("Parents see linked children, enrolled courses and their assigned bus", () 
   assert.equal(linkedChildren(state, parent).some((student) => student.id === "meera"), false);
 });
 
-test("Drivers retain only their current bus assignment", () => {
-  const state = freshState();
-  const driver = contextFor(state, "driver", "driver_01");
-  assert.deepEqual(visibleBuses(state, driver).map((bus) => bus.id), ["01"]);
-  state.buses[0].driverId = "driver_02";
-  assert.equal(visibleBuses(state, driver).length, 0);
+test("Retired Driver role cannot resolve an appointment or read buses", () => {
+  const state = freshState(); assert.equal(contextFor(state, "driver", "driver_01"), null); assert.deepEqual(visibleBuses(state, null), []);
 });
 
 test("A Principal cannot grant leadership in another branch or appoint a Principal", () => {

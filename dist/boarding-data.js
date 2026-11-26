@@ -1,7 +1,7 @@
 import { recordContext } from "./records.js";
 import { linkedChildren } from "./access.js";
 
-export const boardingRoles=["chairman","principal","vice_principal","transport","driver","admin","parent"];
+export const boardingRoles=["chairman","principal","vice_principal","transport","admin","parent"];
 export const boardingStatuses={pending:"Not yet boarded",boarded:"Boarded",unverified:"Needs review",not_boarded:"Confirmed not boarded",excused:"Not travelling"};
 export const boardingDirections={to_school:"To school",from_school:"Return home"};
 export const cardStatuses={active:"Active",lost:"Lost",inactive:"Deactivated",replaced:"Replaced"};
@@ -14,13 +14,12 @@ export function boardingScope(state,context){
     if(!branches.length)return null;
     let buses=state.buses.filter((bus)=>branches.some((branch)=>branch.id===bus.branch));
     let child=null;
-    if(ctx.role==="driver")buses=buses.filter((bus)=>bus.id===ctx.grant.bus&&bus.driverId===ctx.account.id);
     if(ctx.role==="parent"){
       child=linkedChildren(state,ctx).find((student)=>student.id===ctx.studentId);
       if(!child)return null;
       buses=buses.filter((bus)=>bus.id===child.bus&&bus.branch===child.branch);
     }
-    return{context:ctx,branches,buses,child,canCards:["admin","principal","chairman"].includes(ctx.role),canOperate:["transport","driver"].includes(ctx.role),canReview:ctx.role==="transport",canRoster:!["parent","admin"].includes(ctx.role)};
+    return{context:ctx,branches,buses,child,canCards:["admin","principal","chairman"].includes(ctx.role),canOperate:ctx.role==="transport",canReview:ctx.role==="transport",canRoster:!["parent","admin"].includes(ctx.role)};
   }catch{return null;}
 }
 const nextOrder=(state)=>state.nfcSequence=(state.nfcSequence||0)+1;
@@ -59,7 +58,7 @@ function schoolTripValid(state,trip){return state.buses.some((bus)=>bus.id===tri
 export function visibleBoardingTrips(state,context){
   const scope=boardingScope(state,context);if(!scope?.canRoster)return[];
   const trips=(state.nfcTrips||[]).filter((trip)=>scope.buses.some((bus)=>bus.id===trip.busId&&bus.branch===trip.branch)&&schoolTripValid(state,trip));
-  return scope.context.role==="driver"?trips.slice(0,1):trips;
+  return trips;
 }
 export function boardingFilters(state,context,input={}){
   const scope=requireScope(state,context),trips=visibleBoardingTrips(state,context);

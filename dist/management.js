@@ -41,14 +41,14 @@ export function studentForm(state, context, student = {}) {
 export function accessPage({ state, context }) {
   const grants = state.accounts.flatMap((person) => person.grants.map((grant, index) => ({ person, grant, index })))
     .filter(({ grant }) => context.role === "chairman" ? context.branch === "all" || grant.branch === context.branch || grant.role === "chairman" : grant.branch === context.branch);
-  return `${pageHeading("Roles & access", "Appointments combine a role with its branch, section, class, or bus.", button("Assign role", "assign-role", { iconName: "plus" }))}
+  return `${pageHeading("Roles & access", "Appointments combine a role with its branch, section, class or subject.", button("Assign role", "assign-role", { iconName: "plus" }))}
     <section class="surface hierarchy-panel">
       <div class="hierarchy-owner">${icon("school", 20)}<strong>Chairman</strong><span>All branches</span></div><div class="hierarchy-connector"></div>
       <div class="hierarchy-principal"><strong>Principal</strong><span>Full assigned branch access</span></div>
       <div class="hierarchy-lanes">
         <div><strong>Vice Principal</strong><span>Section Heads</span><span>Grade Coordinators</span><span>Class & Subject Teachers</span></div>
         <div><strong>School Administrator</strong><span>Students & guardians</span><span>Subject enrollment</span></div>
-        <div><strong>Transport Coordinator</strong><span>Bus routes & assignments</span><span>Drivers</span></div>
+        <div><strong>Transport Coordinator</strong><span>Bus routes & assignments</span><span>24/7 bus GPS trackers</span></div>
         <div><strong>Book Store Officer</strong><span>Pupil’s books & stock</span><span>Student reservations & collection</span></div>
       <div><strong>Uniform Store Officer</strong><span>Uniform sizes & stock</span><span>Student reservations & collection</span></div></div><p class="hierarchy-family">${icon("users", 17)} Parents access linked children’s bus trips, subjects, and their child’s book and uniform reservations.</p>
     </section>
@@ -63,7 +63,6 @@ export function roleForm(state, context, draft = {}) {
   const role = eligible.includes(draft.role) ? draft.role : eligible[0];
   const branches = state.branches.filter((branch) => context.branch === "all" || branch.id === context.branch);
   const branchId = branches.some((branch) => branch.id === draft.branch) ? draft.branch : branches[0].id;
-  const buses = state.buses.filter((bus) => bus.branch === branchId);
   return `<form data-form="role"><div class="form-body">
     <label class="field">Person<select aria-label="Person" name="person"><option value="new" ${!draft.person || draft.person === "new" ? "selected" : ""}>Create a demo account</option>${state.accounts.map((person) => `<option value="${person.id}" ${draft.person === person.id ? "selected" : ""}>${e(person.name)}</option>`).join("")}</select></label>
     <label class="field">Name for new account<input name="name" value="${e(draft.name || "")}" maxlength="80" placeholder="Full name"></label>
@@ -72,7 +71,6 @@ export function roleForm(state, context, draft = {}) {
     ${role === "section_head" ? `<label class="field">Section<select aria-label="Section" name="section">${sections.map((section) => `<option value="${section.id}">${section.name}</option>`).join("")}</select></label>` : ""}
     ${["coordinator", "class_teacher"].includes(role) ? '<label class="field">Grade<input name="grade" type="number" min="0" max="13" required value="8"></label>' : ""}
     ${role === "class_teacher" ? '<label class="field">Class<input name="className" required maxlength="8" pattern="[0-9]{1,2}[A-Za-z]{1,2}" value="8A"></label>' : ""}
-    ${role === "driver" ? `<label class="field">Bus<select aria-label="Bus" name="bus" required>${buses.map((bus) => `<option value="${bus.id}">BUS ${bus.id}</option>`).join("")}</select></label>` : ""}
     <p class="form-error" role="alert" hidden></p>
     </div><footer class="dialog-actions">${button("Cancel", "close-dialog", { variant: "secondary" })}<button class="button primary" type="submit">Save role</button></footer></form>`;
 }
@@ -85,12 +83,13 @@ export function branchForm(branch) {
 }
 
 export function busForm(bus, state) {
-  const drivers = state.accounts.filter((person) => person.grants.some((grant) => grant.role === "driver" && grant.branch === bus.branch));
   const students = state.students.filter((student) => student.branch === bus.branch);
   return `<form data-form="bus"><input type="hidden" name="id" value="${bus.id}"><div class="form-body">
     <label class="field">Route name<input name="name" required maxlength="60" value="${e(bus.name)}"></label>
-    <label class="field">Assigned driver<select aria-label="Assigned driver" name="driver"><option value="">No driver assigned</option>${drivers.map((person) => `<option value="${person.id}" ${person.id === bus.driverId ? "selected" : ""}>${e(person.name)}</option>`).join("")}</select></label>
+    <label class="field">GPS tracker ID<input name="trackerId" required maxlength="40" pattern="[A-Za-z0-9][A-Za-z0-9-]{3,39}" value="${e(bus.trackerId || "")}" placeholder="SCN-GPS-01"></label>
+    <label class="field">Demo tracker signal<select name="trackerStatus"><option value="online" ${bus.trackerStatus !== "offline" ? "selected" : ""}>Reporting</option><option value="offline" ${bus.trackerStatus === "offline" ? "selected" : ""}>Signal delayed</option></select></label>
+    <p class="chairman-filter-note">On-bus GPS device · 24/7 reporting. Management sees in-scope vehicles all day; parent visibility follows the school transport windows. Hardware ingestion is simulated in this prototype.</p>
     <fieldset class="roster-picker"><legend>Route stops in travel order</legend>${bus.stops.map((stop, index) => `<label class="field stop-field">Stop ${index + 1}<input name="stops" required maxlength="60" value="${e(index === bus.stops.length - 1 ? state.branches.find((branch) => branch.id === bus.branch)?.school : stop)}" ${index === bus.stops.length - 1 ? "readonly" : ""}></label>`).join("")}</fieldset>
-    <p class="chairman-filter-note">A driver serves one bus at a time; moving a driver leaves their former bus unassigned. The school destination is fixed and demo map paths are illustrative.</p><fieldset class="roster-picker"><legend>Students assigned to this bus</legend>${students.map((student) => `<label class="roster-check"><input type="checkbox" name="students" value="${student.id}" ${student.bus === bus.id ? "checked" : ""}>${e(student.name)} · ${e(student.className)}</label>`).join("")}</fieldset>
+    <p class="chairman-filter-note">GPS trackers report around the clock without a staff login. The school destination is fixed and demo map paths are illustrative.</p><fieldset class="roster-picker"><legend>Students assigned to this bus</legend>${students.map((student) => `<label class="roster-check"><input type="checkbox" name="students" value="${student.id}" ${student.bus === bus.id ? "checked" : ""}>${e(student.name)} · ${e(student.className)}</label>`).join("")}</fieldset>
     <p class="form-error" role="alert" hidden></p></div><footer class="dialog-actions">${button("Cancel", "close-dialog", { variant: "secondary" })}<button type="submit" class="button primary">Save bus assignment</button></footer></form>`;
 }

@@ -1,4 +1,5 @@
 import { recordContext } from "./records.js";
+import { withinScope, linkedChildren } from "./access.js";
 const defaults = { pickupStart: "06:00", pickupEnd: "08:30", dropoffStart: "13:00", dropoffEnd: "16:00" };
 const timeOK = (value) => /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value);
 export function transportNow(state, now = new Date()) {
@@ -7,16 +8,20 @@ export function transportNow(state, now = new Date()) {
   const get = (key) => parts.find((part) => part.type === key)?.value;
   return { date: `${get("year")}-${get("month")}-${get("day")}`, time: `${get("hour")}:${get("minute")}`, demo: false };
 }
-export function trackingPolicy(state, bus, now) {
+export const gpsManagementRoles = ["chairman", "principal", "vice_principal", "admin", "transport"];
+export function trackingPolicy(state, bus, now, context) {
   const clock = transportNow(state, now), settings = { ...defaults, ...state.trackingSettings?.[bus.branch] };
   const weekday = new Date(clock.date + "T12:00:00+05:30").getUTCDay();
   const direction = clock.time >= settings.pickupStart && clock.time < settings.pickupEnd ? "pickup" : clock.time >= settings.dropoffStart && clock.time < settings.dropoffEnd ? "dropoff" : "";
-  const completed = Boolean(state.trackingCompleted?.[[bus.branch, bus.id, clock.date, direction].join(":")]) || (state.driverRuns || []).some((run) => run.busId === bus.id && run.branch === bus.branch && run.date === clock.date && run.status === "completed" && direction === "pickup");
-  const visible = Boolean(direction && weekday > 0 && weekday < 6 && !completed && !(direction === "pickup" && bus.status === "school"));
-  return { visible, clock, settings, direction, reason: visible ? "School transport window open" : completed || direction === "pickup" && bus.status === "school" ? "School trip completed" : "Outside pickup / drop-off hours" };
+  const completed = Boolean(state.trackingCompleted?.[[bus.branch, bus.id, clock.date, direction].join(":")]);
+  let management = false, parentAllowed = !context;
+  try { const ctx = recordContext(state, context); management = gpsManagementRoles.includes(ctx.role) && withinScope(ctx, bus); parentAllowed = ctx.role === "parent" && linkedChildren(state, ctx).some(child => (!ctx.studentId || child.id === ctx.studentId) && child.branch === bus.branch && child.bus === bus.id); } catch {}
+  const deviceReady = Boolean(bus.trackerId && bus.trackerEnabled !== false);
+  const visible = deviceReady && (management || parentAllowed && Boolean(direction && weekday > 0 && weekday < 6 && !completed && !(direction === "pickup" && bus.status === "school")));
+  return { visible, management, reporting: "24/7", clock, settings, direction, reason: !deviceReady ? "GPS tracker not configured" : management ? "Management visibility · 24/7" : visible ? "Parent tracking window open" : completed || direction === "pickup" && bus.status === "school" ? "School trip completed" : "Outside pickup / drop-off hours" };
 }
-export function protectFleet(state, fleet) {
-  return fleet.map((bus) => { const policy = trackingPolicy(state, bus); return { ...bus, trackingVisible: policy.visible, trackingPolicy: policy, ...(!policy.visible ? { route: null } : {}) }; });
+export function protectFleet(state, fleet, context) {
+  return fleet.map((bus) => { const policy = trackingPolicy(state, bus, undefined, context); return { ...bus, trackingVisible: policy.visible, trackingPolicy: policy, ...(!policy.visible ? { route: null } : {}) }; });
 }
 export function saveTrackingPolicy(state, context, input) {
   const ctx = recordContext(state, context);

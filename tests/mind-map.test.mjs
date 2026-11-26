@@ -8,15 +8,14 @@ import { classViews } from '../dist/class-data.js';
 import { subjectViews } from '../dist/subject-data.js';
 import { adminViews } from '../dist/admin-data.js';
 import { coordinatorViews } from '../dist/coordinator-data.js';
-import { driverViews } from '../dist/driver-data.js';
 import { storeViews } from '../dist/stores-data.js';
 import { architectureLinks, architectureNodes, architectureSize, familyServiceLinks, mindMapRoles, parseMindMapHash, mindMapHash, roleMapLayout, fitMap, zoomMap } from '../showcase/src/mind-map-data.js';
-const modules={chairman:chairmanViews,principal:chairmanViews,vice_principal:chairmanViews,section_head:sectionViews,coordinator:gradeViews,class_teacher:classViews,teacher:subjectViews,admin:adminViews,transport:coordinatorViews,driver:driverViews,librarian:storeViews,uniform_store:storeViews};
-test('Architecture covers all thirteen current roles, with reporting and family-service links distinguished',()=>{
- assert.deepEqual(Object.keys(mindMapRoles).sort(),Object.keys(roles).sort()); assert.equal(new Set(architectureNodes.map(n=>n.id)).size,13);
+const modules={chairman:chairmanViews,principal:chairmanViews,vice_principal:chairmanViews,section_head:sectionViews,coordinator:gradeViews,class_teacher:classViews,teacher:subjectViews,admin:adminViews,transport:coordinatorViews,librarian:storeViews,uniform_store:storeViews};
+test('Architecture covers all twelve current roles, with reporting and family-service links distinguished',()=>{
+ assert.deepEqual(Object.keys(mindMapRoles).sort(),Object.keys(roles).sort()); assert.equal(new Set(architectureNodes.map(n=>n.id)).size,12);
  for(const node of architectureNodes){assert.ok(mindMapRoles[node.id]);assert.ok(node.x>=0&&node.y>=0&&node.x+node.width<=architectureSize.width&&node.y+node.height<=architectureSize.height);}
  const parents=new Map();for(const edge of architectureLinks){assert.equal(edge.type,'reporting');assert.ok(mindMapRoles[edge.from]);assert.ok(mindMapRoles[edge.to]);assert.ok(!parents.has(edge.to));parents.set(edge.to,edge.from);}
- assert.equal(parents.get('principal'),'chairman');assert.equal(parents.get('driver'),'transport');assert.equal(parents.get('coordinator'),'section_head');assert.equal(parents.has('parent'),false);
+ assert.equal(parents.get('principal'),'chairman');assert.equal(parents.has('driver'),false);assert.equal(parents.get('coordinator'),'section_head');assert.equal(parents.has('parent'),false);
  for(const role of Object.keys(roles).filter(id=>!['chairman','parent'].includes(id))){const seen=new Set();let id=role;while(id){assert.ok(!seen.has(id),'Reporting cycle: '+role);seen.add(id);id=parents.get(id);}assert.ok(seen.has('chairman'));}
  assert.ok(familyServiceLinks.length>0);for(const edge of familyServiceLinks){assert.equal(edge.type,'service');assert.equal(edge.to,'parent');}
 });

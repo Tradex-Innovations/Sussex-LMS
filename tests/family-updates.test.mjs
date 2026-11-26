@@ -11,7 +11,7 @@ import { notifications, markNotification, saveTransportAlert } from '../dist/not
 import { trackingPolicy, saveTrackingPolicy, completeTrackingTrip } from '../dist/transport-privacy.js';
 import { networkFleet, networkTelemetry } from '../dist/network-fleet.js';
 import { generateCoordinatorReport, visibleCoordinatorReports } from '../dist/coordinator-data.js';
-import { saveDriverIncident } from '../dist/driver-data.js';
+import { saveCoordinatorTask } from '../dist/coordinator-data.js';
 const setup = () => { const state = freshState(); return { state, parent: parentContext(state, authenticateParent(state, 'FAMILY-1001', '1234')), other: parentContext(state, authenticateParent(state, 'FAMILY-1002', '1234')), admin: contextFor(state, 'admin', 'admin_c'), teacher: contextFor(state, 'class_teacher', 'dilini'), subject: contextFor(state, 'teacher', 'nuwan'), transport: contextFor(state, 'transport', 'transport_c') }; };
 const eventInput = (extra = {}) => ({ classId: 'class', audience: 'whole', students: [], kind: 'event', channel: 'letter', title: 'Class trip', message: 'Please confirm attendance.', eventDate: '2099-12-12', deadline: '2099-12-01', location: 'Colombo Museum', ...extra });
 const policyInput = (extra = {}) => ({ pickupStart: '06:00', pickupEnd: '08:30', dropoffStart: '13:00', dropoffEnd: '16:00', mode: 'demo', date: '2026-11-26', time: '07:15', ...extra });
@@ -81,10 +81,10 @@ test('Consent is per child, rechecks guardian/class scope, retains response hist
  cancelCommunication(state, teacher, event.id); assert.throws(() => respondConsent(state, parent, { eventId: event.id, studentId: 'amaya', decision: 'yes', signature: parent.account.name }));
  const second = publishCommunication(state, teacher, eventInput()); second.deadline = '2000-01-01'; assert.throws(() => respondConsent(state, parent, { eventId: second.id, studentId: 'amaya', decision: 'yes', signature: parent.account.name }));
 });
-test('Transport alerts reach affected families and class teachers; driver issues never reveal private notes', () => {
+test('Transport alerts reach affected families and class teachers; staff issues never reveal private notes', () => {
  const { state, transport, parent, other, teacher } = setup(); const alert = saveTransportAlert(state, transport, { busId: '01', kind: 'breakdown', message: 'Replacement transport is being arranged.' });
  assert.ok(notifications(state, parent).some(n => n.id === alert.id)); assert.ok(notifications(state, teacher).some(n => n.id === alert.id)); assert.ok(!notifications(state, other).some(n => n.id === alert.id));
- const driver = contextFor(state, 'driver', 'driver_01'); saveDriverIncident(state, driver, { kind: 'breakdown', recipient: 'transport_c', title: 'PRIVATE_TITLE', description: 'PRIVATE_NOTE' });
+ saveCoordinatorTask(state, transport, { busId: '01', title: 'PRIVATE_TITLE', note: 'PRIVATE_NOTE', due: '2026-11-27', status: 'open' });
  assert.doesNotMatch(JSON.stringify(notifications(state, parent)), /PRIVATE_/); assert.ok(notifications(state, teacher).some(n => n.title.includes('breakdown')));
  markNotification(state, parent, alert.id); assert.ok(notifications(state, parent).find(n => n.id === alert.id).read); assert.ok(!notifications(state, teacher).find(n => n.id === alert.id).read);
  assert.throws(() => markNotification(state, other, alert.id)); assert.throws(() => saveTransportAlert(state, transport, { busId: '07', kind: 'late', message: 'Wrong school' }));
@@ -97,9 +97,9 @@ test('Tracking suppresses coordinates and routes outside weekday pickup/drop-off
  saveTrackingPolicy(state, transport, policyInput({ time: '13:30' })); completeTrackingTrip(state, transport, bus.id); assert.equal(trackingPolicy(state, bus).visible, false);
  assert.throws(() => saveTrackingPolicy(state, parent, policyInput())); const before = structuredClone(state); assert.throws(() => saveTrackingPolicy(state, transport, policyInput({ pickupEnd: '14:00' }))); assert.deepEqual(state, before);
 });
-test('Current privacy also redacts previously saved fleet report coordinates outside tracking hours', () => {
+test('Management reports retain scoped coordinates outside Parent tracking hours', () => {
  const { state, transport } = setup(); const report = generateCoordinatorReport(state, transport, { reportType: 'fleet' }); state.coordinatorReports = [report];
- assert.ok(report.customRows.some(row => Number(row.lat) > 5)); saveTrackingPolicy(state, transport, policyInput({ time: '18:00' })); const visible = visibleCoordinatorReports(state, transport)[0]; assert.ok(visible.customRows.every(row => row.lat === 'Hidden' && row.lon === 'Hidden')); assert.ok(report.customRows.some(row => Number(row.lat) > 5));
+ assert.ok(report.customRows.some(row => Number(row.lat) > 5)); saveTrackingPolicy(state, transport, policyInput({ time: '18:00' })); const visible = visibleCoordinatorReports(state, transport)[0]; assert.ok(visible.customRows.every(row => Number(row.lat) > 5 && Number(row.lon) > 79)); assert.ok(report.customRows.some(row => Number(row.lat) > 5));
 });
 test('Removed active appointments revoke fee and communications writes without state changes', () => {
  const { state, admin, teacher } = setup(); state.accounts.find(a => a.id === admin.account.id).grants = []; state.accounts.find(a => a.id === teacher.account.id).grants = [];

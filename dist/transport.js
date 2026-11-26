@@ -2,7 +2,6 @@ import { statuses } from "./data.js";
 import { icon } from "./icons.js";
 import { can } from "./access.js";
 import { routeProgress } from "./map.js";
-import { currentDriverRun } from "./driver-data.js";
 import { badge, button, childSelect, emptyState, escapeHtml as e, iconTile, pageHeading, statusBadge } from "./ui.js";
 
 export function nextStop(bus, progress) {
@@ -37,7 +36,7 @@ function filterSelect(current) {
 function fleetRow(bus, selected) {
   return `<button type="button" class="fleet-row ${selected ? "is-selected" : ""}" data-action="bus" data-value="${bus.id}" data-focus="fleet-${bus.id}" aria-pressed="${selected}">
     <span class="fleet-bus-icon" style="--route-color:${bus.color}">${icon("bus", 20)}</span>
-    <span class="fleet-bus-label"><strong>BUS ${bus.id}</strong><small>${e(bus.name)}</small></span>
+    <span class="fleet-bus-label"><strong>BUS ${bus.id}</strong><small>${e(bus.name)} · ${e(bus.trackerId || "No GPS tracker")}</small></span>
     ${statusBadge(bus.status)}
   </button>`;
 }
@@ -79,8 +78,8 @@ function adminTransport({ fleet, filter, selected, paused, context }) {
   const visible = filter === "all" ? fleet : fleet.filter((bus) => bus.status === filter);
   const current = fleet.find((bus) => bus.id === selected);
   return `
-    ${pageHeading("Bus tracking", "Monitor school buses and check the status of today’s routes.",
-      `<span class="run-label">${icon("calendar", 16)} Morning run</span>${current && can(context, "transport.manage") ? button("Manage bus", "edit-bus", { value: current.id, variant: "secondary", iconName: "edit" }) : ""}${button(paused ? "Resume simulation" : "Pause simulation", "pause", { variant: "secondary", iconName: paused ? "play" : "pause", focus: "pause" })}`)}
+    ${pageHeading("Bus tracking", "24/7 school fleet visibility from bus GPS trackers. Device locations are simulated.",
+      `<span class="run-label">${icon("calendar", 16)} 24/7 management</span>${current && can(context, "transport.manage") ? button("Manage bus", "edit-bus", { value: current.id, variant: "secondary", iconName: "edit" }) : ""}${button(paused ? "Resume simulation" : "Pause simulation", "pause", { variant: "secondary", iconName: paused ? "play" : "pause", focus: "pause" })}`)}
     <div class="stats-grid" aria-label="Fleet status">
       ${stat("Total buses", fleet.length, "bus", "neutral", "all", filter)}
       ${stat("On route", count("route"), "route", "green", "route", filter)}
@@ -88,7 +87,7 @@ function adminTransport({ fleet, filter, selected, paused, context }) {
       ${stat("Signal delayed", count("delayed"), "alert", "amber", "delayed", filter)}
     </div>
     <div class="tracking-grid">
-      ${mapPanel("Live fleet map", "Morning school routes", current, paused)}
+      ${mapPanel("Live fleet map", "School fleet · 24/7 GPS source", current, paused)}
       <section class="surface fleet-card">
         <header class="panel-heading fleet-heading">
           <div><h2>Bus fleet</h2><p>${fleet.length} buses assigned today</p></div>
@@ -140,37 +139,13 @@ function parentTransport({ fleet, child, children, progress, paused }) {
     </div>`;
 }
 
-function driverTransport({ fleet, progress, paused, state, context }) {
-  const bus = fleet[0];
-  const run = currentDriverRun(state, context);
-  const onRoute = bus.status !== "school";
-  const arrived = bus.status === "school";
-  return `
-    ${pageHeading("My trip map", "Follow your assigned simulated route. Record safety checks and stops in Daily Overview.", `<a class="button secondary" href="#driver/overview/route">${icon("route",17)}Trip & stop controls</a>`)}
-    <section class="driver-trip">
-      <div class="driver-trip-text">
-        <div class="driver-trip-icon">${icon("bus", 24)}</div>
-        <div><span class="driver-trip-subtitle">BUS ${bus.id} <span>·</span> ${bus.registration}</span><h2>${e(bus.name)}</h2><p>${onRoute ? `Next stop <strong data-next-stop>${e(nextStop(bus, progress(bus)).label)}</strong>` : `Arrived at ${e(bus.stops.at(-1))}`}</p></div>
-      </div>
-      <div class="driver-trip-action">
-        ${badge(arrived ? "Trip complete" : statuses[bus.status].label, arrived ? "neutral" : "green", true)}
-        ${run?.status === "active" ? `<a class="button light" href="#driver/overview/route">${icon("route",17)}Manage trip stops</a>` : button(onRoute ? "End trip" : "Prepare next trip", onRoute ? "end-trip" : "start-trip", { variant: "light", iconName: onRoute ? "stop" : "checkCircle", focus: "driver-trip" })}
-      </div>
-    </section>
-    <div class="tracking-grid individual-tracking">
-      ${mapPanel("My route", `BUS ${bus.id} · Morning run`, bus, paused)}
-      ${routeStops(bus, progress(bus))}
-    </div>`;
-}
-
 export function transportPage(role, options) {
   if (!options.fleet.length) return pageHeading(role === "parent" ? "Track my bus" : "Bus tracking", "School transport", role === "parent" && options.child ? childSelect(options.child, options.children) : "") + `<section class="surface">${emptyState("bus", "No bus assigned", role === "parent" ? "Your child’s bus assignment will appear here." : "No buses are available in your assigned scope.")}</section>`;
-  if (["parent", "driver"].includes(role) && options.fleet[0]?.trackingVisible === false) {
+  if (role === "parent" && options.fleet[0]?.trackingVisible === false) {
     const bus = options.fleet[0], policy = bus.trackingPolicy;
     return pageHeading(role === "parent" ? "Track my bus" : "My trip map", "School transport privacy", role === "parent" ? childSelect(options.child, options.children) : "") + `<section class="surface portal-card gps-hidden"><span class="family-initials">${icon("bus", 30)}</span><h2>Bus location is hidden</h2><p>BUS ${e(bus.id)} · ${e(bus.name)}</p>${badge(e(policy.reason), "neutral")}<p>Pickup ${e(policy.settings.pickupStart)}–${e(policy.settings.pickupEnd)} · Drop-off ${e(policy.settings.dropoffStart)}–${e(policy.settings.dropoffEnd)}<br>Weekdays · Sri Lanka time</p><p>${policy.clock.demo ? "Demo clock" : "Current time"}: ${e(policy.clock.date)} ${e(policy.clock.time)}</p><a class="button secondary" href="#${role}/${role === "parent" ? "inbox" : "overview"}">${role === "parent" ? "View transport updates" : "Daily overview"}</a></section>`;
   }
   if (role === "parent") return `<a class="button secondary compact nfc-transport-link" href="#parent/boarding">${icon("badge",17)}View boarding status</a>` + parentTransport(options);
-  if (role === "driver") return `<a class="button secondary compact nfc-transport-link" href="#driver/boarding">${icon("badge",17)}Bus boarding & reader</a>` + driverTransport(options);
   const html = adminTransport(options);
   return options.fleet.some((bus) => bus.trackingVisible) ? html : html.replace(/<div id="map-stage"[^>]*><\/div>/, `<div class="portal-card gps-hidden"><h2>Bus locations hidden</h2><p>Outside active school trips. Status and alerts remain available.</p></div>`);
 }

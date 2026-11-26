@@ -18,8 +18,8 @@ Use the fullscreen button or the menu's fullscreen action when supported by the 
 
 | Chapter | Suggested discussion | Interaction |
 | --- | --- | --- |
-| The network | Explain 20 branches and 13 roles. | Show the actual Chairman map. In Try demo, pick a school on the 3D map or selector. |
-| The journey | Show school-bus visibility for parents/staff. | Show Parent and Driver screens. In Try demo, advance Bus 01 and try a delayed signal. |
+| The network | Explain 20 branches and 12 roles. | Show the actual Chairman map. In Try demo, pick a school on the 3D map or selector. |
+| The journey | Show school-bus visibility for parents/staff. | Show Parent and GPS tracker screens. In Try demo, advance Bus 01 and try a delayed signal. |
 | The tap | Explain card-linked boarding and exceptions. | Show the boarding roster, Parent status and student cards. In Try demo, tap/repeat, reconnect/sync and review a missing scan. |
 | The classroom | Connect class teaching with each family. | Show Parent identity/subjects, per-student selections, separate teaching classes, homework, class notices, lecture notes and attendance using Prototype view. In Try demo, publish for Science 8A/8B, select the pupil’s subject, share a common notice and mark homework/notes/attendance separately. |
 | The bigger picture | Discuss network/school oversight. | Show Academic, Attendance, Staffing and Reports screens. In Try demo, compare illustrative subjects. |
@@ -39,15 +39,15 @@ Allow roughly 8–10 minutes for the guided story plus discussion. Chapter notes
 
 ## What the client is seeing
 
-The 51 screenshots are unaltered captures of actual prototype views in an isolated demo browser. They are static images, not live data. Try demo interactions are presentation examples held in memory; they do not read or write the LMS's browser database. GPS, NFC, academic results, uniform designs, collection and student records are sample demonstrations. A missed tap means review, not automatic student absence. Lesson completion does not create academic marks. Book/uniform flows have no checkout or online payment.
+The 50 screenshots are unaltered captures of actual prototype views in an isolated demo browser. They are static images, not live data. Try demo interactions are presentation examples held in memory; they do not read or write the LMS's browser database. GPS, NFC, academic results, uniform designs, collection and student records are sample demonstrations. A missed tap means review, not automatic student absence. Lesson completion does not create academic marks. Book/uniform flows have no checkout or online payment.
 
 Role links open the existing LMS in a separate tab with its normal demo account/login behavior. Parent demo admission: **SCN-1001**, password **1234**. Suggested pilot stages are a proposal, not a delivery commitment or an installed hardware claim.
 
 ## 26 November 2026 family update
 
-The family chapter covers one guardian login/all linked children, transport inbox alerts, trip consent, teacher letters/email and school fee demo payment. Use FAMILY-1001 / 1234. Parents cannot override GPS hours. Transport Coordinator → Tracking hours & alerts has the presenter clock (07:15 visible / 18:00 hidden), school time windows and trip completion. School Administrator owns invoices, unpaid students and fee reminders; Principal/Chairman read scoped fee oversight. Book/uniform reservations remain collection-only without payment. No real email, consent signature verification or payment integration is connected.
+The family chapter covers one guardian login/all linked children, transport inbox alerts, trip consent, teacher letters/email and school fee demo payment. Use FAMILY-1001 / 1234. Parents cannot override GPS hours. Transport Coordinator → Tracking hours & alerts has the presenter clock (07:15 Parent-visible / 18:00 Parent-hidden; management stays visible), school time windows and trip completion. School Administrator owns invoices, unpaid students and fee reminders; Principal/Chairman read scoped fee oversight. Book/uniform reservations remain collection-only without payment. No real email, consent signature verification or payment integration is connected.
 
-51 actual prototype screenshots include 13 new family/communication/fee/privacy views. Affected existing captures were refreshed on 26 November via the in-app browser; unchanged store/boarding examples retain original capture dates. Browser screenshots were converted from JPEG to PNG without layout/content changes. Desktop refreshes use a requested 1440×900 viewport and parent bus/boarding use 390×844; the browser returns slightly smaller JPEG images. Exact file dimensions are recorded in the manifest. `captures.json` records per-file dimensions, capture dates and source provenance. The source hash covers the working tree used for captures.
+50 actual prototype screenshots cover the 12 current roles. The GPS update refreshes affected management, fleet, tracker, privacy, boarding and Parent views using the in-app browser. Desktop GPS captures use the default browser viewport; Parent transport captures use a 390×844 mobile viewport. JPEG captures are converted to PNG without content changes. Exact image dimensions, source dates and source hashes are recorded in `captures.json`. Other unchanged screens retain their original capture dates.
 
 ## Interactive system role mind map
 
@@ -55,8 +55,10 @@ Open **System map** in the header, the final chapter’s **Explore the role mind
 
 1. Start with Chairman → Principal → Vice Principal, then follow academic and operational roles. Parents sit separately through linked children. Solid lines show the recommended staff reporting structure; dashed lines illustrate family services. Neither line grants inherited permissions.
 2. Click any role to open its capability map. Click a feature branch to explain **Can view / Can do**, constraints and the matching prototype workspace links. The role’s central card explains its exact scope and collaborating roles.
-3. Use Full architecture or breadcrumbs to return. Find a role jumps directly between all thirteen roles. Browser Back/Forward and copied role/feature URLs work; refreshing a direct link retains the selected content.
+3. Use Full architecture or breadcrumbs to return. Find a role jumps directly between all twelve roles. Browser Back/Forward and copied role/feature URLs work; refreshing a direct link retains the selected content.
 4. Drag/pinch or scroll to explore; use +/− and Fit. Focus the map for arrow-key panning and Home/0 to fit. On a phone or with a keyboard, choose Outline for a hierarchy/feature list. Feature details scroll independently.
 5. **← Presentation** returns to the active chapter from the same visit. Starting directly at a mind-map URL returns to the network chapter. The eight narrative chapters and their backup video are separate from this additional interactive explorer.
 
 Examples: `#mind-map/parent`, `#mind-map/class_teacher/attendance`, `#mind-map/admin/fees`, `#mind-map/transport/privacy`. All scope descriptions reflect the browser prototype. No real GPS, payment, email, authorization or data mutation is introduced by the map.
+
+GPS update (26 November 2026): Driver is retired. Bus-mounted GPS is the 24/7 source; management sees in-scope buses continuously, Parents only inside coordinator-set windows. The mind map shows GPS as hardware, not an account role. Device signals and locations remain simulated.

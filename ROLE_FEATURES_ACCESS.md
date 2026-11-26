@@ -7,7 +7,7 @@
 
 **Hosting:** GitHub Pages is prepared to serve the prototype at the repository root and the presentation at `showcase/` on the same host. The user explicitly approved making `Tradex-Innovations/Sussex-LMS` public on 25 November 2026; the repository is now public. GitHub Pages is published at `https://tradex-innovations.github.io/Sussex-LMS/` and its `showcase/` route; deployment and live browser checks passed. The existing private Site remains separate.
 
-This is the maintained reference for the **current implementation**, covering all 13 roles, and for user-requested features awaiting implementation. A feature appears as available only when the prototype implements it. Record new user feature ideas in **Proposed features and requirements** with their status, affected roles and scope; keep recommendations distinct from requested requirements. Proposed features do not grant current permissions. Update this file alongside future implementation; the maintenance checklist is at the end.
+This is the maintained reference for the **current implementation**, covering all 12 roles, and for user-requested features awaiting implementation. A feature appears as available only when the prototype implements it. Record new user feature ideas in **Proposed features and requirements** with their status, affected roles and scope; keep recommendations distinct from requested requirements. Proposed features do not grant current permissions. Update this file alongside future implementation; the maintenance checklist is at the end.
 
 ## Contents
 
@@ -23,20 +23,19 @@ This is the maintained reference for the **current implementation**, covering al
 10. [Subject Teacher](#subject-teacher)
 11. [School Administrator](#school-administrator)
 12. [Transport Coordinator](#transport-coordinator)
-13. [Driver](#driver)
-14. [Book Store Officer](#book-store-officer)
-15. [Uniform Store Officer](#uniform-store-officer)
-16. [Parent](#parent)
-17. [Family communication and school fee workflows](#family-communication-and-school-fee-workflows)
-18. [NFC boarding prototype](#nfc-boarding-prototype)
-19. [Interactive client presentation](#interactive-client-presentation)
-20. [Student subjects, homework and class notices](#student-subjects-homework-and-class-notices)
-21. [Cross-role workflows](#cross-role-workflows)
-22. [Persistence and reports](#persistence-and-reports)
-23. [Demo accounts and validation](#demo-accounts-and-validation)
-24. [Proposed features and requirements](#proposed-features-and-requirements)
-25. [Maintenance checklist](#maintenance-checklist)
-26. [Change log](#change-log)
+13. [Book Store Officer](#book-store-officer)
+14. [Uniform Store Officer](#uniform-store-officer)
+15. [Parent](#parent)
+16. [Family communication and school fee workflows](#family-communication-and-school-fee-workflows)
+17. [NFC boarding prototype](#nfc-boarding-prototype)
+18. [Interactive client presentation](#interactive-client-presentation)
+19. [Student subjects, homework and class notices](#student-subjects-homework-and-class-notices)
+20. [Cross-role workflows](#cross-role-workflows)
+21. [Persistence and reports](#persistence-and-reports)
+22. [Demo accounts and validation](#demo-accounts-and-validation)
+23. [Proposed features and requirements](#proposed-features-and-requirements)
+24. [Maintenance checklist](#maintenance-checklist)
+25. [Change log](#change-log)
 
 
 ## Prototype boundaries
@@ -64,7 +63,7 @@ flowchart TD
   G --> T[Class Teacher / Subject Teacher]
   P --> A[School Administrator]
   V --> B[Transport Coordinator]
-  B --> D[Driver: assigned bus]
+  B -. device management .-> GPS[Bus GPS tracker: 24/7 source]
   P --> L[Book Store Officer: pupil’s books]
   P --> U[Uniform Store Officer: school uniforms]
 ```
@@ -82,26 +81,25 @@ This is the recommended operating hierarchy represented by the prototype. Parent
 | Class | The appointed grade and class in the appointed school. |
 | Teaching subject | Subjects assigned to the active Subject Teacher account in its school. |
 | Student / family | All children currently linked to the guardian, each requiring a current Parent appointment in that child’s school; learning, bus, boarding and supplies use the selected child. |
-| Bus | The active driver's currently assigned vehicle in its school. |
+| Bus | School management sees in-scope buses 24/7; Parents see only their selected child’s bus during coordinator-set windows. |
 
 Sections are **Preschool (0), Primary (1–5), Middle School (6–9), Senior School (10–13)**. These are prototype configuration values, not a claim about Sussex's official internal management structure.
 
-An appointment is a role plus its school and, where needed, section, grade, class or bus. The same person can hold several appointments; changing the active role changes the available actions. For example, a Section Head who also teaches a subject publishes materials through their Teacher workspace, and reviews materials through their Section Head workspace.
+An appointment is a role plus its school and, where needed, section, grade, class. The same person can hold several appointments; changing the active role changes the available actions. For example, a Section Head who also teaches a subject publishes materials through their Teacher workspace, and reviews materials through their Section Head workspace.
 
 ## Role summary
 
 | Role / internal key | Current entry | Read scope | Main changes allowed |
 | --- | --- | --- | --- |
 | Chairman / `chairman` | Overview → Transport | Network or selected school(s) | School details, staff appointments, student/course/material/bus and book/uniform store management, vacancy review, reports, read-only fee oversight; NFC school oversight and card management. |
-| Principal / `principal` | Overview → Transport | Assigned school | Lower-role appointments, student/course/material/bus and book/uniform store management, leave decisions, trip controls, vacancy review, reports, read-only fee oversight; NFC school oversight and card management. |
+| Principal / `principal` | Overview → Transport | Assigned school | Lower-role appointments, student/course/material/bus and book/uniform store management, leave decisions, vacancy review, reports, read-only fee oversight; NFC school oversight and card management. |
 | Vice Principal / `vice_principal` | Overview → Transport | Assigned school | Daily follow-ups, temporary cover, leave recommendations, cover-request decisions, student/course/material/bus and book/uniform store coordination, reports; read NFC trip coverage/manifests. |
 | Section Head / `section_head` | Overview → Section Overview | Appointed school and section | Section subject assignments/enrolment, material reviews, attendance follow-ups, cover requests, section reports. |
 | Grade Coordinator / `coordinator` | Overview → Grade Overview | Appointed school and grade | Subject enrolment, attendance follow-ups, class coordination reviews, Section Head support requests, grade reports; assigned subject teacher is retained. |
 | Class Teacher / `class_teacher` | Overview → Class Overview | Appointed school, grade and class | Student-specific subject selection, common class notices, class-subject homework, own sample-class attendance, transport inbox, letters/email, events/consent, follow-ups, private discussion records and class reports; lecture publication only on subjects assigned to the same account. |
 | Subject Teacher / `teacher` | Overview → Subject Overview | Current assigned teaching subjects and matching-class enrolled students in appointed school | Manage each teaching class separately; publish/edit materials and homework, lesson plans, internal learning reviews, class-specific letters/email/events/consent, support requests and subject reports. |
-| School Administrator / `admin` | Overview → Administration Overview | Actual student, guardian and subject records in appointed school | Register/edit admissions, link existing guardians, assign school teachers/matching-class enrolments and generate administration reports; manage fee invoices, office payments, reminders and unpaid students; issue/replace/deactivate NFC transport cards. |
-| Transport Coordinator / `transport` | Overview → Fleet Activity | Appointed school’s operational fleet, transport roster and own assigned transport follow-ups | Route/driver/student allocation, shared Vice Principal issue progress, transport reports, family alerts and GPS hours/completion; NFC rosters, simulated reader taps/sync and boarding corrections. |
-| Driver / `driver` | Overview → Daily Overview | Current assigned bus, own current-bus trip logs/issues, allocated students and latest NFC roster | Save safety checklist; start/complete recorded morning trips; confirm stops; report concerns to school transport; operate assigned NFC reader. |
+| School Administrator / `admin` | Overview → Administration Overview | Actual student, guardian, subject records and read-only 24/7 fleet in appointed school | Register/edit admissions, link existing guardians, assign school teachers/matching-class enrolments and generate administration reports; manage fee invoices, office payments, reminders and unpaid students; issue/replace/deactivate NFC transport cards. |
+| Transport Coordinator / `transport` | Overview → Fleet Activity | Appointed school’s operational fleet, transport roster and own assigned transport follow-ups; 24/7 in-scope GPS | Route/tracker/student allocation, shared Vice Principal issue progress, transport reports, family alerts and GPS hours/completion; NFC rosters, simulated reader taps/sync and boarding corrections. |
 | Book Store Officer / `librarian` | Overview → Store Overview | Appointed school’s pupil-book stock and student reservations | Review/confirm/decline, hold stock, prepare collection, record handover, adjust stock and create store reports. |
 | Uniform Store Officer / `uniform_store` | Overview → Store Overview | Appointed school’s uniform sizes/stock and student reservations | Same reservation/collection workflow for uniforms only, with size-level stock and separate reports. |
 | Parent / `parent` | Family login → Family dashboard | All linked children; selected-child learning, bus, boarding and supplies; family inbox, event consent and school fees; own earlier family book records | Download/mark materials done; reserve pupil’s books and sized uniforms for collection, track status/reference and cancel eligible requests; read own child’s NFC status/history; respond to events, read letters and complete school fee demo checkout. |
@@ -127,7 +125,7 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 - Add/edit student records and admission numbers; link existing guardian accounts.
 - Assign school teachers and matching-class students to existing courses.
 - Publish/edit/download materials and review parent-recorded completion.
-- Manage existing operational bus routes, stop names, drivers and assigned students.
+- Manage existing operational bus routes, stop names, GPS trackers and assigned students.
 - Manage school/network-scoped pupil-book and uniform stock, student reservations and collection; view isolated store report snapshots. No selling, price editing or online payment is provided.
 
 **Limits:** synthetic network buses are read-only. Final leave decisions and the dedicated start/end controls in the school overview are exposed in the Principal workflow; Chairman dashboards do not contain an additional leave approval screen. Reviewing a vacancy does not fill it.
@@ -157,12 +155,11 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 **Entry:** `#vice_principal/overview/transport`. **Scope:** appointed school. **Navigation:** Overview, Bus tracking, Subjects, Students & guardians, Pupil’s books, School uniforms, Bus boarding.
 
 - **Daily pulse and follow-up board:** school attendance, teacher availability, classes to review, delayed bus signals; three seed coordination tasks plus added tasks; category, owner, due date, status and dated note history. Transport Coordinators can create bus issues assigned to themselves and update their own transport tasks through the shared board. The Vice Principal sees their progress/bus reference and retains owner, category, title and due-date control. Reassignment removes the task from its former coordinator’s view. No external notification is sent.
-- **Transport Activity:** assigned-school map/fleet/details; record a bus issue as a named follow-up. The separate Bus tracking workspace provides existing bus/driver/student/stop management.
+- **Transport Activity:** assigned-school map/fleet/details; record a bus issue as a named follow-up. The separate Bus tracking workspace provides existing bus/GPS tracker/student/stop management.
 - **Academic Performance:** school comparisons, assignment/material progress, subject assignment and comparison CSV; assign or cancel one-day temporary teaching cover.
 - **Attendance:** section-independent school/class registers (including saved Class Teacher sample entries), repeated absences and calendars; create a student-specific attendance follow-up.
 - **Staffing Overview:** leadership/capacity/directory/vacancy review, temporary cover and **Leave recommendations**. Add/edit a recommendation and note on a pending leave request; the Principal makes the final decision.
 - **Section Head cover requests:** pending requests appear in Staffing Overview. Assign available cover to the requested subject, or decline with a note. The Section Head sees the outcome. Cancelling cover linked to a request reopens that request for replacement.
-- **Driver transport concerns:** submitted issues join the existing school Follow-up board with their bus reference and assigned Transport Coordinator. Review/reassignment uses the existing follow-up controls. Drivers see their own submitted text and status, not internal staff notes.
 - **School Reports:** operational brief plus transport/academic/attendance/staffing snapshots. Briefs also capture follow-ups, active cover and leave recommendations awaiting Principal decision. CSV/HTML/print; eight snapshots per school/role.
 - **Management retained:** school student records, subject teacher/student assignments, material publication, existing bus management and pupil-book/uniform reservation/stock management.
 
@@ -380,7 +377,9 @@ Also gives homework and manages separate subject classes; the Nuwan demo include
 
 **School fees:** `#admin/fees` is a separate complete workspace alongside the five administration overview views. Issue one-student invoices, review line items and due dates, record demo office payments including partial payments, inspect payment history/receipts, filter by student/status/name/admission/class, export school CSV, review one row per unpaid student, preview and send selected-invoice portal reminders, and review reminder history. Only actual pupils currently in the appointed school are eligible. No other branch or family’s financial records are exposed. Fee write ownership belongs to this role; Principal/Chairman read oversight is separate.
 
-**Entry:** `#admin/overview/summary`. **Scope:** the current, actual School Administrator appointment in one school. **Navigation:** Overview, School fees, Students & guardians, Subjects and Bus boarding. Five overview views are implemented:
+**Entry:** `#admin/overview/summary`. **Scope:** the current, actual School Administrator appointment in one school. **Navigation:** Overview, School fees, Bus tracking, Students & guardians, Subjects and Bus boarding. Five overview views are implemented:
+
+**24/7 transport oversight:** `#admin/transport` reads the appointed school’s buses, tracker IDs, status and simulated location all day. No device/allocation, GPS-window, issue or dispatch writes are granted through this role.
 
 ### Administration Overview
 
@@ -433,7 +432,7 @@ Also gives homework and manages separate subject classes; the Nuwan demo include
 
 ## Transport Coordinator
 
-**Tracking hours & alerts:** `#transport/tracking` configures the appointed school’s weekday pickup/drop-off windows, sends parent-facing late/breakdown/other/resolved updates, and completes a visible pickup/drop-off trip to hide its GPS immediately. The presenter may choose a shared demo clock or current Asia/Colombo time. This clock is shared across the demonstration; school window settings and bus completion writes stay in the appointed school. Parents have no privacy override. See [Family communication and school fee workflows](#family-communication-and-school-fee-workflows).
+**Tracking hours & alerts:** `#transport/tracking` configures the appointed school’s weekday pickup/drop-off windows, sends parent-facing late/breakdown/other/resolved updates, and completes a visible pickup/drop-off trip to hide its GPS from Parents immediately, while management retains 24/7 visibility. The presenter may choose a shared demo clock or current Asia/Colombo time. This clock is shared across the demonstration; school window settings and bus completion writes stay in the appointed school. Parents have no privacy override. See [Family communication and school fee workflows](#family-communication-and-school-fee-workflows).
 
 **Entry:** `#transport/overview/fleet`. **Scope:** current Transport Coordinator appointment in one school; editable operational buses only. **Navigation:** Overview, Bus tracking, Tracking hours & alerts and Bus boarding. Five overview views are implemented:
 
@@ -442,31 +441,27 @@ Also gives homework and manages separate subject classes; the Nuwan demo include
 - Opens with an OpenStreetMap street map of the assigned school’s routes and operational vehicles, ahead of the summary cards. Select a vehicle through its map marker or school-fleet list.
 - Fixed school identity and presenter account selector; no network/school scope selector. New schools with no operational records show an empty fleet rather than the two synthetic national-overview vehicles.
 - Saved vehicle-status filters (on route, at school, signal delayed), school-route reset, pan/zoom and shared demonstration pause/resume.
-- Selected vehicle shows registration, current driver, actual assigned-student count, next stop, route progress, arrival estimate, speed and signal update. Map positions, paths, speed, GPS signals and arrival estimates are labelled simulated.
-- Fleet counts, on-route/delayed counts, actual student allocations, missing drivers and the current coordinator’s open issue count. No sample occupancy is presented as a student allocation count.
-- Manage the selected bus or record a bus issue. Driver/Principal trip start/end controls remain separate from this role.
+- Selected vehicle shows registration, paired GPS tracker, actual assigned-student count, next stop, route progress, arrival estimate, speed and signal update. Map positions, paths, speed, GPS signals and arrival estimates are labelled simulated.
+- Fleet counts, on-route/delayed counts, actual student allocations, unconfigured trackers and the current coordinator’s open issue count. No sample occupancy is presented as a student allocation count.
+- Manage the selected bus or record a bus issue. GPS reporting requires no manual trip start or staff login.
 
 ### Routes & Stops
 
-- School operational route cards with status, registration/driver, ordered pickup-stop names, school destination and assigned-student counts.
-- Search bus ID, route, registration, driver or stop; filter by school bus and saved vehicle status.
+- School operational route cards with status, registration/tracker, ordered pickup-stop names, school destination and assigned-student counts.
+- Search bus ID, route, registration, tracker or stop; filter by school bus and saved vehicle status.
 - Edit an existing route name and the existing ordered stop labels through Manage route & assignments. Final school destination is read-only and validated; map geometry remains illustrative.
 - The prototype does not create/delete buses, add/remove stop positions, geocode stop labels, optimise routes or connect GPS hardware.
 
-### Drivers & Students
+### Trackers & Students
 
-- Two views: Student allocations and Driver assignments. Only actual students and current Driver appointments in the school are included; admissions, guardians, class data and academic records remain read-only.
-- Student rows show name, admission number, class, allocated bus/route and driver; bus/allocation filters, search and 12-record pagination.
-- Allocate an unassigned student to a chosen school bus, or manage a bus’s full student selection. A student has one bus property; moving them changes that allocation and preserves admission, class, subject and completion records. Removing them from a bus clears that bus link.
-- Driver rows show current vehicle/route status, with bus/assigned/unassigned filters and search. Allocate an existing school driver through the quick form or bus management.
-- A driver serves one bus at a time. Moving a driver leaves their former bus unassigned. A replaced/cleared driver retains an unassigned Driver appointment in that school, remains selectable for later allocation, and sees an empty Driver trip workspace until allocated.
-- Driver bus appointments synchronise with bus assignment so Driver and Parent portals follow current allocations. This is limited bus-assignment coordination, not general staff appointment management; the Principal/Chairman creates Driver accounts/appointments.
-- A coordinator cannot move a multi-school driver away from another school’s bus. Such a transfer requires the Chairman. Cross-school students/drivers and duplicate student selections are rejected before mutation.
+- Student allocations and GPS trackers are separate searchable views of actual school records. Student rows show admission, class, bus/route and tracker ID; moving students changes only transport allocation, preserving admissions, subjects and progress.
+- GPS rows show paired device ID, vehicle, reporting/delayed signal and last simulated device receipt. Configure a tracker through Manage bus; IDs use 4–40 letters/numbers/hyphens and must be unique across all buses, including other schools. Devices are associated with vehicles rather than staff accounts.
+- Simulate signal loss / Restore demo signal persists the device status; delayed devices show a last-known simulated position. This does not connect real hardware. Cross-school/synthetic bus writes, duplicate students and stale Driver forms are rejected before mutation.
 
 ### Issues & Coordination
 
 - Read only **transport-category** follow-ups currently assigned to the active coordinator in the school, including the illustrative school-readiness seed and Vice Principal assignments.
-- Driver submissions addressed to the current coordinator also appear here as bus-linked transport follow-ups. Update their status/notes through the same controls; the submitting Driver sees their submitted text/status but no internal notes. The Vice Principal retains ownership/category control.
+- Bus-linked school transport follow-ups retain shared coordination history; internal staff notes stay private.
 - Record a new issue against an existing school bus with title, due date (20–27 November 2026), open/in-progress/resolved status and note. It is assigned to the current coordinator and saved to the same `viceFollowups` board used by the Vice Principal.
 - Update status and add notes (latest 20); read the shared coordination history. Coordinator updates preserve the task’s title, owner, category, due date and bus reference.
 - The Vice Principal reviews through **Follow-up board**, can update/reassign the record, and sees the linked bus badge. Ownership or category changes remove it from the old coordinator’s issue view. Other coordinators’ and other schools’ tasks remain unavailable.
@@ -485,49 +480,6 @@ Also gives homework and manages separate subject classes; the Nuwan demo include
 **Limits:** no another-school or synthetic-fleet edits, general staff appointments, admissions/guardian/course/library changes, attendance marking, trip start/end, leave/cover decisions or leadership dashboards. Existing bus records and fixed demo paths are retained. This is a browser-only UI demonstration with local checks, not production transport security or GPS.
 
 **NFC bus boarding:** `#transport/boarding` opens trip rosters, simulates reader taps/offline queues, synchronises events, closes pickup windows and records reasoned transport-status corrections. CSV manifests and event history use school scope. See [NFC boarding prototype](#nfc-boarding-prototype).
-
-## Driver
-
-**Transport alerts:** reporting a delay, breakdown, vehicle, reader, student-transport or other issue automatically creates a safe generic portal alert for currently allocated families and their Class Teachers. Internal titles/descriptions/coordination notes are not copied to those alerts. Coordinator updates/resolution are reflected. Driver map positions follow the same GPS hours/completion gate as all other roles.
-
-**Entry:** `#driver/overview/summary`. **Navigation:** Overview, Bus tracking and Bus boarding. **Scope:** the current active Driver appointment must match both the operational bus's school and its `driverId`. No former-bus access is retained after reassignment. These are local UI checks, not backend authorization.
-
-### Daily Overview
-
-- Current bus, registration, school, route and recorded trip date/status; quick route-map and boarding-reader links.
-- Actual currently allocated student count; Boarded/expected count from the latest accessible NFC roster; manual stops confirmed; own open/in-progress reported issues. NFC totals are explicitly the latest roster, not a claim that it matches the displayed vehicle run.
-- Five pre-trip checks: vehicle/tyres/brakes/lights/mirrors, doors/seat belts/emergency exits, first-aid/safety equipment, route/student-list review, and reader/boarding arrangements. These are staff confirmations, not sensor checks.
-- Save an incomplete draft; all five checks must be saved before starting a new recorded trip. Readiness uses demo dates **20–27 November 2026** and a **morning to-school run**. The form suggests the next unused date starting with the current Sri Lanka demo date. One trip record per driver/current bus/date; completed records cannot be overwritten. Finish the active run before preparing another.
-- Starting changes the shared bus status to On route, stores a start timestamp and starts the existing map simulation. A route or assigned-student-list change between preparation and start requires saving a fresh checklist review. There is no automatic vehicle or real GPS start.
-
-### Route & Stops
-
-- Read the current route when unprepared, or the trip's saved route/stop snapshot after preparing. Later route-label changes do not rewrite an active/completed trip log.
-- On an active trip, confirm the next stop in order with one button; duplicate or out-of-order confirmations are rejected. The school destination is the final confirmation.
-- Complete the recorded trip only after all stops/school arrival are confirmed. Completion stores its timestamp and changes the shared bus status to At school, reflected in Parent/leadership/Transport Coordinator screens.
-- Manual stop confirmations do not change GPS coordinates or NFC boarding, imply a student's drop-off/alighting, or mark classroom attendance. Use the controls while stationary. NFC pickup closure/review remains a separate coordinator action.
-- The existing `#driver/transport` map remains available. Active recorded runs link to stop controls. Ending an initial seeded map simulation is still supported without fabricating a checklist or historical run; preparing the next recorded trip requires the new checklist. Principal trip controls retain their existing school scope.
-
-### Assigned Students
-
-- Search actual current-bus students by name, admission number or class. Display name/admission/class, active-card readiness and the student's status in the latest accessible NFC roster, if present.
-- No guardian credentials, contact directory, other-bus students or card codes appear in this list. New allocations appear immediately; historical NFC rosters keep their own snapshots and scope rules.
-- Open Bus boarding to create the current assigned bus's roster, simulate taps/offline sync, flag concerns and download the latest roster manifest. Driver cannot issue/disable cards, close pickup, confirm non-boarding or make coordinator corrections. See [NFC boarding prototype](#nfc-boarding-prototype).
-
-### Safety & Issues
-
-- Submit a route delay, vehicle concern, card/reader problem, student transport concern or other transport issue with title and description. The current bus and driver are attached automatically; the recipient must be a currently appointed **Transport Coordinator in the same school**.
-- Each submission creates an owned `driverIncidents` record and a bus-linked transport follow-up in the shared `viceFollowups` board. The recipient coordinator sees/updates it through Issues & Coordination; the Vice Principal can review/reassign it through the existing Follow-up board. No external message, alert, dispatch or automatic bus-status change is sent.
-- Driver reads only own current-bus submitted text, school owner and current follow-up status (all/open/in-progress/resolved/unavailable). Coordinator/internal staff notes are excluded. If the follow-up changes category, bus/school scope or becomes unavailable, internal details are not exposed.
-- Driver cannot edit ownership, resolve the school task, read another driver's issues or access the school-wide follow-up board. A school without an appointed coordinator has an explicit routing empty state; a stale/foreign recipient is rejected.
-
-### Trip History
-
-- Read own prepared/active/completed records for the **currently assigned bus**, including checklist count, demo date, captured route, start/end times and stop-confirmation history. Existing map simulations have no invented historical records.
-- Screen times use Asia/Colombo. Download a current-bus trip-log CSV with recorded route/stop timestamps in UTC; formula characters are neutralised. It excludes passenger/card data, guardian credentials and issue/free-text coordination notes.
-- Exports recheck current Driver/bus appointment. Other drivers' records, other schools and former buses remain unavailable; records persist locally rather than being deleted when access is lost.
-
-**Persistence and limits:** `driverRuns` and `driverIncidents` persist in the same browser, with empty defaults for existing saved data. No new accounts, device permissions, production GPS, vehicle checks/sensors, protected audit service, notifications, emergency dispatch or student alighting workflow is connected. No route/driver/student reassignment, card administration, school/class attendance, academic marks, subjects, library, roles or school-wide report access is added. Replaced/cleared drivers retain an unassigned appointment and see **No bus assigned** until allocated again.
 
 ## Book Store Officer
 
@@ -600,12 +552,12 @@ Implemented **26 November 2026**, browser-local only. Feature IDs: `FAMILY-002`,
 
 ### Transport alerts and GPS privacy
 
-- Saved bus signal delays, Driver-reported concerns and shared school transport follow-ups produce safe generic family/Class Teacher alerts. Internal task titles, free-text descriptions, student-transport details and staff notes stay private. A follow-up resolution is a new readable update.
+- Saved bus signal delays and shared school transport follow-ups produce safe generic family/Class Teacher alerts. Internal task titles, free-text descriptions, student-transport details and staff notes stay private. A follow-up resolution is a new readable update.
 - Transport Coordinator sends an explicit parent-facing message of up to 500 characters: late, breakdown, other travel issue or resolved. Recipient matching uses current student bus/branch allocations and current class appointments; moving an allocation removes access to prior alerts for the old bus. The inbox is local to this browser, not actual email/push/SMS delivery.
 - Default weekday tracking windows are **06:00–08:30 pickup** and **13:00–16:00 drop-off**, in **Asia/Colombo**. End times are exclusive. These are configurable demonstration defaults, not verified Sussex schedules.
 - Prototype initially uses a clearly labelled **26 November 2026, 07:15 presenter clock** so a client can see the map. Only the Transport Coordinator workspace can change demo/current-time mode; Parents cannot override it. Window settings are school-scoped; the demo clock is shared across the demo network. Current-time mode checks Asia/Colombo independent of device timezone, refreshing loaded UI every 15 seconds when the minute changes.
-- All legacy, Parent/Driver, coordinator and national maps use the gate. Hidden vehicles have no marker, route line or telemetry position; non-location status, school bubbles and notifications remain. Completed morning Driver runs/at-school buses hide pickup positions; a Coordinator can complete a current pickup/drop-off trip and hide it for that day/direction. The next window/date is separate. NFC “close pickup” is boarding closure, not journey completion.
-- New fleet reports omit hidden coordinates; reading/exporting a saved fleet snapshot outside the current permitted period redacts its captured location fields. Already downloaded files cannot be recalled. Static screenshots/backup video are labelled historical demonstration captures, not live GPS. No GPS device collection or production security enforcement is connected.
+- Chairman, Principal, Vice Principal, School Administrator and Transport Coordinator maps show in-scope bus locations 24/7. Parent maps hide markers, routes and coordinates outside the school’s configured weekday windows or after Parent trip completion; non-location status and alerts remain. NFC closure is separate from Parent journey completion.
+- Management fleet reports retain scoped coordinates outside Parent viewing windows. If a device is no longer configured/available, saved Coordinator fleet views redact that bus’s captured location fields. Already downloaded files cannot be recalled. Static screenshots/backup video are labelled historical demonstration captures, not live GPS. No GPS device collection or production security enforcement is connected.
 
 ### Teacher communication, events and consent
 
@@ -633,7 +585,7 @@ Implemented **26 November 2026**, browser-local only. Feature IDs: `FAMILY-002`,
 
 ## NFC boarding prototype
 
-**Feature:** `NFC-TRANSPORT-001` — implemented as a simulated UI on 22 November 2026. **Entry:** `#<role>/boarding` for Chairman, Principal, Vice Principal, School Administrator, Transport Coordinator, Driver and Parent. This is separate from the existing five overview views and from classroom attendance.
+**Feature:** `NFC-TRANSPORT-001` — implemented as a simulated UI on 22 November 2026. **Entry:** `#<role>/boarding` for Chairman, Principal, Vice Principal, School Administrator, Transport Coordinator and Parent. This is separate from the existing five overview views and from classroom attendance.
 
 ### Transport cards
 
@@ -644,9 +596,9 @@ Implemented **26 November 2026**, browser-local only. Feature IDs: `FAMILY-002`,
 
 ### Trip rosters and boarding status
 
-- Transport Coordinator opens school-bus rosters; Driver can open one for the currently assigned bus. Pick a demo date from 20–27 November and a to-school/return-home direction. The default date is the current Sri Lanka date within that sample window, otherwise 20 November.
+- Transport Coordinator opens school-bus rosters without a Driver login. Pick a demo date from 20–27 November and a to-school/return-home direction. The default date is the current Sri Lanka date within that sample window, otherwise 20 November.
 - Each roster snapshots the bus's current allocated student names, admission numbers and classes. Later allocation/name/class changes do not rewrite it. New allocations apply to subsequent rosters. One roster exists per bus/date/direction; only one pickup window per bus can remain open, and outstanding queued events must sync before another roster opens.
-- Opening/closing the NFC roster does not start/end the simulated vehicle trip. Those trip controls remain in the existing Driver/Principal workflows.
+- Opening/closing the NFC roster does not start/end the simulated vehicle trip. GPS device reporting remains independent of roster state and staff login.
 - Students start as **Not yet boarded**. A valid tap produces **Boarded**. Repeated taps are ignored for counts and logged; they never imply alighting.
 - Closing pickup is a Transport Coordinator action. Untapped students become **Needs review**, including when the reader is online. No missing scan automatically confirms non-boarding or school absence.
 - Only the Transport Coordinator records reasoned manual statuses: Boarded, Needs review, Not travelling, or Confirmed not boarded. Confirmed non-boarding requires a closed pickup window, online reader and no queued events. Original events remain in the history.
@@ -660,7 +612,7 @@ Implemented **26 November 2026**, browser-local only. Feature IDs: `FAMILY-002`,
 - Simulate offline mode to queue captures locally. Reconnect & sync reconciles each receipt once and retains capture time separately from sync time. Until reconciliation, the tap does not count as confirmed boarding and parents see a sync warning.
 - Queue processing uses the card's validity/order at capture: an offline tap captured before loss/replacement can still be accepted; issuing a previously unknown code later does not make its old scan valid. Queued events for unavailable rosters retain a generic rejection receipt.
 - Reader taps captured during pickup can sync after closure. New taps after closure are blocked; corrections are a coordinator review action.
-- Driver/Coordinator can flag a student's scan/card concern with a note. A flag does not itself confirm or reverse boarding. Accepted taps, duplicates, rejections, pickup closure, concerns and corrections remain in a browser-local append-only event list. Staff identity/reasons and Sri Lanka display times are available to authorised roster viewers.
+- Transport Coordinator can flag a student's scan/card concern with a note. A flag does not itself confirm or reverse boarding. Accepted taps, duplicates, rejections, pickup closure, concerns and corrections remain in a browser-local append-only event list. Staff identity/reasons and Sri Lanka display times are available to authorised roster viewers.
 - UI history is not a protected production audit log; Reset demo/browser storage can remove it. No parent push/email/SMS notification is sent.
 
 ### Role scope and manifests
@@ -669,14 +621,13 @@ Implemented **26 November 2026**, browser-local only. Feature IDs: `FAMILY-002`,
 | --- | --- |
 | School Administrator | Manage school transport cards and lifecycle history; no trip passenger roster or reader operations. |
 | Transport Coordinator | School trip history/rosters and manifests; open/close pickup, simulate scans/offline/sync, flag concerns and make reasoned status corrections. |
-| Driver | Currently assigned bus's latest roster/manifest; open a roster, simulate taps/sync and flag concerns. Older rosters and other buses are unavailable. No card management, pickup closure or coordinator corrections. |
 | Parent | Only the selected linked child’s current-school trip history and latest status, including prior bus allocations. No passenger list, card codes, staff reasons, CSV manifest or write controls. |
 | Principal | School oversight/rosters/event history/manifests and card management; no reader simulation or boarding correction. |
 | Vice Principal | School oversight/rosters/event history/manifests; no card, reader or correction writes. |
 | Chairman | Scoped school/network coverage, rosters/event history/manifests and card management; no operational reader or correction writes. |
 
 - Leadership coverage totals all accessible recorded demo trip entries, not unique students. Schools with no NFC rosters show zero recorded coverage, not invented scans.
-- Current appointments are validated on writes. Driver access follows actual bus ownership; other-school rosters/readers/cards and stale bus/trip IDs are rejected. Staff rosters are unavailable if captured students move outside their school; Parent reads remain child-only.
+- Current appointments are validated on writes. other-school rosters/readers/cards and stale bus/trip IDs are rejected. Staff rosters are unavailable if captured students move outside their school; Parent reads remain child-only.
 - Manifest CSV is generated from the current accessible roster, including admission/class, bus/direction, transport status, recorded time/source and reader/sync context. It excludes card codes, free-text reasons and guardian credentials, and neutralises spreadsheet formula characters. It is a current export, not an added saved-report history or PDF service.
 - Bus boarding never writes Class Teacher attendance, academic marks, subject enrolment or parent lesson completion.
 
@@ -688,9 +639,9 @@ On GitHub Pages the repository prefix applies to both routes: `/Sussex-LMS/` for
 
 ### Story and interaction scope
 
-**Default view:** each chapter opens in **Screens**, showing actual prototype screenshots inside browser/phone frames. There are 38 unaltered captures covering all 13 roles and the shared transport, academic, attendance and collection workflows. Screen tabs choose related views; clicking the image opens a labelled enlargement dialog with **Actual size** scrolling and **Fit to view**. **Open prototype** uses that screen's fixed LMS route. **Try demo** switches to the existing interactive presentation examples described below. Changing chapters restores Screens view. The screenshots retain the actual application's text, while the surrounding presentation removes small captions, descriptive paragraphs, fact rows, time labels, scene annotations and repeated footer explanations. Large headlines and functional controls remain; narration and limitations stay in Notes and this reference.
+**Default view:** each chapter opens in **Screens**, showing actual prototype screenshots inside browser/phone frames. There are 50 actual captures covering all 12 roles and the shared transport, academic, attendance and collection workflows. Screen tabs choose related views; clicking the image opens a labelled enlargement dialog with **Actual size** scrolling and **Fit to view**. **Open prototype** uses that screen's fixed LMS route. **Try demo** switches to the existing interactive presentation examples described below. Changing chapters restores Screens view. The screenshots retain the actual application's text, while the surrounding presentation removes small captions, descriptive paragraphs, fact rows, time labels, scene annotations and repeated footer explanations. Large headlines and functional controls remain; narration and limitations stay in Notes and this reference.
 
-Captures were made on 23 November 2026 from the current LMS source in an isolated Chrome demo context: 36 desktop views at 1440×960 and two Parent mobile views at 390×844. Demo boarding, safety/issue and ready-for-collection states were prepared through the existing prototype APIs. These static images do not fetch live records or grant any additional role access. `showcase/public/assets/screens/captures.json` records the base commit, current prototype source hash, routes, dimensions and capture timestamps. Re-capture the affected views when the LMS changes.
+The capture manifest records each image’s actual source date and dimensions. GPS-related views were refreshed on 26 November 2026 through the in-app demo browser, with mobile Parent transport layouts and default desktop sizing. Unchanged academic/store captures retain their prior dates. These static images do not fetch live records or grant additional role access. Re-capture affected views when the LMS changes.
 
 1. **The network:** actual Sri Lanka coastline from the existing Natural Earth source, 20 previously verified approximate school locations, clickable 3D points and an accessible school selector. This is not a new verification of branch addresses or real transport routes.
 2. **The journey:** original procedural 3D school bus/road and parent-phone illustration, sample Nugegoda Bus 01 stop progress and delayed-signal state. The initial network selection does not invent an operational route for another branch.
@@ -698,26 +649,27 @@ Captures were made on 23 November 2026 from the current LMS source in an isolate
 4. **The classroom:** actual Parent subjects/identity, Class Teacher student selection/notices, separate Subject Teacher classes/homework and attendance screens. A single Prototype view selector chooses these screens. Try demo has Teacher/Parent/Subjects/Notices/Attendance perspectives, Science 8A/8B, subject access, common notices and separate notes/homework publication/completion, plus Present/Absent/Late. The downloadable text notes are labelled sample material. Completion, attendance and assessment marks remain separate concepts.
 5. **The bigger picture:** subject comparison using the exact existing illustrative Grade 8/Term 3 assessment model, selected schools or all 20 with the top five shown, and school selection. Values are labelled sample, not actual Sussex results.
 6. **School essentials:** pupil-book/uniform selection, sample size, requested/confirmed/ready/collected progression and the responsible store role. No sales, prices, checkout or payment. This simplified presentation does not create a real reservation or change stock.
-7. **Your next chapter:** four focused three-step tours (Chairman, Principal, Parent, Driver), contextual prototype links, all 13 role summaries/links, and a proposed one-school/one-bus/small-card-group pilot. The pilot is for discussion, with production work explicitly identified.
+7. **The family:** one guardian login for linked children, transport alerts, per-child consent, teacher letters/email and demo school-fee payments/reminders. Parents cannot access another family; stores remain reserve-and-collect only.
+8. **Your next chapter:** four focused three-step tours (Chairman, Principal, Parent, Transport Coordinator), contextual prototype links, all 12 role summaries/links, and a proposed one-school/one-bus/small-card-group pilot. The pilot is for discussion, with production work explicitly identified.
 
 ### Presenter, exploration and resilience
 
-- **Presenter mode:** fullscreen where the browser permits it, Next/Previous, seven direct chapter controls, notes, discussion timing and animation pause/resume. Left/right and Page Up/Down navigate; Space pauses outside button/link focus; N opens notes and M chapters. Form controls/role tabs retain their native keys. Native dialogs support focus containment, labelled headings and Escape dismissal.
+- **Presenter mode:** fullscreen where the browser permits it, Next/Previous, eight direct chapter controls, notes, discussion timing and animation pause/resume. Left/right and Page Up/Down navigate; Space pauses outside button/link focus; N opens notes and M chapters. Form controls/role tabs retain their native keys. Native dialogs support focus containment, labelled headings and Escape dismissal.
 - **Explore mode:** the same content with chapter selection, scene-area wheel navigation and horizontal touch swipes. Mobile chapter content scrolls vertically; all controls remain reachable. URL hash addresses each chapter; query values retain Explore and simple-graphics choices on reload.
 - **Motion/graphics:** GSAP transitions, one shared React Three Fiber/Three.js canvas, locally generated bus/card/reader/map meshes and supporting tablet/books/uniform props. OS reduced-motion preferences are respected; manual reduced-motion/2D choices remain available. A 2D SVG/CSS alternative supports every interaction when chosen or after GPU context loss.
-- **Offline:** a content-versioned service worker scoped strictly to `/showcase/` caches its local HTML/JS/CSS/font/logo/screenshots/poster/video after an initial successful online load. Cache updates remove old showcase caches only. The menu reports readiness; clearing browser storage removes the cache. Existing LMS routes and private Site authorization remain separate; opening the LMS still requires access/internet.
+- **Offline:** a content-versioned service worker scoped strictly to `/showcase/` caches its local HTML/JS/CSS/font/logo/screenshots/poster/video after an initial successful online load. Cache updates remove old showcase caches only. The menu reports readiness; clearing browser storage removes the cache. Existing LMS routes and private Site authorization remain separate; opening the LMS uses the separate online prototype route.
 - **Backup:** a downloadable 45-second 1440×900 H264 MP4 screenshot walkthrough, without audio, demonstrates the eight chapters, real prototype captures and example interactions. It is available from the presentation menu and cached for offline playback, with a local poster. It is not live bus/hardware footage.
 
 ### Interactive system role mind map
 
 **Implemented 26 November 2026 — `PRESENTATION-MINDMAP-001`.** Open **System map** from the presentation header, **Explore the role mind map** in the final role chapter, or Presentation menu → **Explore the system role mind map**.
 
-- **Full architecture:** `/showcase/#mind-map` shows all 13 implemented roles and the recommended network/school/academic/operational reporting structure. Chairman spans 20 schools; Principal and Vice Principal are school-scoped; Section Head → Grade Coordinator → Class/Subject Teacher shows academic coordination; school administration, the two stores, transport coordination and Driver have separate responsibilities. The structure illustrates prototype responsibilities, not a verified official Sussex organisational chart.
+- **Full architecture:** `/showcase/#mind-map` shows all 12 implemented roles and the recommended network/school/academic/operational reporting structure. Chairman spans 20 schools; Principal and Vice Principal are school-scoped; Section Head → Grade Coordinator → Class/Subject Teacher shows academic coordination; school administration, the two stores, transport coordination have separate responsibilities; bus GPS is a device rather than a role. The structure illustrates prototype responsibilities, not a verified official Sussex organisational chart.
 - **Family connection:** Parent is a separate linked-student role, not a subordinate staff appointment. Dashed overview lines illustrate learning/consent, journey updates and school collection. Role-scope panels also link all relevant collaborating roles, including class notices/alerts, guardian/fee administration and Book Store collection. A reporting or collaboration line does not inherit permissions or broaden access.
 - **Role drill-through:** select a role node or use **Find a role**. `/showcase/#mind-map/<role>` opens that role at the centre of a feature mind map. Every existing navigation workspace and every overview module is represented. Labels come from the current LMS role definitions; the explanatory feature catalogue is maintained against this reference and validated by tests.
 - **Feature drill-through:** select a capability branch. `/showcase/#mind-map/<role>/<feature>` opens a **Can view / Can do** panel with applicable limits and fixed links into that role’s actual prototype workspaces. Select the central role card, or `.../<role>/scope`, for school/section/grade/class/subject/bus/family scope, explicit permission limits and related roles. External workspace links retain the current host and repository prefix and open the ordinary prototype/demo login in a separate tab.
 - Coverage includes bus/GPS privacy and alerts, NFC boarding/cards, academic comparisons, attendance, staffing/appointments/leave/temporary cover, student/guardian records, subject selection and lectures/homework, teacher communication/event consent, school fee demo workflows, separate book/uniform collections, scoped reports and request/recommendation/approval hand-offs. Read-only leadership fees, Class Teacher publication limits, coordinator enrolment-only writes and school/subject/student scope stay explicit.
-- **Navigation:** breadcrumbs, Full architecture, per-role selector, browser Back/Forward, and direct-link refresh. **← Presentation** returns to the previously active chapter in the same visit; opening a mind-map URL directly defaults the return chapter to the network introduction. The eight story chapters and 51 existing prototype screenshots remain available.
+- **Navigation:** breadcrumbs, Full architecture, per-role selector, browser Back/Forward, and direct-link refresh. **← Presentation** returns to the previously active chapter in the same visit; opening a mind-map URL directly defaults the return chapter to the network introduction. The eight story chapters and 50 actual prototype screenshots remain available.
 - **Interaction:** drag/pinch, wheel zoom, +/−, Fit and zoom percentage. With the canvas focused, arrow keys pan and Home/0 fits; +/− zoom. Normal chapter shortcuts and Explore swipes/wheel do not change chapters while explaining a mind map. Semantic HTML role/feature buttons are rendered over SVG connectors; map and outline controls have accessible names, visible focus and headings.
 - **Small screens:** an optional Outline view lists the staff hierarchy or role features with large buttons. Feature details form a separately scrolling lower panel; desktop uses a side panel. The role picker, breadcrumbs, map controls and workspace links remain reachable. The header uses a compact logo on narrow phones.
 - **Persistence and limits:** selected role/feature is represented in the URL; zoom/pan and outline mode are in presentation memory. Reload retains the direct role/feature but resets the camera/outline. It does not access or mutate LMS localStorage/sessionStorage, users, enrolments, GPS, payments, consent or messages. This is a presenter/explanation view, not a new authenticated role or a permission management interface. All current prototype integrations remain simulations.
@@ -806,25 +758,25 @@ The Vice Principal may also create cover directly without a request. Cover teach
 - Class Teachers maintain their own class attendance follow-ups.
 - These are four distinct local task collections. Owners, dates and notes are recorded; no SMS, email, WhatsApp or automatic cross-board task delivery occurs.
 
-### Driver trip and transport concern
+### Bus GPS devices and family visibility
 
-1. Transport Coordinator or authorised leadership assigns the Driver and students to a school bus; the current appointment determines Driver access.
-2. Driver prepares a dated morning trip, saves the five safety checks, then starts. Route/student allocation changes before start require another checklist review.
-3. Driver confirms route stops in sequence and the final school arrival, then completes the trip. Shared fleet/Parent views reflect bus status; NFC scans, classroom attendance and subject records remain separate.
-4. Driver reports a concern to a school Transport Coordinator. A shared transport follow-up appears in that coordinator's issue queue and the Vice Principal board. Status changes appear in the Driver's own issue view; internal staff notes remain private.
-5. Driver downloads the captured trip/stop log. Reassignment removes former-bus run, issue, student and export access, including stale actions.
+1. Transport Coordinator (or authorised school leadership) pairs a network-unique tracker ID with an existing school bus. Students retain their same-school allocations. The final school stop stays fixed.
+2. The bus-mounted device is the intended 24/7 source, independent of staff login. The prototype simulates positions and device signal loss/recovery; actual GPS ingestion, SIM connectivity and device authentication are future integration work.
+3. Chairman sees the selected network/schools; Principal, Vice Principal, School Administrator and Transport Coordinator see their appointed school’s buses 24/7, including outside school transport hours and after Parent trip completion. School Administrator is read-only.
+4. Transport Coordinator sets weekday pickup/drop-off windows for Parents, sends family/Class Teacher alerts and may close that bus’s current Parent window. Parents see only the selected linked child’s allocated bus in an open window; hidden maps contain no marker, route or position. Alerts remain available.
+5. NFC readers operate separately from GPS. Transport Coordinator demonstrates reader taps, offline reconciliation and roster corrections without a Driver account. A missed tap is not classroom absence.
 
 ### NFC cards and trip boarding
 
 1. Register/allocate a school transport student using existing admission and bus-allocation tools. School Administrator/Principal/Chairman issues a demo card from Bus boarding → Transport cards.
-2. Transport Coordinator or assigned Driver opens the expected bus roster for the date/direction, then uses the simulated bus reader to record taps. Offline captures queue locally and do not yet confirm boarding.
-3. Driver/Coordinator flags concerns; Coordinator synchronises readers, closes pickup and reviews untapped students. Confirmed not boarded is a reasoned, post-sync review action. Classroom attendance stays separate.
+2. Transport Coordinator opens the expected bus roster for the date/direction, then uses the simulated bus reader to record taps. Offline captures queue locally and do not yet confirm boarding.
+3. Transport Coordinator flags concerns; Coordinator synchronises readers, closes pickup and reviews untapped students. Confirmed not boarded is a reasoned, post-sync review action. Classroom attendance stays separate.
 4. Parents see only their selected linked child’s status/history. School leadership reads scoped coverage/manifests; physical devices and external notifications remain future integration work; transport issue alerts are available in the portal.
 
 ### Transport and school supplies
 
-- Transport Coordinator/authorised school leadership updates an operational bus’s route labels, eligible driver and school students. The final school stop stays fixed. Student moves change only the transport allocation; Driver/Parent views use the current bus and status.
-- Driver moves leave the former vehicle without a driver, synchronise the new bus appointment and retain replaced/cleared drivers as unassigned school Driver accounts. The coordinator can allocate these existing appointments again. Driver/Principal controls trip start/end; coordinator issue status does not dispatch a bus.
+- Transport Coordinator/authorised school leadership updates an operational bus’s route labels, unique GPS tracker and school students. The final school stop stays fixed. Student moves change only the transport allocation; Management/Parent views use the current bus and status.
+- GPS reporting runs independently of login or manual dispatch. Signal simulations affect only existing operational buses in scope; coordinator issues do not dispatch vehicles.
 - Transport Coordinator issues and Vice Principal follow-ups share `viceFollowups`. Only transport tasks assigned to the active coordinator are writable in their role; the Vice Principal controls ownership/category/title/due dates. Reassignment removes old-coordinator task/report access. This is local coordination, without messages or notifications.
 - Parent reserves pupil’s books or sized uniforms for the selected child. Requests route to the school Book Store or Uniform Store separately. Staff confirm stock, set collection details and verify handover; scoped leadership coordinates both. Parent sees own request progress without internal notes or online payment.
 
@@ -840,9 +792,9 @@ The Vice Principal may also create cover directly without a request. Cover teach
 - Subject Teacher state includes `subjectLessonPlans`, `subjectLearningReviews`, `subjectSupportRequests` and `subjectReports`. No new demo accounts or migration flag are required. Notes/history persist in this browser; subject ownership follows current assignments. Reports retain eight per teacher/school and recheck captured course/student access. Learning-review text is available to current subject staff, excluded from exports/parent views, and never copied into generic activity messages.
 - A one-time `classTeacherVersion` migration adds Nugegoda 6A and Malabe 8A demo Class Teacher accounts while retaining existing enrolment, materials, progress, roles and saved state. Removed appointments are not restored on later loads.
 - School Administrator adds `adminReports`, eight per appointed school/role, shared by administrators in the same school and isolated from other roles. No new demo accounts or migration are required. Captured student/course school membership and the current appointment are rechecked before report access. New admissions, guardian links and subject assignments use existing student/assignment storage; report exports omit passwords and internal note text.
-- Transport Coordinator adds `coordinatorReports`, eight per coordinator account/school, and bus-linked transport tasks in the existing `viceFollowups` list. No new demo accounts or migration are required. Saved tasks retain shared note history; reports omit note text and recheck captured task ownership/category plus bus/student school scope. Driver assignment updates preserve unassigned Driver appointments instead of deleting them.
-- Driver adds `driverRuns` (draft/checklist, route snapshot, start/completion and stop receipts) and `driverIncidents` (own submissions linked to shared school tasks). Existing browser data gains empty collections without resetting records or NFC state. Read/write/export scope is rechecked against the current driver/bus appointment; older records remain stored but become unavailable after reassignment. Trip CSV is generated directly from an accessible record, with no new leadership report-history store.
-- Stores add `storeCatalog`, `storeReservations`, `reservationBags`, `storeReports` and sequence `storeSequence`. A one-time `storesVersion` migration adds sample book/uniform inventories and missing Uniform Store demo accounts while preserving older orders/carts, admissions, subjects, NFC and Driver data. Later edits/deactivated listings/removed accounts are not reseeded. Existing `librarian` appointments are renamed in the UI, not replaced. Status transitions and stock changes validate before mutation; this is browser-local consistency, not concurrent server/database transactions.
+- Transport Coordinator adds `coordinatorReports`, eight per coordinator account/school, and bus-linked transport tasks in the existing `viceFollowups` list. No new demo accounts or migration are required. Saved tasks retain shared note history; reports omit note text and recheck captured task ownership/category plus bus/student school scope. GPS tracker configuration replaces staff bus appointments.
+- `gpsTransportVersion: 1` seeds a GPS device per existing bus once. The migration removes active Driver appointments/accounts and bus driver fields; mixed-role accounts retain other grants. Previous Driver accounts, appointments, runs, incidents and reports containing retired Driver fields/columns are archived under `retiredTransport` without an active UI/export. Existing academic, family, NFC, fee and route data is preserved. Explicitly removed/unconfigured trackers are not reseeded on later loads.
+- Stores add `storeCatalog`, `storeReservations`, `reservationBags`, `storeReports` and sequence `storeSequence`. A one-time `storesVersion` migration adds sample book/uniform inventories and missing Uniform Store demo accounts while preserving older orders/carts, admissions, subjects, NFC and historical transport data. Later edits/deactivated listings/removed accounts are not reseeded. Existing `librarian` appointments are renamed in the UI, not replaced. Status transitions and stock changes validate before mutation; this is browser-local consistency, not concurrent server/database transactions.
 - Store reports are independent per active account/role/school/kind, latest eight. Snapshots retain captured values; current appointment, branch scope and captured pupils’ current school membership are rechecked before access/export. A reservation is unavailable to staff/parent if its pupil leaves that school; its units no longer contribute to accessible stock holds. No school-move operational transfer process is added.
 - NFC state includes `nfcCards`, `nfcReaders` (online state/queue/sync), `nfcTrips` (snapshot rosters), `nfcEvents` and ordering counter `nfcSequence`. A one-time `nfcVersion` migration seeds readers/cards from the browser’s current buses/allocated students without replacing existing admissions, assignments, notes or trip state. Later lost/replaced cards, queued taps and event histories persist and are not reseeded. All roles share this browser-local demonstration state; there is no device/backend synchronisation service.
 - Report snapshots capture values at generation time. Filters/data edits do not rewrite older reports. Scope checks apply to opening, downloading and printing saved reports.
@@ -863,7 +815,6 @@ The Vice Principal may also create cover directly without a request. Cover teach
 | Subject Teacher | Dilini Silva (`dilini`, Mathematics 8A + ICT 6A); Nuwan Gamage (`nuwan`, Science 8A); Rihana Farook (`rihana`, English 6A); Asha Wickramasinghe (`asha`, Mathematics 4A) — Nugegoda. Lakshmi Fernando (`lakshmi`) — Malabe teaching courses. Actual assignments control visibility. |
 | Administrator | Anjali Fernando (`admin_c`) — Nugegoda; Shanika Dias (`admin_l`) — Malabe. Both preview all five administration views in their own school. |
 | Transport Coordinator | Nimal Rathnayake (`transport_c`) — Nugegoda (six operational buses); Chamara Silva (`transport_l`) — Malabe (two operational buses). Both have five scoped overview views. |
-| Driver | Kasun Dias (`driver_01`) — Nugegoda Bus 01; Nalin De Silva (`driver_07`) — Malabe Bus 07. All eight operational demo buses have Driver accounts; assignment changes control current access. Five overview views plus map and NFC boarding. |
 | Book Store Officer | Hasini Perera (`librarian_c`) — Nugegoda; Kumari Rodrigo (`librarian_l`) — Malabe. Existing appointments retained under the renamed role. |
 | Uniform Store Officer | Ishara Senanayake (`uniform_c`) — Nugegoda; Dulani Jayawardena (`uniform_l`) — Malabe. Both have the five store views. |
 | Parent | Nadeesha `FAMILY-1001` — Amaya + Kavin; Tharushi `FAMILY-1002` — Meera + Thevin; password `1234`. Existing admission aliases still work. |
@@ -876,9 +827,15 @@ Role assignments may be changed in the demo, so these are seeded examples rather
 node --test tests/*.test.mjs
 ```
 
-The suite covers access, migration, parent admission selection, network/directory/fleet data, academic/attendance reconciliation, report isolation, Principal leave decisions, Vice Principal coordination, Section Head scope/reviews/follow-ups and the cover-request handoff, Grade Coordinator scope/class reviews/follow-ups/reports, Section Head support responses and new-account migration. Browser verification should cover all five Section Head views, all three seeded Section Head accounts, 390px/320px layouts, course/material interactions, persistent follow-up/review/request outcomes, role switching and report CSV/HTML/print handling. Grade Coordinator browser checks should cover all five views, all three seeded grade accounts, enrolment teacher protection, material downloads, class/follow-up note persistence, Section Head queue isolation/responses, report exports and 390px/320px layouts. Class Teacher checks should cover fixed class scope, own-subject publication and parent completion, attendance overlays/restores across leadership views, private discussion notes, coordinator responses, report isolation and mobile forms. Check one-choice attendance buttons, keyboard navigation, live totals, draft cancellation, search/empty states, whole-list All present, saving while filtered, saved preselection and persistent Save controls at small screen sizes. Subject Teacher checks cover actual grant and course/student scope, own-course publication and parent completion, plan/review history, staff-only note visibility, coordinator queue isolation/responses, Class Teacher attendance separation, reassignment, report retention and scoped CSV/HTML/print. Check five teaching accounts and 1500px/390px/320px layouts, including forms. School Administrator checks cover both schools, direct registration/edit and duplicate admissions, same-school guardian links, class-change enrolment cleanup, subject teacher/enrolment writes and parent completion, private-note exclusion, current-appointment checks, filtered report totals/history, legacy routes and desktop/mobile forms. Transport Coordinator checks cover the operational-only street map, filtering/selection and paused simulation, driver/student moves and empty assignments, fixed school destination, cross-school rejection, Driver/Parent propagation, shared Vice Principal task history/reassignment, five report types with note exclusion/history isolation, legacy tracking, empty-school fleets and mobile forms/maps. NFC checks cover seven roles, current school/bus/child scope, card issue/loss/replacement and migration, roster snapshots, repeated/wrong-card taps, offline receipt reconciliation and historical card validity, coordinator review/closure rules, Parent privacy, CSV exclusion and mobile reader/card/review forms. Driver checks additionally cover incomplete/full safety checks, route/allocation invalidation, sequential stops/school arrival, shared fleet status, current-bus student/NFC summaries, issue handoff/status/privacy, trip CSV, existing-map compatibility, saved-state preservation, stale appointment/reassignment rejection and five views/forms at 1500px/390px/320px. Store checks cover grade/student/school/type isolation, uniform sizes/quantities, separate pupil bags, duplicate requests/guardians, stock holds/oversubscription, lifecycle/cancellation/reference verification, private-note exclusion, stock adjustments/listing changes, stale bag cleanup, report ownership/CSV safety, legacy-data migration and mobile catalogue/request/stock/collection forms. Keep passing test counts/evidence in the change log when updated.
+The suite covers access, migration, parent admission selection, network/directory/fleet data, academic/attendance reconciliation, report isolation, Principal leave decisions, Vice Principal coordination, Section Head scope/reviews/follow-ups and the cover-request handoff, Grade Coordinator scope/class reviews/follow-ups/reports, Section Head support responses and new-account migration. Browser verification should cover all five Section Head views, all three seeded Section Head accounts, 390px/320px layouts, course/material interactions, persistent follow-up/review/request outcomes, role switching and report CSV/HTML/print handling. Grade Coordinator browser checks should cover all five views, all three seeded grade accounts, enrolment teacher protection, material downloads, class/follow-up note persistence, Section Head queue isolation/responses, report exports and 390px/320px layouts. Class Teacher checks should cover fixed class scope, own-subject publication and parent completion, attendance overlays/restores across leadership views, private discussion notes, coordinator responses, report isolation and mobile forms. Check one-choice attendance buttons, keyboard navigation, live totals, draft cancellation, search/empty states, whole-list All present, saving while filtered, saved preselection and persistent Save controls at small screen sizes. Subject Teacher checks cover actual grant and course/student scope, own-course publication and parent completion, plan/review history, staff-only note visibility, coordinator queue isolation/responses, Class Teacher attendance separation, reassignment, report retention and scoped CSV/HTML/print. Check five teaching accounts and 1500px/390px/320px layouts, including forms. School Administrator checks cover both schools, direct registration/edit and duplicate admissions, same-school guardian links, class-change enrolment cleanup, subject teacher/enrolment writes and parent completion, private-note exclusion, current-appointment checks, filtered report totals/history, legacy routes and desktop/mobile forms. Transport Coordinator checks cover the operational-only street map, filtering/selection and paused simulation, tracker configuration and student moves, fixed school destination, cross-school rejection, Management/Parent propagation, shared Vice Principal task history/reassignment, five report types with note exclusion/history isolation, legacy tracking, empty-school fleets and mobile forms/maps. NFC checks cover six roles, current school/bus/child scope, card issue/loss/replacement and migration, roster snapshots, repeated/wrong-card taps, offline receipt reconciliation and historical card validity, coordinator review/closure rules, Parent privacy, CSV exclusion and mobile reader/card/review forms. GPS checks cover 24/7 scoped management access, Parent window boundaries/weekends/completion, stale appointments, unique devices, signal loss/recovery and preservation of legacy records. Store checks cover grade/student/school/type isolation, uniform sizes/quantities, separate pupil bags, duplicate requests/guardians, stock holds/oversubscription, lifecycle/cancellation/reference verification, private-note exclusion, stock adjustments/listing changes, stale bag cleanup, report ownership/CSV safety, legacy-data migration and mobile catalogue/request/stock/collection forms. Keep passing test counts/evidence in the change log when updated.
 
 ## Proposed features and requirements
+
+### GPS-device transport and removal of the Driver role
+
+**Feature ID:** `TRANSPORT-GPS-003`. **Requested:** 26 November 2026. **Status:** Implemented UI prototype; hardware integration pending.
+
+**User requirement:** remove the Driver role from the whole system. A GPS tracker installed on each bus reports location 24 hours a day without a Driver account, phone or login. **Clarified visibility:** school management sees in-scope buses 24/7; Parents see only their linked child’s bus during time ranges configured by the Transport Coordinator. Implementation covers role/appointment migration, bus/device setup, NFC operations without Driver login, transport reports, parent privacy, presentation/tours/screenshots and the role mind map. Existing browser records must be retained safely; actual physical tracker ingestion remains a future production integration because this is a UI prototype.
 
 ### Drill-through system role mind map
 
@@ -926,11 +883,13 @@ The user approved the recommended web presentation as proposed: a separate fulls
 
 **Recommended and implemented:** Book Store Officer (existing `librarian` key renamed), new Uniform Store Officer/Uniform Store section, pupil-specific lists and snapshots, separate school/store queues, stock confirmation/holds, Ready collection details, reference-checked handover, controlled cancellation, staff notes, stock adjustment and scoped CSV reports. School book lists/designs/stock are illustrative. Production stock/device/service integration, notifications, sales/payments and uniform returns/exchanges remain unsupported.
 
-### Driver daily workspace
+### Driver daily workspace (retired 26 November 2026)
 
-**Feature ID:** `DRIVER-WORKSPACE-001`. **Requested:** 22 November 2026 (“next role - driver”). **Status:** **Prototype implemented**.
+Superseded by `TRANSPORT-GPS-003`. This historical request no longer represents an available role, login or workflow.
 
-The user requested the next Driver role implementation. The recommended daily overview, pre-trip safety checklist, sequential route confirmations, current-bus students, school-coordinator issue handoff and own trip history/CSV are implemented as documented in [Driver](#driver). Existing map/NFC functions are retained. Real hardware, GPS uploads, emergency dispatch, notifications, authenticated services and student alighting remain outside this prototype.
+**Feature ID:** `DRIVER-WORKSPACE-001`. **Requested:** 22 November 2026 (“next role - driver”). **Status:** Retired; historical prototype requirement.
+
+The user requested the next Driver role implementation. The recommended daily overview, pre-trip safety checklist, sequential route confirmations, current-bus students, school-coordinator issue handoff and own trip history/CSV are implemented in the former workspace, now retired. Existing map/NFC functions are retained. Real hardware, GPS uploads, emergency dispatch, notifications, authenticated services and student alighting remain outside this prototype.
 
 ### NFC transport cards and boarding register
 
@@ -958,6 +917,15 @@ For **every new user feature idea or future implementation**:
 8. Update README links and relevant demo account examples. Do not broaden site sharing or role permissions just to expose a view.
 
 ## Change log
+
+Older entries below describe historical implementations. Driver functionality and earlier all-role GPS gates were superseded by the 26 November device-GPS update.
+
+### 26 November 2026 — Device GPS and role retirement
+
+- Removed the Driver role, accounts, appointments, pages, tours, report columns and presentation captures; the system has 12 current roles. Historical records are archived locally without reactivating old permissions.
+- Added unique bus GPS tracker configuration and signal loss/recovery simulation under Transport Coordinator. Chairman, Principal, Vice Principal, School Administrator (read-only) and Transport Coordinator see in-scope GPS 24/7; Parents retain coordinator-set weekday windows and selected-child scope.
+- Removed manual Driver trip/checklist requirements; NFC reader simulation and roster review remain with Transport Coordinator. Device hardware/API ingestion remains unconnected in this UI prototype.
+- Updated role mind maps, presentation screenshots, guides and regression coverage for scope, migration, device validation and Parent privacy. Validation: **194 Node tests passed**. Browser checks passed for removal from role menus/tours, unique tracker pairing, signal loss/recovery, management GPS after hours, Parent hidden/visible windows, NFC taps without a Driver login, 320px/390px layouts and GPS capability drill-through. The presentation has 50 actual screen captures; affected captures and the eight-chapter backup recording were refreshed. Runtime module versions prevent a cached browser mixing old/new modules.
 
 ### 26 November 2026 — Drill-through presentation role mind map
 

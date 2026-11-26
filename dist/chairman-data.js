@@ -11,7 +11,7 @@ export const chairmanViews = [
   { id: "reports", name: "Executive Reports", icon: "file" },
 ];
 export const reportTypes = { brief: "Network executive brief", transport: "Transport activity", academic: "Academic performance", attendance: "Attendance", staffing: "Staffing overview" };
-export const staffRoles = { principal: "Principal", vice_principal: "Vice Principal", section_head: "Section Head", coordinator: "Grade Coordinator", class_teacher: "Class Teacher", teacher: "Subject Teacher", admin: "School Administrator", transport: "Transport Coordinator", librarian: "Book Store Officer", uniform_store: "Uniform Store Officer", driver: "Driver" };
+export const staffRoles = { principal: "Principal", vice_principal: "Vice Principal", section_head: "Section Head", coordinator: "Grade Coordinator", class_teacher: "Class Teacher", teacher: "Subject Teacher", admin: "School Administrator", transport: "Transport Coordinator", librarian: "Book Store Officer", uniform_store: "Uniform Store Officer" };
 export const round = (value) => Math.round(value * 10) / 10;
 const hash = (value) => [...String(value)].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0, 7);
 const names = ["Amaya", "Kavin", "Senuli", "Dineth", "Nethmi", "Yenul", "Thisali", "Dulith", "Hasini", "Thevin", "Minuli", "Shenul", "Rashmi", "Sahan", "Tharushi", "Naveen", "Anuki", "Keshan", "Dinuli", "Ravin"];
@@ -108,7 +108,7 @@ export function branchStaff(state, branch, date = demoDate) {
     : person.roles.some((role) => ["teacher", "class_teacher", "coordinator", "section_head"].includes(role)) ? "teachers" : "support";
   const target = Math.ceil(schoolEnrollment(branch) / 21);
   for (let i = staff.filter((person) => category(person) === "teachers").length; i < target; i += 1) add("teacher", i);
-  for (let i = staff.filter((person) => category(person) === "support").length; i < 7 + branch.directoryIndex % 4; i += 1) add(["admin", "librarian", "transport", "driver"][i % 4], i);
+  for (let i = staff.filter((person) => category(person) === "support").length; i < 7 + branch.directoryIndex % 4; i += 1) add(["admin", "librarian", "transport"][i % 3], i);
   const requestDay = Math.floor(Date.parse(demoDate + "T12:00:00Z") / 86400000);
   const requestStaff = new Set(staff.filter((person) => category(person) === "teachers" && (hash(person.id) + requestDay * 7) % 23 >= 2 && (hash(person.id) + requestDay) % 29 !== 0).slice(0, 3).map((person) => person.id));
   return staff.map((person, index) => {
@@ -118,7 +118,7 @@ export function branchStaff(state, branch, date = demoDate) {
     const leave = (key + day) % 29 === 0;
     const approved = requestStaff.has(person.id) && date === demoDate && state.principalLeaveReviews?.["leave-" + branch.id + "-" + person.id]?.decision === "approved";
     const status = approved || leave ? "leave" : absent ? "absent" : "present";
-    const primaryRole = ["principal", "vice_principal", "section_head", "coordinator", "class_teacher", "teacher", "admin", "transport", "librarian", "uniform_store", "driver"].find((role) => person.roles.includes(role));
+    const primaryRole = ["principal", "vice_principal", "section_head", "coordinator", "class_teacher", "teacher", "admin", "transport", "librarian", "uniform_store"].find((role) => person.roles.includes(role));
     const assignedCourses = state.courses.filter((course) => course.branch === branch.id && state.assignments[course.id]?.teacher === person.id);
     const assignedSubjects = [...new Set(assignedCourses.map((course) => course.title))];
     return { ...person, category: category(person), primaryRole, designation: staffRoles[primaryRole], status, leaveRequestEligible: requestStaff.has(person.id),
@@ -248,7 +248,7 @@ export function generateExecutiveReport(state, context, settings, academic, tele
   const audience = settings.reportType === "attendance" ? settings.audience : "students";
   const attendance = branches.map((branch) => attendanceResult(state, branch, { ...settings, period: settings.reportPeriod, audience }));
   const staffing = branches.map((branch) => staffingResult(state, branch, dates.at(-1)));
-  const fleet = networkFleet(state, branches);
+  const fleet = networkFleet(state, branches, context);
   const rows = branches.map((branch) => {
     const result = assessments.find((row) => row.branch.id === branch.id);
     const register = attendance.find((row) => row.branch.id === branch.id);
@@ -272,7 +272,7 @@ export function generateExecutiveReport(state, context, settings, academic, tele
     summary: { academic: networkSummary(assessments), attendance: attendanceSummary(attendance), staffing: staffingSummary(staffing), fleet: fleetSummary(fleet) },
     rows, insights, buses: fleet.map((bus) => {
       const signal = networkTelemetry(bus, telemetry);
-      return { school: bus.branchName, label: bus.label, route: bus.name, driver: bus.driver, status: bus.status,
+      return { school: bus.branchName, label: bus.label, route: bus.name, tracker: bus.trackerId, status: bus.status,
         speed: signal.speed, nextStop: signal.nextStop, signal: signal.updated, students: bus.studentsOnBoard,
         lat: signal.position?.[0], lon: signal.position?.[1] };
     }) };
@@ -280,7 +280,7 @@ export function generateExecutiveReport(state, context, settings, academic, tele
 
 export function reportColumns(type, audience = "students") {
   const shared = [["school", "School branch"]];
-  if (type === "transport") return [...shared, ["label", "Bus"], ["route", "Route"], ["driver", "Driver"], ["status", "Status"], ["speed", "Speed km/h"], ["nextStop", "Next stop"], ["signal", "Last signal"], ["students", "Sample occupancy"], ["lat", "Latitude"], ["lon", "Longitude"]];
+  if (type === "transport") return [...shared, ["label", "Bus"], ["route", "Route"], ["tracker", "GPS tracker"], ["status", "Status"], ["speed", "Speed km/h"], ["nextStop", "Next stop"], ["signal", "Last signal"], ["students", "Sample occupancy"], ["lat", "Latitude"], ["lon", "Longitude"]];
   if (type === "academic") return [...shared, ["rank", "Rank"], ["academic", "Average mark %"], ["passRate", "Pass rate %"], ["assessed", "Students assessed"]];
   if (type === "attendance") return [...shared, ["attendance", "Attendance %"], ["expected", "Expected attendance-days"], ["present", "Present attendance-days"], ["absent", "Absent attendance-days"], audience === "staff" ? ["leave", "On leave attendance-days"] : ["late", "Late arrivals"]];
   if (type === "staffing") return [...shared, ["staff", "Total staff"], ["teachers", "Teachers"], ["available", "Available staff"], ["vacancies", "Vacancies"], ["coverage", "Positions filled %"], ["ratio", "Students per teacher"]];

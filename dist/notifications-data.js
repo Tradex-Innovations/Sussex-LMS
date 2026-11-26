@@ -24,9 +24,8 @@ export function notifications(state, context) {
   for (const task of state.viceFollowups || []) {
     const bus = state.buses.find((item) => item.id === task.busId && item.branch === task.branch);
     if (task.category !== "transport" || !bus) continue;
-    const incident = (state.driverIncidents || []).find((item) => item.taskId === task.id);
-    const kind = incident?.kind === "breakdown" ? "breakdown" : incident?.kind === "delay" ? "delay" : "transport issue";
-    pushBus("task-" + task.id, bus, `Bus ${bus.id} · ${task.status === "resolved" ? "issue resolved" : kind}`, task.status === "resolved" ? "School transport has marked this issue resolved." : "A transport concern has been reported to school. Please watch for further updates.", task.notes?.[0]?.at || incident?.createdAt || "2026-11-26T01:00:00.000Z", ":" + task.status);
+    const kind = "transport issue";
+    pushBus("task-" + task.id, bus, `Bus ${bus.id} · ${task.status === "resolved" ? "issue resolved" : kind}`, task.status === "resolved" ? "School transport has marked this issue resolved." : "A transport concern has been reported to school. Please watch for further updates.", task.notes?.[0]?.at || "2026-11-26T01:00:00.000Z", ":" + task.status);
   }
   for (const alert of state.transportAlerts || []) {
     const bus = state.buses.find((item) => item.id === alert.busId && item.branch === alert.branch);

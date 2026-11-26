@@ -12,7 +12,7 @@ test("The network fleet covers every school while preserving assigned vehicle re
   assert.equal(new Set(fleet.map((bus) => bus.branch)).size, 20);
   for (const bus of state.buses) {
     const record = fleet.find((record) => record.id === bus.id);
-    assert.equal(record.driver, bus.driver);
+    assert.equal(record.trackerId, bus.trackerId);
     assert.equal(record.status, bus.status);
     assert.equal(record.registration, bus.registration);
   }

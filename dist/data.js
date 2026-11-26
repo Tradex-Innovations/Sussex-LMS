@@ -1,3 +1,4 @@
+import { migrateGpsTransport } from "./gps-seed.js";
 import { migrateFamilyPortal } from "./family-seed.js";
 import { migrateAcademicPortal } from "./academic-seed.js";
 import { storesSeed, storeOfficerAccounts } from "./stores-seed.js";
@@ -12,9 +13,8 @@ export const roles = {
   coordinator: { name: "Grade Coordinator", icon: "users", start: "overview", pages: ["overview", "courses", "people"] },
   class_teacher: { name: "Class Teacher", icon: "book", start: "overview", pages: ["overview", "inbox", "communications", "events", "courses", "homework", "notices", "people"] },
   teacher: { name: "Subject Teacher", icon: "book", start: "overview", pages: ["overview", "communications", "events", "courses", "homework"] },
-  admin: { name: "School Administrator", icon: "settings", start: "overview", pages: ["overview", "fees", "people", "courses", "boarding"] },
+  admin: { name: "School Administrator", icon: "settings", start: "overview", pages: ["overview", "fees", "transport", "people", "courses", "boarding"] },
   transport: { name: "Transport Coordinator", icon: "route", start: "overview", pages: ["overview", "transport", "tracking", "boarding"] },
-  driver: { name: "Driver", icon: "bus", start: "overview", pages: ["overview", "transport", "boarding"] },
   librarian: { name: "Book Store Officer", icon: "library", start: "overview", pages: ["overview", "library"] },
   uniform_store: { name: "Uniform Store Officer", icon: "package", start: "overview", pages: ["overview", "uniforms"] },
   parent: { name: "Parent", icon: "user", start: "family", pages: ["family", "transport", "inbox", "events", "fees", "communications", "courses", "homework", "notices", "library", "uniforms", "boarding", "more"] },
@@ -79,12 +79,12 @@ export const books = [
 ];
 
 export const buses = [
-  { id: "01", name: "Nugegoda Loop", driver: "Kasun Dias", registration: "WP NB-4521", status: "route", color: "#168467", start: 0.55, stops: ["Nugegoda Junction", "Nawala Junction", "Rajagiriya", "Sussex College Network"], stopProgress: [0, 0.67, 0.94, 1] },
-  { id: "02", name: "Battaramulla Line", driver: "Ruwan Peries", registration: "WP NB-3692", status: "route", color: "#386bc7", start: 0.32, stops: ["Battaramulla", "Diyatha Uyana", "Rajagiriya", "Sussex College Network"], stopProgress: [0, 0.41, 0.84, 1] },
-  { id: "03", name: "Dehiwala Express", driver: "Sanjeewa Rathnayake", registration: "WP ND-7104", status: "route", color: "#785db6", start: 0.33, stops: ["Dehiwala Junction", "Kohuwala", "Narahenpita", "Sussex College Network"], stopProgress: [0, 0.34, 0.71, 1] },
-  { id: "04", name: "Kotte Shuttle", driver: "Indika Perera", registration: "WP NE-8406", status: "school", color: "#60796f", stops: ["Pita Kotte", "Etul Kotte", "Sussex College Network"] },
-  { id: "05", name: "Thalawathugoda Line", driver: "Dinesh Fernando", registration: "WP NC-8259", status: "school", color: "#60796f", stops: ["Thalawathugoda", "Battaramulla", "Sussex College Network"] },
-  { id: "06", name: "Maharagama Loop", driver: "Saman Jayasinghe", registration: "WP ND-1960", status: "delayed", color: "#b26a21", start: 0.44, stops: ["Maharagama", "Pita Kotte", "Etul Kotte", "Sussex College Network"], stopProgress: [0, 0.64, 0.82, 1] },
+  { id: "01", name: "Nugegoda Loop", registration: "WP NB-4521", status: "route", color: "#168467", start: 0.55, stops: ["Nugegoda Junction", "Nawala Junction", "Rajagiriya", "Sussex College Network"], stopProgress: [0, 0.67, 0.94, 1] },
+  { id: "02", name: "Battaramulla Line", registration: "WP NB-3692", status: "route", color: "#386bc7", start: 0.32, stops: ["Battaramulla", "Diyatha Uyana", "Rajagiriya", "Sussex College Network"], stopProgress: [0, 0.41, 0.84, 1] },
+  { id: "03", name: "Dehiwala Express", registration: "WP ND-7104", status: "route", color: "#785db6", start: 0.33, stops: ["Dehiwala Junction", "Kohuwala", "Narahenpita", "Sussex College Network"], stopProgress: [0, 0.34, 0.71, 1] },
+  { id: "04", name: "Kotte Shuttle", registration: "WP NE-8406", status: "school", color: "#60796f", stops: ["Pita Kotte", "Etul Kotte", "Sussex College Network"] },
+  { id: "05", name: "Thalawathugoda Line", registration: "WP NC-8259", status: "school", color: "#60796f", stops: ["Thalawathugoda", "Battaramulla", "Sussex College Network"] },
+  { id: "06", name: "Maharagama Loop", registration: "WP ND-1960", status: "delayed", color: "#b26a21", start: 0.44, stops: ["Maharagama", "Pita Kotte", "Etul Kotte", "Sussex College Network"], stopProgress: [0, 0.64, 0.82, 1] },
 ];
 
 export const statuses = {
@@ -117,9 +117,6 @@ function seedAccounts() {
     account("admin_l", "Shanika Dias", [grant("admin", "lakeside")]),
     account("transport_c", "Nimal Rathnayake", [grant("transport")]),
     account("transport_l", "Chamara Silva", [grant("transport", "lakeside")]),
-    ...buses.map((bus) => account("driver_" + bus.id, bus.driver, [grant("driver", "colombo", { bus: bus.id })])),
-    account("driver_07", "Nalin De Silva", [grant("driver", "lakeside", { bus: "07" })]),
-    account("driver_08", "Ashan Mendis", [grant("driver", "lakeside", { bus: "08" })]),
     account("librarian_c", "Hasini Perera", [grant("librarian")]),
     account("librarian_l", "Kumari Rodrigo", [grant("librarian", "lakeside")]),
     ...structuredClone(storeOfficerAccounts),
@@ -160,11 +157,9 @@ export function freshState() {
   );
   const scopedAssignments = { ...structuredClone(assignments), math4: { teacher: "asha", students: ["anuki"] } };
   for (const course of courses) scopedAssignments["lake-" + course.id] = { teacher: "lakshmi", students: [course.grade === 8 ? "meera" : "thevin"] };
-  return migrateFamilyPortal(migrateAcademicPortal({
+  return migrateGpsTransport(migrateFamilyPortal(migrateAcademicPortal({
     version: 2,
     ...storesSeed(),
-    driverRuns: [],
-    driverIncidents: [],
     networkVersion: 1,
     gradeCoordinatorVersion: 1,
     classTeacherVersion: 1,
@@ -187,12 +182,12 @@ export function freshState() {
     carts: {},
     orders: [],
     buses: [
-      ...buses.map((bus) => ({ ...bus, stops: [...bus.stops.slice(0, -1), "Sussex College Nugegoda"], branch: "colombo", driverId: "driver_" + bus.id })),
-      { id: "07", name: "Rajagiriya Link", driver: "Nalin De Silva", driverId: "driver_07", branch: "lakeside", registration: "WP NE-4528", status: "route", color: "#cb6655", start: 0.15, stops: ["Rajagiriya", "Diyatha Uyana", "Sussex College Malabe"] },
-      { id: "08", name: "Nugegoda Link", driver: "Ashan Mendis", driverId: "driver_08", branch: "lakeside", registration: "WP NF-3172", status: "route", color: "#277c96", start: 0.42, stops: ["Nugegoda Junction", "Nawala Junction", "Rajagiriya", "Diyatha Uyana", "Sussex College Malabe"] },
+      ...buses.map((bus) => ({ ...bus, stops: [...bus.stops.slice(0, -1), "Sussex College Nugegoda"], branch: "colombo" })),
+      { id: "07", name: "Rajagiriya Link", branch: "lakeside", registration: "WP NE-4528", status: "route", color: "#cb6655", start: 0.15, stops: ["Rajagiriya", "Diyatha Uyana", "Sussex College Malabe"] },
+      { id: "08", name: "Nugegoda Link", branch: "lakeside", registration: "WP NF-3172", status: "route", color: "#277c96", start: 0.42, stops: ["Nugegoda Junction", "Nawala Junction", "Rajagiriya", "Diyatha Uyana", "Sussex College Malabe"] },
     ],
     books: branches.flatMap((branch) => books.map((book) => ({ ...book, id: branch.id === "colombo" ? book.id : "lake-" + book.id, branch: branch.id, available: true }))),
-  }));
+  })));
 }
 
 function migrateSchoolLabel(label) {
@@ -220,6 +215,7 @@ function loadStoredState() {
         ...saved,
         academicPortalVersion: saved.academicPortalVersion || 0,
         familyPortalVersion: saved.familyPortalVersion || 0,
+        gpsTransportVersion: saved.gpsTransportVersion || 0,
         ...(!saved.storesVersion ? storesSeed() : {}),
         ...(!saved.nfcVersion ? boardingSeed(saved.students || defaults.students, saved.buses || defaults.buses) : {}),
         networkVersion: 1,
@@ -250,7 +246,7 @@ function loadStoredState() {
   }
 }
 
-export function loadState() { return migrateFamilyPortal(migrateAcademicPortal(loadStoredState())); }
+export function loadState() { return migrateGpsTransport(migrateFamilyPortal(migrateAcademicPortal(loadStoredState()))); }
 
 export function saveState(state) {
   try {

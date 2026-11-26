@@ -13,7 +13,7 @@ const admission = { branch:"colombo", name:"Demo Admissions Student", admissionN
 const editInput = (state,id) => { const student=state.students.find(student=>student.id===id);return {...student}; };
 
 test("School Administrator views require a current school appointment and preserve other role boundaries",()=>{
- const {state,context}=setup();assert.equal(roles.admin.start,"overview");assert.deepEqual(roles.admin.pages,["overview","fees","people","courses","boarding"]);
+ const {state,context}=setup();assert.equal(roles.admin.start,"overview");assert.deepEqual(roles.admin.pages,["overview","fees","transport","people","courses","boarding"]);
  assert.equal(adminScope(state,{...context,branch:"lakeside"}).branch.id,"colombo");
  assert.equal(adminScope(state,{...context,grant:{...context.grant,branch:"lakeside"}}),null);
  for(const role of ["principal","vice_principal","section_head","coordinator","class_teacher","teacher","parent"])assert.equal(adminScope(state,contextFor(state,role)),null);

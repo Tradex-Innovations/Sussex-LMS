@@ -29,7 +29,9 @@ jobs:
         working-directory: showcase
         run: npm ci
       - name: Verify prototype and presentation
-        run: node --test tests/*.test.mjs
+        run: |
+          node scripts/refresh-module-versions.mjs --check
+          node --test tests/*.test.mjs
       - name: Build presentation into the prototype site
         working-directory: showcase
         run: npm run build

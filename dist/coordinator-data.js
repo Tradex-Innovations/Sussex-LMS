@@ -8,14 +8,14 @@ import { statuses } from "./data.js";
 export const coordinatorViews = [
   { id: "fleet", name: "Fleet Activity", short: "Fleet", icon: "map" },
   { id: "routes", name: "Routes & Stops", short: "Routes", icon: "route" },
-  { id: "assignments", name: "Drivers & Students", short: "People", icon: "users" },
+  { id: "assignments", name: "Trackers & Students", short: "People", icon: "users" },
   { id: "issues", name: "Issues & Coordination", short: "Issues", icon: "alert" },
   { id: "reports", name: "Transport Reports", short: "Reports", icon: "file" },
 ];
 export const coordinatorReportTypes = { brief: "Transport coordination brief", fleet: "Fleet activity snapshot", routes: "Route and stop register", students: "Student bus allocations", tasks: "Assigned transport issues" };
 export const allocationStatuses = { all: "All school students", assigned: "Bus assigned", unassigned: "No valid bus assigned" };
-export const driverStatuses = { all: "All school drivers", assigned: "Bus assigned", unassigned: "Awaiting bus assignment" };
-export const coordinatorDefaults = () => ({ status: "all", busId: "", busFilter: "all", query: "", allocation: "all", driverStatus: "all", peopleTab: "students", taskStatus: "all", reportType: "brief", reportFormat: "csv", reportId: "", page: 1, mapFocus: "", resetMap: false });
+export const trackerStatuses = { all: "All GPS trackers", online: "Reporting", offline: "Signal delayed", unconfigured: "Not configured" };
+export const coordinatorDefaults = () => ({ status: "all", busId: "", busFilter: "all", query: "", allocation: "all", trackerStatus: "all", peopleTab: "students", taskStatus: "all", reportType: "brief", reportFormat: "csv", reportId: "", page: 1, mapFocus: "", resetMap: false });
 export function coordinatorScope(state, context) {
   if (context?.role !== "transport" || context.grant?.role !== "transport") return null;
   try { const normalized = recordContext(state, context), branch = state.branches.find((branch) => branch.id === normalized.branch); return branch ? { context: normalized, branch, key: "transport:" + branch.id + ":" + normalized.account.id } : null; } catch { return null; }
@@ -27,18 +27,18 @@ export function coordinatorBuses(state, context) {
 }
 export function coordinatorFleet(state, context) {
   const scope = requireCoordinator(state, context), ids = new Set(coordinatorBuses(state, context).map((bus) => bus.id));
-  return networkFleet(state, [scope.branch]).filter((bus) => bus.operational && ids.has(bus.id));
+  return networkFleet(state, [scope.branch], context).filter((bus) => bus.operational && ids.has(bus.id));
 }
 export function coordinatorFilters(state, context, input = {}) {
   const buses = coordinatorBuses(state, context), status = input.status === "all" || Object.hasOwn(statuses, input.status) ? input.status : "all", visible = buses.filter((bus) => status === "all" || bus.status === status);
   return { ...coordinatorDefaults(), status, busId: visible.some((bus) => bus.id === input.busId) ? input.busId : visible[0]?.id || "", busFilter: buses.some((bus) => bus.id === input.busFilter) ? input.busFilter : "all",
-    query: String(input.query || "").slice(0,80), allocation: Object.hasOwn(allocationStatuses,input.allocation)?input.allocation:"all", driverStatus: Object.hasOwn(driverStatuses,input.driverStatus)?input.driverStatus:"all",
-    peopleTab: input.peopleTab === "drivers" ? "drivers" : "students", taskStatus: input.taskStatus === "all" || Object.hasOwn(followupStatuses,input.taskStatus) ? input.taskStatus : "all",
+    query: String(input.query || "").slice(0,80), allocation: Object.hasOwn(allocationStatuses,input.allocation)?input.allocation:"all", trackerStatus: Object.hasOwn(trackerStatuses,input.trackerStatus)?input.trackerStatus:"all",
+    peopleTab: input.peopleTab === "trackers" ? "trackers" : "students", taskStatus: input.taskStatus === "all" || Object.hasOwn(followupStatuses,input.taskStatus) ? input.taskStatus : "all",
     reportType: Object.hasOwn(coordinatorReportTypes,input.reportType)?input.reportType:"brief", reportFormat: input.reportFormat === "html" ? "html" : "csv", reportId: String(input.reportId||""), page: Number.isInteger(Number(input.page))&&Number(input.page)>0 ? Number(input.page):1, mapFocus: buses.some((bus)=>bus.id===input.mapFocus)?input.mapFocus:"",resetMap:Boolean(input.resetMap) };
 }
-export function coordinatorDrivers(state, context, input = {}) {
-  const scope = requireCoordinator(state, context), f = coordinatorFilters(state,context,input), buses=coordinatorBuses(state,context),query=f.query.trim().toLowerCase();
-  return state.accounts.filter((person)=>person.grants.some((grant)=>grant.role==="driver"&&grant.branch===scope.branch.id)).map((person)=>({person,buses:buses.filter((bus)=>bus.driverId===person.id&&person.grants.some((grant)=>grant.role==="driver"&&grant.branch===bus.branch&&grant.bus===bus.id))})).filter((row)=>(f.busFilter==="all"||row.buses.some((bus)=>bus.id===f.busFilter))&&(f.driverStatus==="all"||f.driverStatus==="assigned"&&row.buses.length||f.driverStatus==="unassigned"&&!row.buses.length)&&(!query||[row.person.name,...row.buses.flatMap((bus)=>[bus.id,bus.name,bus.registration])].join(" ").toLowerCase().includes(query)));
+export function coordinatorTrackers(state, context, input = {}) {
+  const scope = requireCoordinator(state, context), f = coordinatorFilters(state, context, input), query = f.query.trim().toLowerCase();
+  return coordinatorBuses(state, context).filter(bus => (f.busFilter === "all" || bus.id === f.busFilter) && (f.trackerStatus === "all" || f.trackerStatus === "unconfigured" && !bus.trackerId || bus.trackerId && bus.trackerStatus === f.trackerStatus) && (!query || [bus.id, bus.name, bus.registration, bus.trackerId].join(" ").toLowerCase().includes(query))).map(bus => ({ bus, trackerId: bus.trackerId || "Not configured", status: bus.trackerId ? bus.trackerStatus : "unconfigured" }));
 }
 export function coordinatorStudents(state, context, input = {}) {
   const scope=requireCoordinator(state,context), f=coordinatorFilters(state,context,input), buses=coordinatorBuses(state,context),query=f.query.trim().toLowerCase();
@@ -46,7 +46,7 @@ export function coordinatorStudents(state, context, input = {}) {
 }
 export function coordinatorRoutes(state,context,input={}) {
   const f=coordinatorFilters(state,context,input),query=f.query.trim().toLowerCase();
-  return coordinatorBuses(state,context).filter((bus)=>(f.busFilter==="all"||bus.id===f.busFilter)&&(f.status==="all"||bus.status===f.status)&&(!query||[bus.id,bus.name,bus.registration,bus.driver,...bus.stops].join(" ").toLowerCase().includes(query)));
+  return coordinatorBuses(state,context).filter((bus)=>(f.busFilter==="all"||bus.id===f.busFilter)&&(f.status==="all"||bus.status===f.status)&&(!query||[bus.id,bus.name,bus.registration,bus.trackerId,...bus.stops].join(" ").toLowerCase().includes(query)));
 }
 export function coordinatorTasks(state,context,input={}) {
   const scope=requireCoordinator(state,context),f=coordinatorFilters(state,context,input),ids=new Set(coordinatorBuses(state,context).map((bus)=>bus.id)),query=f.query.trim().toLowerCase();
@@ -67,13 +67,13 @@ export function saveCoordinatorTask(state,context,input) {
   return task;
 }
 export function coordinatorOverview(state,context) {
-  const buses=coordinatorBuses(state,context),students=coordinatorStudents(state,context),drivers=coordinatorDrivers(state,context),tasks=coordinatorTasks(state,context);
-  return {buses,students,drivers,tasks,route:buses.filter((bus)=>bus.status==="route").length,school:buses.filter((bus)=>bus.status==="school").length,delayed:buses.filter((bus)=>bus.status==="delayed").length,unassigned:buses.filter((bus)=>!drivers.some((row)=>row.buses.some((item)=>item.id===bus.id))).length,allocated:students.filter((row)=>row.bus).length};
+  const buses=coordinatorBuses(state,context),students=coordinatorStudents(state,context),trackers=coordinatorTrackers(state,context),tasks=coordinatorTasks(state,context);
+  return {buses,students,trackers,tasks,route:buses.filter((bus)=>bus.status==="route").length,school:buses.filter((bus)=>bus.status==="school").length,delayed:buses.filter((bus)=>bus.status==="delayed").length,unassigned:buses.filter((bus)=>!bus.trackerId).length,allocated:students.filter((row)=>row.bus).length};
 }
 export function visibleCoordinatorReports(state,context) {
   const scope=coordinatorScope(state,context);if(!scope)return[];
   const buses=new Set(coordinatorBuses(state,context).map((bus)=>bus.id)),students=new Set(coordinatorStudents(state,context).map((row)=>row.student.id)),tasks=new Set(coordinatorTasks(state,context).map((task)=>task.id));
-  return(state.coordinatorReports||[]).filter((report)=>report.owner?.role==="transport"&&report.owner.key===scope.key&&report.criteria.scope.length===1&&report.criteria.scope[0]===scope.branch.id&&report.criteria.busIds.every((id)=>buses.has(id))&&report.criteria.studentIds.every((id)=>students.has(id))&&report.criteria.taskIds.every((id)=>tasks.has(id))).map((report)=> report.type !== "fleet" ? report : { ...report, customRows: report.customRows.map((row)=>{ const bus=state.buses.find((bus)=>bus.id===row.bus&&bus.branch===scope.branch.id); return bus&&!trackingPolicy(state,bus).visible?{...row,lat:"Hidden",lon:"Hidden",next:"GPS hidden",progress:"Hidden",eta:"Hidden",signal:"GPS hidden"}:row; }) });
+  return(state.coordinatorReports||[]).filter((report)=>report.owner?.role==="transport"&&report.owner.key===scope.key&&report.criteria.scope.length===1&&report.criteria.scope[0]===scope.branch.id&&report.criteria.busIds.every((id)=>buses.has(id))&&report.criteria.studentIds.every((id)=>students.has(id))&&report.criteria.taskIds.every((id)=>tasks.has(id))).map((report)=> report.type !== "fleet" ? report : { ...report, customRows: report.customRows.map((row)=>{ const bus=state.buses.find((bus)=>bus.id===row.bus&&bus.branch===scope.branch.id); return bus&&!trackingPolicy(state,bus,undefined,context).visible?{...row,lat:"Hidden",lon:"Hidden",next:"GPS hidden",progress:"Hidden",eta:"Hidden",signal:"GPS hidden"}:row; }) });
 }
 export function generateCoordinatorReport(state,context,input={},telemetry={}) {
   const scope=requireCoordinator(state,context),f=coordinatorFilters(state,context,input);
@@ -85,30 +85,24 @@ export function generateCoordinatorReport(state,context,input={},telemetry={}) {
   if(f.reportType==="routes"){
     rows=buses.flatMap((bus)=>bus.stops.map((stop,index)=>({bus:bus.id,route:bus.name,order:index+1,stop,kind:index===bus.stops.length-1?"School destination":"Pickup stop"})));columns=[["bus","Bus"],["route","Route"],["order","Stop order"],["stop","Stop name"],["kind","Stop type"]];
   }else if(f.reportType==="students"){
-    rows=students.map((row)=>({name:row.student.name,admission:row.student.admissionNumber,className:row.student.className,bus:row.bus?.id||"Unassigned",route:row.bus?.name||"—",driver:row.bus?.driver||"—"}));columns=[["name","Student"],["admission","Admission number"],["className","Class"],["bus","Assigned bus"],["route","Route"],["driver","Driver"]];studentIds=students.map((row)=>row.student.id);busIds=[...new Set(students.filter((row)=>row.bus).map((row)=>row.bus.id))];
+    rows=students.map((row)=>({name:row.student.name,admission:row.student.admissionNumber,className:row.student.className,bus:row.bus?.id||"Unassigned",route:row.bus?.name||"—",tracker:row.bus?.trackerId||"—"}));columns=[["name","Student"],["admission","Admission number"],["className","Class"],["bus","Assigned bus"],["route","Route"],["tracker","GPS tracker"]];studentIds=students.map((row)=>row.student.id);busIds=[...new Set(students.filter((row)=>row.bus).map((row)=>row.bus.id))];
   }else if(f.reportType==="tasks"){
     rows=tasks.map((task)=>({title:task.title,bus:task.busId||"School transport",due:task.due,status:followupStatuses[task.status],owner:scope.context.account.name}));columns=[["title","Transport issue / task"],["bus","Bus / scope"],["due","Due date"],["status","Status"],["owner","Assigned coordinator"]];taskIds=tasks.map((task)=>task.id);busIds=[...new Set(tasks.filter((task)=>task.busId).map((task)=>task.busId))];
   }else if(f.reportType==="fleet"){
-    rows=buses.map((bus)=>{const details=fleet.find((item)=>item.id===bus.id),t=networkTelemetry(details,telemetry);return{bus:bus.id,registration:bus.registration,route:bus.name,driver:bus.driver,status:statuses[bus.status].label,next:t.nextStop,progress:Math.round(t.progress*100),eta:details.trackingVisible===false?"Hidden":bus.status==="school"?"Arrived":t.eta+" min",signal:t.updated,lat:t.position?.[0]?.toFixed(5)||"Unavailable",lon:t.position?.[1]?.toFixed(5)||"Unavailable"};});columns=[["bus","Bus"],["registration","Vehicle"],["route","Route"],["driver","Driver"],["status","Saved status"],["next","Demo next stop"],["progress","Demo progress %"],["eta","Demo arrival estimate"],["signal","Simulated signal"],["lat","Simulated latitude"],["lon","Simulated longitude"]];
+    rows=buses.map((bus)=>{const details=fleet.find((item)=>item.id===bus.id),t=networkTelemetry(details,telemetry);return{bus:bus.id,registration:bus.registration,route:bus.name,tracker:bus.trackerId,status:statuses[bus.status].label,next:t.nextStop,progress:Math.round(t.progress*100),eta:details.trackingVisible===false?"Hidden":bus.status==="school"?"Arrived":t.eta+" min",signal:t.updated,lat:t.position?.[0]?.toFixed(5)||"Unavailable",lon:t.position?.[1]?.toFixed(5)||"Unavailable"};});columns=[["bus","Bus"],["registration","Vehicle"],["route","Route"],["tracker","GPS tracker"],["status","Saved status"],["next","Demo next stop"],["progress","Demo progress %"],["eta","Demo arrival estimate"],["signal","Simulated signal"],["lat","Simulated latitude"],["lon","Simulated longitude"]];
   }else{
-    rows=buses.map((bus)=>({bus:bus.id,route:bus.name,status:statuses[bus.status].label,driver:bus.driver,students:coordinatorStudents(state,context,{busFilter:bus.id}).length,stops:bus.stops.length,issues:tasks.filter((task)=>task.busId===bus.id&&task.status!=="resolved").length}));columns=[["bus","Bus"],["route","Route"],["status","Saved status"],["driver","Driver"],["students","Assigned student records"],["stops","Stops"],["issues","Your open bus issues"]];studentIds=coordinatorStudents(state,context).filter((row)=>busIds.includes(row.bus?.id)).map((row)=>row.student.id);taskIds=tasks.filter((task)=>busIds.includes(task.busId)).map((task)=>task.id);
+    rows=buses.map((bus)=>({bus:bus.id,route:bus.name,status:statuses[bus.status].label,tracker:bus.trackerId,students:coordinatorStudents(state,context,{busFilter:bus.id}).length,stops:bus.stops.length,issues:tasks.filter((task)=>task.busId===bus.id&&task.status!=="resolved").length}));columns=[["bus","Bus"],["route","Route"],["status","Saved status"],["tracker","GPS tracker"],["students","Assigned student records"],["stops","Stops"],["issues","Your open bus issues"]];studentIds=coordinatorStudents(state,context).filter((row)=>busIds.includes(row.bus?.id)).map((row)=>row.student.id);taskIds=tasks.filter((task)=>busIds.includes(task.busId)).map((task)=>task.id);
   }
   const generatedAt=new Date().toISOString(),date=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Colombo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(generatedAt));
   return{id:"coordinator-report-"+crypto.randomUUID(),title:coordinatorReportTypes[f.reportType],type:f.reportType,generatedAt,owner:{role:"transport",key:scope.key,school:scope.branch.school,by:scope.context.account.name},criteria:{...criteria,scope:[scope.branch.id],from:date,to:date,busIds,studentIds,taskIds},summary:{buses:busIds.length,students:f.reportType==="students"?students.length:studentIds.length,rows:rows.length},customColumns:columns,customRows:rows};
 }
 
-export function saveCoordinatorAllocation(state,context,input){
-  requireCoordinator(state,context);
-  const bus=coordinatorBuses(state,context).find((bus)=>bus.id===input.busId);
-  if(!bus)throw new Error("Choose an operational bus from your school.");
-  const students=coordinatorStudents(state,context,{busFilter:bus.id}).map((row)=>row.student.id);
-  let driver=bus.driverId||"";
-  if(input.kind==="student"){
-    if(!coordinatorStudents(state,context).some((row)=>row.student.id===input.person))throw new Error("Choose a student from your appointed school.");
-    if(!students.includes(input.person))students.push(input.person);
-  }else if(input.kind==="driver"){
-    if(!coordinatorDrivers(state,context).some((row)=>row.person.id===input.person))throw new Error("Choose a driver appointed to your school.");
-    driver=input.person;
-  }else throw new Error("Choose a driver or student allocation.");
-  return saveBusAssignment(state,context,{id:bus.id,name:bus.name,driver,stops:bus.stops,students});
+export function saveCoordinatorAllocation(state, context, input) {
+  requireCoordinator(state, context);
+  const bus = coordinatorBuses(state, context).find(bus => bus.id === input.busId);
+  if (!bus || input.kind !== "student") throw new Error("Choose a school bus and student allocation.");
+  if (!coordinatorStudents(state, context).some(row => row.student.id === input.person)) throw new Error("Choose a student from your appointed school.");
+  const students = coordinatorStudents(state, context, { busFilter: bus.id }).map(row => row.student.id);
+  if (!students.includes(input.person)) students.push(input.person);
+  return saveBusAssignment(state, context, { id: bus.id, name: bus.name, trackerId: bus.trackerId, stops: bus.stops, students });
 }

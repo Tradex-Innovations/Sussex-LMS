@@ -4,7 +4,7 @@ import { branches, chapters, initialDemo, demoReducer as reduce, comparison, cha
 import { roles } from '../dist/data.js';
 import { assessmentResult } from '../dist/network-analytics.js';
 
-test('Showcase keeps eight addressable chapters, the verified 20 branches and all current 13 roles',()=>{
+test('Showcase keeps eight addressable chapters, the verified 20 branches and all current 12 roles',()=>{
  assert.equal(chapters.length,8);assert.equal(new Set(chapters.map(item=>item.id)).size,8);assert.equal(branches.length,20);assert.equal(new Set(branches.map(branch=>branch.id)).size,20);
  assert.deepEqual(roleTours.map(role=>role.id).sort(),Object.keys(roles).sort());assert.equal(focusedTours.length,4);
  for(const chapter of chapters)assert.equal(chapterFromHash('#'+chapter.id),chapters.indexOf(chapter));assert.equal(chapterFromHash('#invalid'),0);
@@ -45,6 +45,6 @@ test('Academic comparison exactly reuses the existing illustrative LMS marks',()
  assert.equal(comparison({...initialDemo,compareAll:true}).length,20);assert.ok(comparison({...initialDemo,subject:'science'}).every(row=>Number.isFinite(row.mean)));
 });
 test('Invalid school/role choices do not change the example; reset is isolated and deterministic',()=>{
- assert.equal(reduce(initialDemo,{type:'branch',id:'foreign'}),initialDemo);assert.equal(reduce(initialDemo,{type:'role',id:'root'}),initialDemo);let state=reduce(initialDemo,{type:'role',id:'driver'});state=reduce(state,{type:'tour-step',value:10});assert.equal(state.tourStep,2);assert.deepEqual(reduce(state,{type:'reset'}),initialDemo);
+ assert.equal(reduce(initialDemo,{type:'branch',id:'foreign'}),initialDemo);assert.equal(reduce(initialDemo,{type:'role',id:'root'}),initialDemo);let state=reduce(initialDemo,{type:'role',id:'transport'});state=reduce(state,{type:'tour-step',value:10});assert.equal(state.tourStep,2);assert.deepEqual(reduce(state,{type:'reset'}),initialDemo);
  let progress={...initialDemo};for(let i=0;i<20;i++)progress=reduce(progress,{type:'advance'});assert.equal(progress.journey,1);
 });

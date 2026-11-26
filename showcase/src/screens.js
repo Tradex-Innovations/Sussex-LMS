@@ -14,8 +14,6 @@ export const screenshots = {
  teacher: { title: 'Subject Teacher', file: 'teacher.png', route: 'teacher/overview/summary' },
  admin: { title: 'School Administrator', file: 'admin.png', route: 'admin/overview/summary' },
  transport: { title: 'Transport Coordinator', file: 'transport.png', route: 'transport/overview/fleet' },
- driver: { title: 'Driver overview', file: 'driver.png', route: 'driver/overview/summary' },
- 'driver-issues': { title: 'Driver issues', file: 'driver-issues.png', route: 'driver/overview/issues' },
  librarian: { title: 'Book Store', file: 'librarian.png', route: 'librarian/overview/summary' },
  uniform_store: { title: 'Uniform Store', file: 'uniform_store.png', route: 'uniform_store/overview/summary' },
  'teacher-notes': { title: 'Lecture notes', file: 'teacher-notes.png', route: 'teacher/subjects' },
@@ -27,7 +25,6 @@ export const screenshots = {
  'parent-notices': { title: 'Parent class notices', file: 'parent-notices.png', route: 'parent/notices' },
  'class-attendance': { title: 'Class attendance', file: 'class-attendance.png', route: 'class_teacher/overview/attendance' },
  boarding: { title: 'Bus boarding', file: 'boarding.png', route: 'transport/boarding' },
- 'driver-boarding': { title: 'Driver boarding', file: 'driver-boarding.png', route: 'driver/boarding' },
  'transport-cards': { title: 'Student cards', file: 'transport-cards.png', route: 'admin/boarding' },
  'book-requests': { title: 'Book Store requests', file: 'book-requests.png', route: 'librarian/overview/reservations' },
  'uniform-requests': { title: 'Uniform Store requests', file: 'uniform-requests.png', route: 'uniform_store/overview/reservations' },
@@ -50,16 +47,18 @@ export const screenshots = {
  'admin-unpaid': { title: 'Unpaid students', file: 'admin-unpaid.png', route: 'admin/fees' },
  'transport-privacy': { title: 'Tracking hours & alerts', file: 'transport-privacy.png', route: 'transport/tracking' },
  'parent-gps-hidden': { title: 'GPS privacy', file: 'parent-gps-hidden.png', route: 'parent/transport' },
+ 'gps-trackers': { title: 'Bus GPS trackers', file: 'gps-trackers.png', route: 'transport/overview/assignments' },
+ 'admin-transport': { title: 'School management GPS', file: 'admin-transport.png', route: 'admin/transport' },
 };
 export const chapterScreens = [
  [['network','Network']],
- [['parent-bus','Parent'],['parent-inbox','Alerts'],['parent-gps-hidden','Privacy'],['transport-privacy','Tracking hours'],['class-inbox','Class Teacher'],['driver','Driver']],
+ [['parent-bus','Parent'],['admin-transport','Management'],['parent-inbox','Alerts'],['parent-gps-hidden','Privacy'],['transport-privacy','Tracking hours'],['class-inbox','Class Teacher'],['gps-trackers','GPS trackers']],
  [['boarding','Boarding'],['parent-boarding','Parent'],['transport-cards','Student cards']],
  [['parent-courses','Subjects'],['class-subjects','Selections'],['teacher-classes','Classes'],['parent-homework','Homework'],['parent-notices','Notices'],['class-notices','Teacher notices'],['teacher-homework','Teacher homework'],['teacher-notes','Notes'],['class-attendance','Attendance']],
  [['chairman-academic','Academic'],['chairman-attendance','Attendance'],['chairman-staffing','Staffing'],['chairman-reports','Reports']],
  [['parent-books','Books'],['parent-uniforms','Uniforms'],['book-requests','Book Store'],['uniform-requests','Uniform Store'],['parent-ready','Collection']],
  [['parent-family','Family'],['parent-events','Consent'],['parent-fees','School fees'],['parent-payment','Online payment'],['admin-unpaid','Unpaid students'],['admin-fees','Fee administration'],['class-events','Consent register'],['class-letters','Teacher letters'],['parent-letters','Parent letters']],
 ];
-export const roleScreens = { chairman: ['network','chairman-academic','chairman-reports'], principal: ['principal','principal-attendance','principal-reports'], parent: ['parent-family','parent-events','parent-fees'], driver: ['driver','driver-boarding','driver-issues'] };
+export const roleScreens = { chairman: ['network','chairman-academic','chairman-reports'], principal: ['principal','principal-attendance','principal-reports'], parent: ['parent-family','parent-events','parent-fees'], transport: ['transport','boarding','transport-privacy'] };
 export function roleScreenshot(id, step = 0) { return roleScreens[id]?.[Math.max(0,Math.min(2,step))] || (screenshots[id] ? id : 'network'); }
 export const screenshotSource = id => './assets/screens/'+screenshots[id].file;

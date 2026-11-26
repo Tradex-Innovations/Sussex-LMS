@@ -4,14 +4,14 @@ import { networkRoutes } from "./network-routes.js";
 const routeCache = new WeakMap();
 const startedAt = performance.now();
 
-export function networkFleet(state, branches) {
+export function networkFleet(state, branches, context) {
   return protectFleet(state, branches.flatMap((branch) => {
     const index = branch.directoryIndex;
     const assigned = state.buses.filter((bus) => bus.branch === branch.id);
     const buses = assigned.length ? assigned : [0, 1].map((number) => ({
       id: "demo-" + branch.id + "-" + (number + 1),
       name: branch.name + (number ? " town pickup" : " morning pickup"),
-      driver: "Sample driver " + (index * 2 + number + 1),
+      trackerId: "DEMO-GPS-" + branch.id + "-" + (number + 1), trackerEnabled: true, trackerStatus: number && index % 3 === 0 ? "offline" : "online",
       registration: "Demo vehicle",
       status: number === 0 ? "route" : index % 3 === 0 ? "delayed" : index % 3 === 1 ? "school" : "route",
       start: 0.16 + ((index * 7 + number * 19) % 60) / 100,
@@ -25,7 +25,7 @@ export function networkFleet(state, branches) {
       studentsOnBoard: bus.status === "school" ? 0 : 18 + (index * 7 + number * 3) % 22,
       capacity: 40, sample: true, operational: Boolean(assigned.length),
     }));
-  }));
+  }), context);
 }
 
 export function fleetSummary(fleet) {

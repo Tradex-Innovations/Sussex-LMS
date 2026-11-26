@@ -10,7 +10,6 @@ const permissions = {
   teacher: [],
   admin: ["students.edit", "courses.assign", "courses.teacher"],
   transport: ["transport.manage"],
-  driver: ["trip.manage"],
   librarian: ["library.manage", "stores.books.manage"],
   uniform_store: ["stores.uniforms.manage"],
   parent: ["materials.complete", "stores.reserve"],
@@ -21,6 +20,7 @@ export function can(context, permission) {
 }
 
 export function contextFor(state, role, accountId, branchId, grantIndex) {
+  if (!Object.hasOwn(roles, role)) return null;
   const eligible = state.accounts.filter((person) => person.grants.some((grant) => grant.role === role));
   const account = eligible.find((person) => person.id === accountId) || eligible[0];
   if (!account) return null;
@@ -70,11 +70,11 @@ export function canPublish(state, context, course) {
 }
 
 export function visibleBuses(state, context, child) {
+  if (!context || !roles[context.role]?.pages.includes("transport")) return [];
   if (context.role === "parent") {
     const linked = linkedChildren(state, context).find((student) => student.id === child?.id);
     return state.buses.filter((bus) => linked && bus.id === linked.bus && bus.branch === linked.branch);
   }
-  if (context.role === "driver") return state.buses.filter((bus) => withinScope(context, bus) && bus.id === context.grant.bus && bus.driverId === context.account.id);
   return state.buses.filter((bus) => withinScope(context, bus));
 }
 

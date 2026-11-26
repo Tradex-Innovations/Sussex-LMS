@@ -15,3 +15,5 @@ Capture every new user-requested feature idea in the reference’s **Proposed fe
 Check the other roles participating in a changed workflow and update their entries too. Keep `README.md` walkthrough links consistent. Verify scope and workflow changes with appropriate tests; include cross-school and cross-section rejection where applicable. Do not describe UI-only restrictions as server-enforced security.
 
 Preserve the existing site's project identity and audience. Keep generated QA outputs and temporary credentials out of source control.
+
+After changing prototype runtime JavaScript or CSS, run `node scripts/refresh-module-versions.mjs`. This keeps the import map and entry asset versions coherent for cached browser sessions. Check it with `node scripts/refresh-module-versions.mjs --check` before publishing.
