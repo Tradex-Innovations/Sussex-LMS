@@ -12,9 +12,9 @@ Choose **Present** for a guided walkthrough. **Explore** additionally supports s
 
 Chapters open in **Screens** view with actual prototype captures. Use the screen tabs (or **Prototype view** in The classroom) to show related views; select the image to enlarge it. **Actual size** allows scrolling across the original pixels; **Fit to view** restores the full frame. **Open prototype** opens that captured view's real LMS route. Choose **Try demo** for the presentation's interactive examples. Headlines and functional controls remain visible; supporting narration and limits are in **Notes** instead of small on-screen annotations.
 
-Use the fullscreen button or the menu's fullscreen action when supported by the browser. Load the menu's **Watch the backup walkthrough** before the meeting if a video-only fallback is needed. The downloadable H264 video is 39 seconds at 1440×900, with no audio; it is a short visual summary rather than the full narrated presentation.
+Use the fullscreen button or the menu's fullscreen action when supported by the browser. Load the menu's **Watch the backup walkthrough** before the meeting if a video-only fallback is needed. The downloadable H264 video is 45 seconds at 1440×900, with no audio; it is a short visual summary rather than the full narrated presentation.
 
-## Seven chapters
+## Eight chapters
 
 | Chapter | Suggested discussion | Interaction |
 | --- | --- | --- |
@@ -39,6 +39,12 @@ Allow roughly 8–10 minutes for the guided story plus discussion. Chapter notes
 
 ## What the client is seeing
 
-The 38 screenshots are unaltered captures of actual prototype views in an isolated demo browser. They are static images, not live data. Try demo interactions are presentation examples held in memory; they do not read or write the LMS's browser database. GPS, NFC, academic results, uniform designs, collection and student records are sample demonstrations. A missed tap means review, not automatic student absence. Lesson completion does not create academic marks. Book/uniform flows have no checkout or online payment.
+The 51 screenshots are unaltered captures of actual prototype views in an isolated demo browser. They are static images, not live data. Try demo interactions are presentation examples held in memory; they do not read or write the LMS's browser database. GPS, NFC, academic results, uniform designs, collection and student records are sample demonstrations. A missed tap means review, not automatic student absence. Lesson completion does not create academic marks. Book/uniform flows have no checkout or online payment.
 
 Role links open the existing LMS in a separate tab with its normal demo account/login behavior. Parent demo admission: **SCN-1001**, password **1234**. Suggested pilot stages are a proposal, not a delivery commitment or an installed hardware claim.
+
+## 26 November 2026 family update
+
+The family chapter covers one guardian login/all linked children, transport inbox alerts, trip consent, teacher letters/email and school fee demo payment. Use FAMILY-1001 / 1234. Parents cannot override GPS hours. Transport Coordinator → Tracking hours & alerts has the presenter clock (07:15 visible / 18:00 hidden), school time windows and trip completion. School Administrator owns invoices, unpaid students and fee reminders; Principal/Chairman read scoped fee oversight. Book/uniform reservations remain collection-only without payment. No real email, consent signature verification or payment integration is connected.
+
+51 actual prototype screenshots include 13 new family/communication/fee/privacy views. Affected existing captures were refreshed on 26 November via the in-app browser; unchanged store/boarding examples retain original capture dates. Browser screenshots were converted from JPEG to PNG without layout/content changes. Desktop refreshes use a requested 1440×900 viewport and parent bus/boarding use 390×844; the browser returns slightly smaller JPEG images. Exact file dimensions are recorded in the manifest. `captures.json` records per-file dimensions, capture dates and source provenance. The source hash covers the working tree used for captures.

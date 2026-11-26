@@ -15,7 +15,7 @@ export const driverChecks = {
   route: "Assigned route and student list reviewed",
   reader: "Reader and boarding arrangements checked",
 };
-export const driverIssueTypes = { delay: "Route delay", vehicle: "Vehicle concern", reader: "Card / reader problem", student: "Student transport concern", other: "Other transport issue" };
+export const driverIssueTypes = { delay: "Route delay", breakdown: "Bus breakdown", vehicle: "Vehicle concern", reader: "Card / reader problem", student: "Student transport concern", other: "Other transport issue" };
 export const driverDefaults = () => ({ query: "", issueStatus: "all" });
 
 export function driverScope(state, context) {

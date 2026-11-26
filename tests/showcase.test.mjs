@@ -4,8 +4,8 @@ import { branches, chapters, initialDemo, demoReducer as reduce, comparison, cha
 import { roles } from '../dist/data.js';
 import { assessmentResult } from '../dist/network-analytics.js';
 
-test('Showcase keeps seven addressable chapters, the verified 20 branches and all current 13 roles',()=>{
- assert.equal(chapters.length,7);assert.equal(new Set(chapters.map(item=>item.id)).size,7);assert.equal(branches.length,20);assert.equal(new Set(branches.map(branch=>branch.id)).size,20);
+test('Showcase keeps eight addressable chapters, the verified 20 branches and all current 13 roles',()=>{
+ assert.equal(chapters.length,8);assert.equal(new Set(chapters.map(item=>item.id)).size,8);assert.equal(branches.length,20);assert.equal(new Set(branches.map(branch=>branch.id)).size,20);
  assert.deepEqual(roleTours.map(role=>role.id).sort(),Object.keys(roles).sort());assert.equal(focusedTours.length,4);
  for(const chapter of chapters)assert.equal(chapterFromHash('#'+chapter.id),chapters.indexOf(chapter));assert.equal(chapterFromHash('#invalid'),0);
 });

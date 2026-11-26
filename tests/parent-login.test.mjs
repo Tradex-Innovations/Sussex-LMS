@@ -13,14 +13,14 @@ test("Demo admission numbers are unique and the temporary password selects a stu
   assert.equal(authenticateParent(state, "UNKNOWN", "1234"), null);
 });
 
-test("Admission login limits the parent context to the selected student", () => {
+test("Admission alias opens the linked family and keeps a selected child", () => {
   const state = freshState();
   const session = authenticateParent(state, "SCN-1001", "1234");
   const context = parentContext(state, session);
-  assert.deepEqual(linkedChildren(state, context).map((child) => child.id), ["amaya"]);
+  assert.deepEqual(linkedChildren(state, context).map((child) => child.id), ["amaya", "kavin"]);
   const sibling = state.students.find((student) => student.id === "kavin");
-  assert.equal(visibleBuses(state, context, sibling).length, 0);
-  assert.equal(visibleCourses(state, context, sibling).length, 0);
+  assert.equal(visibleBuses(state, context, sibling).length, 1);
+  assert.equal(visibleCourses(state, context, sibling).length, 1);
 });
 
 test("Login and sessions require a linked guardian with a parent role in the student's branch", () => {

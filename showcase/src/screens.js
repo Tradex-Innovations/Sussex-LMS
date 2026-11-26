@@ -37,15 +37,29 @@ export const screenshots = {
  'parent-ready': { title: 'Collection', file: 'parent-ready.png', route: 'parent/library' },
  'parent-bus': { title: 'Parent bus tracking', file: 'parent-bus.png', route: 'parent/transport', mobile: true },
  'parent-boarding': { title: 'Parent boarding status', file: 'parent-boarding.png', route: 'parent/boarding', mobile: true },
+ 'parent-family': { title: 'Family dashboard', file: 'parent-family.png', route: 'parent/family' },
+ 'parent-inbox': { title: 'Family notifications', file: 'parent-inbox.png', route: 'parent/inbox' },
+ 'parent-events': { title: 'Parent consent', file: 'parent-events.png', route: 'parent/events' },
+ 'parent-fees': { title: 'School fees', file: 'parent-fees.png', route: 'parent/fees' },
+ 'parent-payment': { title: 'Demo online payment', file: 'parent-payment.png', route: 'parent/fees' },
+ 'parent-letters': { title: 'Parent letters', file: 'parent-letters.png', route: 'parent/communications' },
+ 'class-events': { title: 'Teacher consent register', file: 'class-events.png', route: 'class_teacher/events' },
+ 'class-letters': { title: 'Teacher communications', file: 'class-letters.png', route: 'class_teacher/communications' },
+ 'class-inbox': { title: 'Teacher bus alerts', file: 'class-inbox.png', route: 'class_teacher/inbox' },
+ 'admin-fees': { title: 'Fee administration', file: 'admin-fees.png', route: 'admin/fees' },
+ 'admin-unpaid': { title: 'Unpaid students', file: 'admin-unpaid.png', route: 'admin/fees' },
+ 'transport-privacy': { title: 'Tracking hours & alerts', file: 'transport-privacy.png', route: 'transport/tracking' },
+ 'parent-gps-hidden': { title: 'GPS privacy', file: 'parent-gps-hidden.png', route: 'parent/transport' },
 };
 export const chapterScreens = [
  [['network','Network']],
- [['parent-bus','Parent'],['driver','Driver']],
+ [['parent-bus','Parent'],['parent-inbox','Alerts'],['parent-gps-hidden','Privacy'],['transport-privacy','Tracking hours'],['class-inbox','Class Teacher'],['driver','Driver']],
  [['boarding','Boarding'],['parent-boarding','Parent'],['transport-cards','Student cards']],
  [['parent-courses','Subjects'],['class-subjects','Selections'],['teacher-classes','Classes'],['parent-homework','Homework'],['parent-notices','Notices'],['class-notices','Teacher notices'],['teacher-homework','Teacher homework'],['teacher-notes','Notes'],['class-attendance','Attendance']],
  [['chairman-academic','Academic'],['chairman-attendance','Attendance'],['chairman-staffing','Staffing'],['chairman-reports','Reports']],
  [['parent-books','Books'],['parent-uniforms','Uniforms'],['book-requests','Book Store'],['uniform-requests','Uniform Store'],['parent-ready','Collection']],
+ [['parent-family','Family'],['parent-events','Consent'],['parent-fees','School fees'],['parent-payment','Online payment'],['admin-unpaid','Unpaid students'],['admin-fees','Fee administration'],['class-events','Consent register'],['class-letters','Teacher letters'],['parent-letters','Parent letters']],
 ];
-export const roleScreens = { chairman: ['network','chairman-academic','chairman-reports'], principal: ['principal','principal-attendance','principal-reports'], parent: ['parent-bus','parent-courses','parent-books'], driver: ['driver','driver-boarding','driver-issues'] };
+export const roleScreens = { chairman: ['network','chairman-academic','chairman-reports'], principal: ['principal','principal-attendance','principal-reports'], parent: ['parent-family','parent-events','parent-fees'], driver: ['driver','driver-boarding','driver-issues'] };
 export function roleScreenshot(id, step = 0) { return roleScreens[id]?.[Math.max(0,Math.min(2,step))] || (screenshots[id] ? id : 'network'); }
 export const screenshotSource = id => './assets/screens/'+screenshots[id].file;

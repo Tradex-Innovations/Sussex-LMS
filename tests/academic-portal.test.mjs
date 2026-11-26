@@ -32,7 +32,7 @@ test('Common class notices reach class parents regardless of subject selection, 
  const{state,teacher,parent,child}=setup();assignStudentSubjects(state,teacher,{student:'amaya',subjects:[]});const notice=saveClassNotice(state,teacher,{title:'Class trip',message:'Bring a water bottle.'});
  assert.ok(visibleClassNotices(state,parent,child).some(n=>n.id===notice.id));markNoticeRead(state,parent,child,notice.id);assert.equal(state.noticeReads['parent:amaya:'+notice.id],notice.updatedAt);
  assert.equal(visibleClassNotices(state,contextFor(state,'parent','parent_l'),state.students.find(s=>s.id==='meera')).some(n=>n.id===notice.id),false);
- assert.equal(visibleClassNotices(state,parent,state.students.find(s=>s.id==='kavin')).length,0);
+ assert.equal(visibleClassNotices(state,parent,state.students.find(s=>s.id==='kavin')).some(n=>n.id===notice.id),false);
  saveClassNotice(state,teacher,{...notice,status:'withdrawn'});assert.equal(visibleClassNotices(state,parent,child).some(n=>n.id===notice.id),false);
 });
 test('Only an appointed Class Teacher can publish or edit notices in that exact class',()=>{

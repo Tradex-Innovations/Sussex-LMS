@@ -27,11 +27,11 @@ GitHub Pages serves the demonstration’s frontend. Browser-local records and de
 
 ## Features and access reference
 
-[ROLE_FEATURES_ACCESS.md](ROLE_FEATURES_ACCESS.md) documents all 13 roles, their implemented views, read/write scope, approvals, cross-role workflows, demo accounts and prototype limits. Project instructions in [AGENTS.md](AGENTS.md) require this reference to be updated alongside future feature and permission changes. New user feature ideas are also recorded as proposed requirements before implementation. The [NFC boarding prototype](ROLE_FEATURES_ACCESS.md#nfc-boarding-prototype) demonstrates cards, reader taps and boarding registers; physical NFC hardware and notifications remain future integration work.
+[ROLE_FEATURES_ACCESS.md](ROLE_FEATURES_ACCESS.md) documents all 13 roles, their implemented views, read/write scope, approvals, cross-role workflows, demo accounts and prototype limits. Project instructions in [AGENTS.md](AGENTS.md) require this reference to be updated alongside future feature and permission changes. New user feature ideas are also recorded as proposed requirements before implementation. The [NFC boarding prototype](ROLE_FEATURES_ACCESS.md#nfc-boarding-prototype) demonstrates cards, reader taps and boarding registers; physical NFC hardware and external notifications remain future integration work; in-portal alerts are implemented.
 
 ## Interactive client presentation
 
-Open [the GitHub Pages presentation](https://tradex-innovations.github.io/Sussex-LMS/showcase/), [the original private presentation](https://campusway-school-demo.manusara.chatgpt.site/showcase/) or the [local showcase](http://127.0.0.1:4183/showcase/). The same `/showcase/` route is included in the prepared GitHub Pages deployment. This separate seven-chapter presentation combines cinematic 3D scenes with **38 actual prototype screenshots**, four guided role tours and links to all 13 LMS roles. Chapters open in **Screens** view; click a screenshot to enlarge it, then choose **Actual size** to inspect the original. **Try demo** opens the interactive sample workflow. It does not change LMS records.
+Open [the GitHub Pages presentation](https://tradex-innovations.github.io/Sussex-LMS/showcase/), [the original private presentation](https://campusway-school-demo.manusara.chatgpt.site/showcase/) or the [local showcase](http://127.0.0.1:4183/showcase/). The same `/showcase/` route is included in the prepared GitHub Pages deployment. This separate eight-chapter presentation combines cinematic 3D scenes with **51 actual prototype screenshots**, four guided role tours and links to all 13 LMS roles. Chapters open in **Screens** view; click a screenshot to enlarge it, then choose **Actual size** to inspect the original. **Try demo** opens the interactive sample workflow. It does not change LMS records.
 
 Use **Present** for the guided story or **Explore** for client browsing. The presentation keeps large headlines and functional controls; supporting explanations and prototype limits are in presenter notes. Left/right keys move chapters, **N** opens notes and **M** opens the chapter menu. The menu includes reduced motion, simpler graphics, reset, fullscreen and a short backup video. Load once online until **Presentation available offline** appears before using it without a connection; screenshots and video are included. Prototype links need connectivity; the original private Site also requires its existing access.
 
@@ -43,7 +43,7 @@ npm ci
 npm run build
 ```
 
-The build writes only `dist/showcase/`. Read [the meeting guide](showcase/PRESENTATION_GUIDE.md), [asset provenance](showcase/ASSETS.md) and [presentation access/limits](ROLE_FEATURES_ACCESS.md#interactive-client-presentation). GPS, NFC, results and collection examples remain simulated; there is no online payment.
+The build writes only `dist/showcase/`. Read [the meeting guide](showcase/PRESENTATION_GUIDE.md), [asset provenance](showcase/ASSETS.md) and [presentation access/limits](ROLE_FEATURES_ACCESS.md#interactive-client-presentation). GPS, NFC, results and collection examples remain simulated; school fees include a simulated online checkout; no real money is collected. Book/uniform reservations have no payment.
 
 ## Subjects, homework and class notices
 
@@ -58,7 +58,7 @@ The presentation’s **The classroom → Prototype view** selector shows these a
 
 ## Parent demo login
 
-Open [Parent login](http://127.0.0.1:4183/#parent/login). Use a student's admission number and the temporary demo password `1234`.
+Open [Parent login](http://127.0.0.1:4183/#parent/login). Use `FAMILY-1001` / `1234` for Nadeesha’s Amaya + Kavin account or `FAMILY-1002` / `1234` for Tharushi’s Meera + Thevin account. Admission numbers below remain login aliases. All linked children appear under one family login.
 
 | Student | Admission number |
 | --- | --- |
@@ -67,7 +67,17 @@ Open [Parent login](http://127.0.0.1:4183/#parent/login). Use a student's admiss
 | Meera Fernando | SCN-1008 |
 | Thevin Fernando | SCN-1009 |
 
-The account cards fill in demo credentials. Sign in to open that student's bus, subjects, pupil’s books and school uniform portals. Log out to choose another admission number. The session survives a tab refresh. Student admission numbers appear in the staff directory and can be edited by authorized branch staff.
+The account cards fill in demo credentials. Sign in to the Family dashboard and use the child switcher for each child’s bus, subjects, boarding and supplies. Inbox, events/consent and fees show all linked children. The session survives a tab refresh. Student admission numbers appear in the staff directory and can be edited by authorized branch staff.
+
+## Family, communications and fee walkthrough
+
+- [Family dashboard](http://127.0.0.1:4183/#parent/family): one family login, child cards and to-do list. Mobile uses Family / Buses / Inbox / Fees / More.
+- [Transport alerts and tracking hours](http://127.0.0.1:4183/#transport/tracking): send a late/breakdown/other update to allocated families and Class Teachers. Change demo time from 07:15 to 18:00 to show GPS hidden, or complete a current trip. Defaults: weekdays 06:00–08:30 and 13:00–16:00, Asia/Colombo; presenter defaults are illustrative.
+- [Teacher letters/email](http://127.0.0.1:4183/#class_teacher/communications) and [events/consent](http://127.0.0.1:4183/#class_teacher/events): preview whole-class or selected-student recipients, publish portal copies, download printable letters, review responses and remind pending guardians. Subject Teachers have equivalent pages separated by assigned teaching class.
+- [Parent inbox](http://127.0.0.1:4183/#parent/inbox), [events](http://127.0.0.1:4183/#parent/events) and [fees](http://127.0.0.1:4183/#parent/fees): read transport updates, respond per child and try fee Review → Method → Confirm → Success/decline, then download a demo receipt.
+- [School Administrator fees](http://127.0.0.1:4183/#admin/fees): issue invoices, record partial office payments, inspect one-row-per-unpaid-student register, preview reminders and export CSV. Principal/Chairman have scoped read-only fee oversight.
+
+All notifications, consent and payments persist only in the same browser. No real email, payment gateway or money transfer is connected. Pupil’s books/uniforms remain reserve-and-collect without payment. See [the full workflow and access contract](ROLE_FEATURES_ACCESS.md#family-communication-and-school-fee-workflows).
 
 ## Walkthrough
 

@@ -165,9 +165,14 @@ function driverTransport({ fleet, progress, paused, state, context }) {
 
 export function transportPage(role, options) {
   if (!options.fleet.length) return pageHeading(role === "parent" ? "Track my bus" : "Bus tracking", "School transport", role === "parent" && options.child ? childSelect(options.child, options.children) : "") + `<section class="surface">${emptyState("bus", "No bus assigned", role === "parent" ? "Your child’s bus assignment will appear here." : "No buses are available in your assigned scope.")}</section>`;
+  if (["parent", "driver"].includes(role) && options.fleet[0]?.trackingVisible === false) {
+    const bus = options.fleet[0], policy = bus.trackingPolicy;
+    return pageHeading(role === "parent" ? "Track my bus" : "My trip map", "School transport privacy", role === "parent" ? childSelect(options.child, options.children) : "") + `<section class="surface portal-card gps-hidden"><span class="family-initials">${icon("bus", 30)}</span><h2>Bus location is hidden</h2><p>BUS ${e(bus.id)} · ${e(bus.name)}</p>${badge(e(policy.reason), "neutral")}<p>Pickup ${e(policy.settings.pickupStart)}–${e(policy.settings.pickupEnd)} · Drop-off ${e(policy.settings.dropoffStart)}–${e(policy.settings.dropoffEnd)}<br>Weekdays · Sri Lanka time</p><p>${policy.clock.demo ? "Demo clock" : "Current time"}: ${e(policy.clock.date)} ${e(policy.clock.time)}</p><a class="button secondary" href="#${role}/${role === "parent" ? "inbox" : "overview"}">${role === "parent" ? "View transport updates" : "Daily overview"}</a></section>`;
+  }
   if (role === "parent") return `<a class="button secondary compact nfc-transport-link" href="#parent/boarding">${icon("badge",17)}View boarding status</a>` + parentTransport(options);
   if (role === "driver") return `<a class="button secondary compact nfc-transport-link" href="#driver/boarding">${icon("badge",17)}Bus boarding & reader</a>` + driverTransport(options);
-  return adminTransport(options);
+  const html = adminTransport(options);
+  return options.fleet.some((bus) => bus.trackingVisible) ? html : html.replace(/<div id="map-stage"[^>]*><\/div>/, `<div class="portal-card gps-hidden"><h2>Bus locations hidden</h2><p>Outside active school trips. Status and alerts remain available.</p></div>`);
 }
 
 export function mountMapSummary(stage, bus, progress) {
@@ -175,7 +180,7 @@ export function mountMapSummary(stage, bus, progress) {
 }
 
 export function updateTripDetails(page, bus, progress) {
-  if (!bus || bus.status !== "route") return;
+  if (!bus || bus.trackingVisible === false || bus.status !== "route") return;
   const stop = nextStop(bus, progress);
   for (const label of page.querySelectorAll("[data-next-stop]")) {
     if (label.textContent !== stop.label) label.textContent = stop.label;

@@ -13,7 +13,7 @@ const busInput=(state,id="01")=>{const bus=state.buses.find(bus=>bus.id===id);re
 const issue={busId:"01",title:"Review pickup delay",due:"2026-11-23",status:"open",note:"PRIVATE_TRANSPORT_NOTE"};
 
 test("Coordinator scope follows the real active school appointment and excludes synthetic vehicles",()=>{
- const {state,context}=setup();assert.equal(roles.transport.start,"overview");assert.deepEqual(roles.transport.pages,["overview","transport","boarding"]);
+ const {state,context}=setup();assert.equal(roles.transport.start,"overview");assert.deepEqual(roles.transport.pages,["overview","transport","tracking","boarding"]);
  assert.equal(coordinatorScope(state,{...context,branch:"lakeside"}).branch.id,"colombo");assert.equal(coordinatorScope(state,{...context,grant:{...context.grant,branch:"lakeside"}}),null);
  assert.equal(coordinatorBuses(state,context).length,6);assert.equal(coordinatorFleet(state,context).length,6);assert.ok(coordinatorFleet(state,context).every(bus=>bus.operational&&bus.branch==="colombo"));
  for(const role of ["principal","vice_principal","admin","teacher","driver","parent"])assert.equal(coordinatorScope(state,contextFor(state,role)),null);
@@ -75,7 +75,7 @@ test("Five report types capture scoped operational records and exclude free-text
  for(const type of ["brief","fleet","routes","students","tasks"]){const report=generateCoordinatorReport(state,context,{reportType:type},{progress:()=>0.5,elapsed:0,paused:false});assert.equal(report.owner.key,"transport:colombo:transport_c");assert.deepEqual(report.criteria.scope,["colombo"]);
  for(const output of [JSON.stringify(report),reportCSV(report),coordinatorReportHTML(report)])assert.doesNotMatch(output,/PRIVATE_TRANSPORT_NOTE|Malabe|Students on board|Academic assessment|Attendance period|undefined/);
  assert.match(reportCSV(report),/SIMULATED GPS/);assert.match(coordinatorReportHTML(report),/School Transport Coordination/);
- if(type==="fleet"){assert.equal(report.customRows.length,6);assert.ok(report.customRows.every(row=>Number(row.lat)>5&&Number(row.lon)>79));}
+ if(type==="fleet"){assert.equal(report.customRows.length,6);assert.ok(report.customRows.every(row=>row.lat==="Unavailable" || Number(row.lat)>5&&Number(row.lon)>79));}
  if(type==="students")assert.equal(report.customRows.length,9);}
  assert.throws(()=>generateCoordinatorReport(state,context,{busFilter:"07"}),/operational fleet/);
 });

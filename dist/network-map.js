@@ -123,7 +123,7 @@ export class SchoolNetworkMap {
   drawRoutes() {
     const L = window.L;
     for (const bus of this.options.fleet) {
-      if (!bus.route || (this.options.selectedBus ? bus.id !== this.options.selectedBus : bus.branch !== this.options.selected)) continue;
+      if (bus.trackingVisible === false || !bus.route || (this.options.selectedBus ? bus.id !== this.options.selectedBus : bus.branch !== this.options.selected)) continue;
       L.polyline(bus.route.points, {
         pane: "networkRoutes", color: bus.status === "delayed" ? "#bb701e" : bus.status === "school" ? "#527ca4" : "#168166",
         opacity: 0.85, weight: bus.id === this.options.selectedBus ? 5 : 3, dashArray: bus.status === "route" ? "7 9" : null,

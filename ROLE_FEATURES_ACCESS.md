@@ -1,6 +1,6 @@
 # Sussex College Network — Role Features and Access Reference
 
-**Last updated:** 25 November 2026 (Asia/Colombo).
+**Last updated:** 26 November 2026 (Asia/Colombo).
 **Status:** Implemented browser-only demonstration, plus separately labelled proposed requirements; limitations are listed below.
 
 **Application:** `dist/`; start locally with `python3 -m http.server 4183 --bind 127.0.0.1 --directory dist`.
@@ -27,21 +27,23 @@ This is the maintained reference for the **current implementation**, covering al
 14. [Book Store Officer](#book-store-officer)
 15. [Uniform Store Officer](#uniform-store-officer)
 16. [Parent](#parent)
-17. [NFC boarding prototype](#nfc-boarding-prototype)
-18. [Interactive client presentation](#interactive-client-presentation)
-19. [Student subjects, homework and class notices](#student-subjects-homework-and-class-notices)
-20. [Cross-role workflows](#cross-role-workflows)
-21. [Persistence and reports](#persistence-and-reports)
-22. [Demo accounts and validation](#demo-accounts-and-validation)
-23. [Proposed features and requirements](#proposed-features-and-requirements)
-24. [Maintenance checklist](#maintenance-checklist)
-25. [Change log](#change-log)
+17. [Family communication and school fee workflows](#family-communication-and-school-fee-workflows)
+18. [NFC boarding prototype](#nfc-boarding-prototype)
+19. [Interactive client presentation](#interactive-client-presentation)
+20. [Student subjects, homework and class notices](#student-subjects-homework-and-class-notices)
+21. [Cross-role workflows](#cross-role-workflows)
+22. [Persistence and reports](#persistence-and-reports)
+23. [Demo accounts and validation](#demo-accounts-and-validation)
+24. [Proposed features and requirements](#proposed-features-and-requirements)
+25. [Maintenance checklist](#maintenance-checklist)
+26. [Change log](#change-log)
+
 
 ## Prototype boundaries
 
 - This is a UI demonstration, with browser-local data and permission checks. There is no authenticated staff backend, server-side authorization, database, production GPS integration, payment gateway or real messaging service.
 - The role/account switcher deliberately lets a presenter preview different accounts. It is not a production login or a security boundary. Staff roles are separate workspaces, even when one person holds several roles.
-- Parent admission login uses a linked student's admission number and the shared temporary password `1234`. It demonstrates student selection and access, not real password security.
+- Parent family login uses a family ID or a linked student’s admission alias with temporary password `1234`. One guardian account shows all currently linked children with valid Parent school appointments. This is sample access, not real password security.
 - School names and approximate locations use the 20-branch Sussex directory verified in the existing project on 19 November 2026. The directory is not refreshed automatically. Internal IDs `colombo` and `lakeside` display as Nugegoda and Malabe.
 - The national overview shows 44 simulated buses: eight editable operational demo records at Nugegoda/Malabe and two illustrative vehicles at each other branch. Illustrative vehicles do not create student, teacher or editable bus records.
 - Map movement, GPS signals, occupancy, arrival estimates and routes are demonstrations. Street tiles require internet access and retain OpenStreetMap attribution.
@@ -79,7 +81,7 @@ This is the recommended operating hierarchy represented by the prototype. Parent
 | Grade | The appointed grade in the appointed school. |
 | Class | The appointed grade and class in the appointed school. |
 | Teaching subject | Subjects assigned to the active Subject Teacher account in its school. |
-| Student | The admission-selected child linked to the active guardian account. |
+| Student / family | All children currently linked to the guardian, each requiring a current Parent appointment in that child’s school; learning, bus, boarding and supplies use the selected child. |
 | Bus | The active driver's currently assigned vehicle in its school. |
 
 Sections are **Preschool (0), Primary (1–5), Middle School (6–9), Senior School (10–13)**. These are prototype configuration values, not a claim about Sussex's official internal management structure.
@@ -102,9 +104,11 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 | Driver / `driver` | Overview → Daily Overview | Current assigned bus, own current-bus trip logs/issues, allocated students and latest NFC roster | Save safety checklist; start/complete recorded morning trips; confirm stops; report concerns to school transport; operate assigned NFC reader. |
 | Book Store Officer / `librarian` | Overview → Store Overview | Appointed school’s pupil-book stock and student reservations | Review/confirm/decline, hold stock, prepare collection, record handover, adjust stock and create store reports. |
 | Uniform Store Officer / `uniform_store` | Overview → Store Overview | Appointed school’s uniform sizes/stock and student reservations | Same reservation/collection workflow for uniforms only, with size-level stock and separate reports. |
-| Parent / `parent` | Admission login → Bus tracking | Admission-selected child’s identity, bus, Class Teacher-selected subjects, homework, class notices and own book/uniform reservations; own earlier family book records | Download/mark materials done; reserve pupil’s books and sized uniforms for collection, track status/reference and cancel eligible requests; read own child’s NFC status/history. |
+| Parent / `parent` | Family login → Family dashboard | All linked children; selected-child learning, bus, boarding and supplies; family inbox, event consent and school fees; own earlier family book records | Download/mark materials done; reserve pupil’s books and sized uniforms for collection, track status/reference and cancel eligible requests; read own child’s NFC status/history. |
 
 ## Chairman
+
+**School fees:** additional `#chairman/fees` view reads the active network/school fee invoices, payment history, unpaid-student register, reminder log and CSV. Cannot issue invoices, record payments or send reminders; School Administrator executes those actions. No Class Teacher, Subject Teacher or other family financial scope is inherited.
 
 **Entry:** `#chairman/overview/transport`. **Navigation:** Overview, Bus tracking, Subjects, Students & guardians, Pupil’s books, School uniforms, Roles & access, Bus boarding.
 
@@ -131,6 +135,8 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 **NFC boarding:** `#chairman/boarding` reads scoped trip rosters, school coverage, histories and CSV manifests. The branch selector applies to NFC data. Transport cards can be managed within the selected/network scope; reader operation and corrections stay with the operational roles.
 
 ## Principal
+
+**School fees:** additional `#principal/fees` view gives read-only invoice, payment-history, unpaid-student, reminder-log and CSV oversight within the appointed school. Cannot execute fee writes or payments through the Principal workspace.
 
 **Entry:** `#principal/overview/transport`. **Scope:** appointed school. **Navigation:** same six workspaces as Chairman, without a school selector.
 
@@ -264,9 +270,9 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 
 ## Class Teacher
 
-Also manages per-student subject selection, common class notices and homework for the appointed class. See [Student subjects, homework and class notices](#student-subjects-homework-and-class-notices) for the complete access and persistence rules.
+Also manages per-student subject selection, common class notices and homework for the appointed class, receives allocated-student transport alerts, and publishes class/selected-student communications and consent requests. See [Student subjects, homework and class notices](#student-subjects-homework-and-class-notices) for the complete access and persistence rules.
 
-**Entry:** `#class_teacher/overview/summary`. **Scope:** the actual appointed school, grade and exact class. **Navigation:** Overview, Subjects, Homework, Notices, Students & guardians. The overview has five views:
+**Entry:** `#class_teacher/overview/summary`. **Scope:** the actual appointed school, grade and exact class. **Navigation:** Overview, Inbox & to do, Letters & email, Events & consent, Subjects, Homework, Notices, Students & guardians. The overview has five views:
 
 ### Class Overview
 
@@ -322,6 +328,8 @@ Also manages per-student subject selection, common class notices and homework fo
 
 ## Subject Teacher
 
+**Letters, email and consent:** `#teacher/communications` and `#teacher/events` use a current assigned subject/class selector. Whole-class delivery means only enrolled matching-class actual pupils in that teaching subject. Preview recipients, publish portal copies, download letters, withdraw own communications, track event consent, remind pending guardians and export the consent register. Science 8A and 8B remain separate. Reassignment removes access to the old subject’s outbox; a different active role does not inherit the author’s records. See [Family communication and school fee workflows](#family-communication-and-school-fee-workflows).
+
 Also gives homework and manages separate subject classes; the Nuwan demo includes Science 8A and 8B. See [Student subjects, homework and class notices](#student-subjects-homework-and-class-notices) for the complete access and persistence rules.
 
 **Entry:** `#teacher/overview/summary`. **Scope:** current teaching-course assignments for an actual Subject Teacher appointment in its school; enrolled students must also match the subject’s school, grade and class. **Navigation:** Overview and Courses. Five overview views are implemented:
@@ -369,6 +377,8 @@ Also gives homework and manages separate subject classes; the Nuwan demo include
 **Limits:** no subject enrolment/teacher/admission/guardian changes, whole-class or school directories, Class Teacher private discussion notes, class/staff attendance marking, role appointments, leave decisions, readiness approval, cover allocation, transport/library management or another role’s reports. Subject Teacher attendance concerns use the coordinator request workflow. Even a person with both roles marks their own class register only while active as its appointed **Class Teacher**. Temporary cover does not grant permanent teaching access. This remains a browser-only prototype, not server-enforced authorization.
 
 ## School Administrator
+
+**School fees:** `#admin/fees` is a separate complete workspace alongside the five administration overview views. Issue one-student invoices, review line items and due dates, record demo office payments including partial payments, inspect payment history/receipts, filter by student/status/name/admission/class, export school CSV, review one row per unpaid student, preview and send selected-invoice portal reminders, and review reminder history. Only actual pupils currently in the appointed school are eligible. No other branch or family’s financial records are exposed. Fee write ownership belongs to this role; Principal/Chairman read oversight is separate.
 
 **Entry:** `#admin/overview/summary`. **Scope:** the current, actual School Administrator appointment in one school. **Navigation:** Overview, Students & guardians, Subjects, Bus boarding. Five overview views are implemented:
 
@@ -423,6 +433,8 @@ Also gives homework and manages separate subject classes; the Nuwan demo include
 
 ## Transport Coordinator
 
+**Tracking hours & alerts:** `#transport/tracking` configures the appointed school’s weekday pickup/drop-off windows, sends parent-facing late/breakdown/other/resolved updates, and completes a visible pickup/drop-off trip to hide its GPS immediately. The presenter may choose a shared demo clock or current Asia/Colombo time. This clock is shared across the demonstration; school window settings and bus completion writes stay in the appointed school. Parents have no privacy override. See [Family communication and school fee workflows](#family-communication-and-school-fee-workflows).
+
 **Entry:** `#transport/overview/fleet`. **Scope:** current Transport Coordinator appointment in one school; editable operational buses only. **Navigation:** Overview, Bus tracking and Bus boarding. Five overview views are implemented:
 
 ### Fleet Activity
@@ -475,6 +487,8 @@ Also gives homework and manages separate subject classes; the Nuwan demo include
 **NFC bus boarding:** `#transport/boarding` opens trip rosters, simulates reader taps/offline queues, synchronises events, closes pickup windows and records reasoned transport-status corrections. CSV manifests and event history use school scope. See [NFC boarding prototype](#nfc-boarding-prototype).
 
 ## Driver
+
+**Transport alerts:** reporting a delay, breakdown, vehicle, reader, student-transport or other issue automatically creates a safe generic portal alert for currently allocated families and their Class Teachers. Internal titles/descriptions/coordination notes are not copied to those alerts. Coordinator updates/resolution are reflected. Driver map positions follow the same GPS hours/completion gate as all other roles.
 
 **Entry:** `#driver/overview/summary`. **Navigation:** Overview, Bus tracking and Bus boarding. **Scope:** the current active Driver appointment must match both the operational bus's school and its `driverId`. No former-bus access is retained after reassignment. These are local UI checks, not backend authorization.
 
@@ -531,7 +545,7 @@ Also gives homework and manages separate subject classes; the Nuwan demo include
 
 ### Reservation lifecycle and stock
 
-1. Parent submits **Requested** for the admission-selected pupil; requested items do **not** hold stock. Parent sees that confirmation is pending.
+1. Parent submits **Requested** for the selected linked pupil; requested items do **not** hold stock. Parent sees that confirmation is pending.
 2. Store **Confirms** after rechecking every line’s available stock. Confirmation holds the requested units atomically. Insufficient stock cannot be overbooked; staff can adjust stock or decline with a parent-visible reason.
 3. Store marks **Ready to collect**, providing a collection date (**22 November–31 December 2026** demo window), counter/location and collection hours. Parent receives those details in the portal; no message is sent.
 4. Store records **Collected** only after matching the entered reservation reference and receiving-adult name. On-hand units are reduced once; the held quantity is released. Duplicate/invalid transitions are rejected.
@@ -556,22 +570,66 @@ Stock edits require an adjustment reason, whole units from 0–10,000 and on-han
 
 Also sees the parent/student identity panel, Class Teacher-selected subjects, common class notices and separate homework. See [Student subjects, homework and class notices](#student-subjects-homework-and-class-notices) for the complete access and persistence rules.
 
-**Entry:** `#parent/login`, then `#parent/transport`. **Views:** Bus tracking; Subjects; Homework; Notices; Pupil’s books; School uniforms; Bus boarding. **Scope:** one admission-selected student linked to the guardian’s school role and that guardian’s own reservations for that child; earlier family book records remain separately labelled.
+**Entry:** `#parent/login`, then `#parent/family`. **Views:** Family; Bus tracking; Inbox & to do; Events & consent; School fees; Letters & email; Subjects; Homework; Notices; Pupil’s books; School uniforms; Bus boarding. Mobile navigation uses Family / Buses / Inbox / Fees / More. **Scope:** all currently linked children, each requiring a Parent appointment in that child’s school. Learning, transport, boarding and supplies use the selected child; family events, inbox and fees explicitly show all linked children. Earlier family book records remain separately labelled.
 
-- Sign in with the selected student's admission number and `1234`; example cards fill credentials. Login rejects an unknown student, wrong password, or missing linked guardian/school role. Log out to select another student.
-- Track the student’s assigned bus, simulated route/progress/stops and arrival context. Show an empty state when no bus is assigned.
+- Sign in with `FAMILY-1001` (Nadeesha: Amaya + Kavin) or `FAMILY-1002` (Tharushi: Meera + Thevin), password `1234`. Existing admission numbers remain login aliases and select that child initially. The family dashboard shows every eligible child; switch children without logging out. Unknown IDs, wrong passwords, missing links/appointments are rejected. Existing admission sessions migrate into family access on refresh, without sharing children across unrelated guardians.
+- Track the selected child’s assigned bus only during permitted weekday pickup/drop-off hours and before trip completion. Outside these periods the map, route position, next-stop telemetry and coordinates are hidden. Assigned-bus identity and transport alerts remain available. An unallocated child receives an empty state.
 - See Parent, Student, Admission number, Class/Grade and School throughout the portal.
 - Read only Class Teacher-selected subjects with a valid matching-class enrolment for the selected student; download lecture notes/attachments; mark materials done/undone and see progress. Teachers/leadership can review that completion.
 - **Pupil’s books:** browse only the selected child’s current grade and school; search school-issued sample subjects, add one copy per pupil’s book to a student-specific reservation list and submit for school collection. No additional reading books, prices, purchasing or payment portal are offered. Duplicate open reservations for the same pupil/book/year are blocked, including a second guardian; a collected 2027 pupil’s book cannot be requested again in this demo cycle.
 - **School uniforms:** browse the child’s school catalogue, choose item/size and 1–3 units per size, then submit a separate request to the Uniform Store. Duplicate open requests for the same pupil/item/size are blocked; later requests after collection are allowed.
 - Each reservation list is separated by guardian, selected pupil, school and store type. Remove unavailable/stale entries and recheck quantities before submission. Current stock is checked on submit and again on staff confirmation.
 - **My reservations:** read own selected-child references, captured items/sizes/quantities, progress and collection location/date/hours. Cancel Requested/Confirmed requests; contact the relevant store after Ready. Internal staff notes/identity history are hidden, while decline/cancellation reasons are shown.
-- Collection is an in-school handover against the reference/admission number. The Parent portal requests no card/bank/payment details. No SMS/email/push notification is sent.
+- Collection is an in-school handover against the reference/admission number. Book/uniform reservations request no payment details. The separate school-fee demo uses fixed dummy payment details only. No external SMS/email/push notification is sent.
 - Session survives refresh. Subject completion stays per student; book/uniform lists and reservations are per guardian/student/school/type. Earlier legacy family book records remain read-only and are not automatically assigned to the currently selected child.
 
-**Limits:** no other family's orders or unlinked student data, other guardians’ reservations, internal store notes, staff fulfilment/stock controls, staff role switcher inside the signed-in portal, teacher material publication, admission/course/bus edits, school comparisons, payments or real GPS guarantees. Internal Section Head review notes are hidden from this portal.
+**Limits:** no other family's orders or unlinked student data, other guardians’ reservations, internal store notes, staff fulfilment/stock controls, staff role switcher inside the signed-in portal, teacher material publication, admission/course/bus edits, school comparisons, real payments or real GPS guarantees. Internal Section Head review notes are hidden from this portal.
 
-**NFC boarding status:** `#parent/boarding` shows only the admission-selected child’s latest transport status, date/direction, bus, recorded time, sync warning and boarding history. It exposes no other passengers, card codes, staff reasons or reader controls. See [NFC boarding prototype](#nfc-boarding-prototype).
+**NFC boarding status:** `#parent/boarding` shows only the selected linked child’s latest transport status, date/direction, bus, recorded time, sync warning and boarding history. It exposes no other passengers, card codes, staff reasons or reader controls. See [NFC boarding prototype](#nfc-boarding-prototype).
+
+## Family communication and school fee workflows
+
+Implemented **26 November 2026**, browser-local only. Feature IDs: `FAMILY-002`, `TRANSPORT-ALERTS-002`, `GPS-PRIVACY-002`, `EVENT-CONSENT-001`, `SCHOOL-FEES-001`, `TEACHER-COMMS-001`.
+
+### Family identity, inbox and action items
+
+- One account per guardian/family; it is not one shared login for every school parent. Each child must still list that guardian and have a valid Parent appointment in its current branch. The child switcher resolves the selected child’s school appointment. Cross-school siblings are supported only when both links/appointments exist.
+- Family dashboard shows child cards, admission/class/school identity, family fee balance and action items. Inbox has All / Unread / To do / Transport filters, per-account read state and Open actions that select the correct child before navigating.
+- Notifications derive from currently accessible bus allocations, published class notices/homework, fee balances/reminders, communications and event consent. Homework completion and fee settlement remove their outstanding action items; consent requests stop needing action after a response/deadline/cancellation. Read status does not complete a task.
+- Parents see only their linked children’s names/details. Class Teachers receive only transport alerts affecting actual admissions in their currently appointed exact class. Other staff roles do not gain the Parent/Class Teacher inbox.
+
+### Transport alerts and GPS privacy
+
+- Saved bus signal delays, Driver-reported concerns and shared school transport follow-ups produce safe generic family/Class Teacher alerts. Internal task titles, free-text descriptions, student-transport details and staff notes stay private. A follow-up resolution is a new readable update.
+- Transport Coordinator sends an explicit parent-facing message of up to 500 characters: late, breakdown, other travel issue or resolved. Recipient matching uses current student bus/branch allocations and current class appointments; moving an allocation removes access to prior alerts for the old bus. The inbox is local to this browser, not actual email/push/SMS delivery.
+- Default weekday tracking windows are **06:00–08:30 pickup** and **13:00–16:00 drop-off**, in **Asia/Colombo**. End times are exclusive. These are configurable demonstration defaults, not verified Sussex schedules.
+- Prototype initially uses a clearly labelled **26 November 2026, 07:15 presenter clock** so a client can see the map. Only the Transport Coordinator workspace can change demo/current-time mode; Parents cannot override it. Window settings are school-scoped; the demo clock is shared across the demo network. Current-time mode checks Asia/Colombo independent of device timezone, refreshing loaded UI every 15 seconds when the minute changes.
+- All legacy, Parent/Driver, coordinator and national maps use the gate. Hidden vehicles have no marker, route line or telemetry position; non-location status, school bubbles and notifications remain. Completed morning Driver runs/at-school buses hide pickup positions; a Coordinator can complete a current pickup/drop-off trip and hide it for that day/direction. The next window/date is separate. NFC “close pickup” is boarding closure, not journey completion.
+- New fleet reports omit hidden coordinates; reading/exporting a saved fleet snapshot outside the current permitted period redacts its captured location fields. Already downloaded files cannot be recalled. Static screenshots/backup video are labelled historical demonstration captures, not live GPS. No GPS device collection or production security enforcement is connected.
+
+### Teacher communication, events and consent
+
+- Class Teacher → Letters & email / Events & consent: compose for all actual appointed-class pupils or explicitly selected pupils. Subject Teacher: choose one currently assigned subject/class, with recipients restricted to its enrolled matching-class pupils. No generated attendance students become real recipients.
+- Preview title/message, student list and linked guardian delivery before publishing. Students without linked guardians are explicitly shown as requiring school follow-up. No contact email is invented. Email is a demo portal copy; Letter has an escaped standalone HTML download with browser Print / Save PDF. No real external message or mail dispatch occurs.
+- Published records snapshot recipients and remain owned by the author’s active class/subject workspace. Current class/school, subject assignment and guardian links are checked again on access. Parents never see classmates, recipient lists, other guardians’ consent or staff delivery records.
+- Events/trips capture date, place, message and consent deadline. Each eligible guardian can give consent or decline for a linked child by typing their displayed guardian name. One current response per child is shared between its linked guardians; changes retain prior response history. Responses close after the deadline or cancellation. This typed name is a demo acknowledgement, not a verified/legal electronic signature.
+- Teacher sees per-pupil pending/yes/no responses and totals, can export a scoped CSV, remind pending parents once per event/day, or cancel/withdraw own current-class communication. Cancellation retains past responses and a visible cancellation state. Internal parent-discussion notes remain private and do not send messages.
+
+### School fees and demo payments
+
+- School Administrator executes invoice issuance, demo office payment recording and portal reminders in the appointed school. Principal reads its school; Chairman reads its current network/school selection. Other staff roles have no fee workspace or financial export permission.
+- Parents read invoices/payment history for all currently linked children, filter by student/status/query, inspect line items/due dates, pay an outstanding balance through Review → Method → Confirm → Result, and download a text demo receipt. Supported outcomes: success, decline and cancellation. Fixed test-card or demo-bank details are displayed; no real card numbers or banking credentials are requested/stored, no payment SDK/network is used and no money moves.
+- Amounts are integer LKR cents, with positive two-decimal inputs. Successful payments alone reduce balances. Office payments allow partial settlement, reject duplicate school receipt references and overpayment. Checkout rechecks the current family and balance and is idempotent after success; a changed balance rejects stale confirmation. Declines/cancellations leave the balance unchanged.
+- Staff views: Invoices, Payment history, Unpaid students (one row per student, aggregated balance, invoice detail/payment actions), Reminders; student/status/name/admission/class filters and scoped CSV. Current school membership is rechecked for every invoice. This is an illustrative ledger, not an accounting, banking or reconciliation integration.
+- Selected-invoice reminders are validated as a complete school-scoped unpaid batch before mutation, previewed and delivered only to current linked guardian portals. Missing guardians are shown for school follow-up; duplicate guardian/invoice/day reminders are skipped. Reminder history names the local acting administrator.
+- Initial seed includes a sample Bus 01 delay alert and gives each actual demo pupil a LKR 25,000 Term 3 fee invoice due 25 November; Kavin/Thevin have LKR 10,000 sample partial payments. Amounts are invented prototype fixtures, not actual Sussex fee rates. New admissions do not receive automatic real charges; Administrator issues demo invoices explicitly.
+- **Pupil’s books and uniforms remain reserve-and-collect only, without online payment.** School fees are a separate feature and ledger.
+
+### Persistence and production limits
+
+- `familyPortalVersion` is an additive one-time migration. New state includes family IDs, fee invoices/payments/checkouts/reminders, communications, consent/history, notification reads, transport alerts, school tracking windows, shared presenter clock and dated/directional trip-completion flags. Existing admissions, assignments, subjects, attendance, stores and NFC records are retained. Deleted/changed family workflow data are not reseeded after migration.
+- Parent session still uses `sussex-parent-demo-session`; legacy admission sessions are accepted, and child selection is saved in sessionStorage. Core data stays under `campusway-demo-v1` localStorage. Other browsers/devices do not receive notifications or share consent/payment state.
+- Record mutations revalidate current appointments and scope; the app writes a cloned state only after model validation and storage success. This does not supply backend transaction/concurrency guarantees, real authentication, protected GPS, mail delivery, legal consent or payment processing.
 
 ## NFC boarding prototype
 
@@ -612,7 +670,7 @@ Also sees the parent/student identity panel, Class Teacher-selected subjects, co
 | School Administrator | Manage school transport cards and lifecycle history; no trip passenger roster or reader operations. |
 | Transport Coordinator | School trip history/rosters and manifests; open/close pickup, simulate scans/offline/sync, flag concerns and make reasoned status corrections. |
 | Driver | Currently assigned bus's latest roster/manifest; open a roster, simulate taps/sync and flag concerns. Older rosters and other buses are unavailable. No card management, pickup closure or coordinator corrections. |
-| Parent | Only the admission-selected child's current-school trip history and latest status, including prior bus allocations. No passenger list, card codes, staff reasons, CSV manifest or write controls. |
+| Parent | Only the selected linked child’s current-school trip history and latest status, including prior bus allocations. No passenger list, card codes, staff reasons, CSV manifest or write controls. |
 | Principal | School oversight/rosters/event history/manifests and card management; no reader simulation or boarding correction. |
 | Vice Principal | School oversight/rosters/event history/manifests; no card, reader or correction writes. |
 | Chairman | Scoped school/network coverage, rosters/event history/manifests and card management; no operational reader or correction writes. |
@@ -648,13 +706,13 @@ Captures were made on 23 November 2026 from the current LMS source in an isolate
 - **Explore mode:** the same content with chapter selection, scene-area wheel navigation and horizontal touch swipes. Mobile chapter content scrolls vertically; all controls remain reachable. URL hash addresses each chapter; query values retain Explore and simple-graphics choices on reload.
 - **Motion/graphics:** GSAP transitions, one shared React Three Fiber/Three.js canvas, locally generated bus/card/reader/map meshes and supporting tablet/books/uniform props. OS reduced-motion preferences are respected; manual reduced-motion/2D choices remain available. A 2D SVG/CSS alternative supports every interaction when chosen or after GPU context loss.
 - **Offline:** a content-versioned service worker scoped strictly to `/showcase/` caches its local HTML/JS/CSS/font/logo/screenshots/poster/video after an initial successful online load. Cache updates remove old showcase caches only. The menu reports readiness; clearing browser storage removes the cache. Existing LMS routes and private Site authorization remain separate; opening the LMS still requires access/internet.
-- **Backup:** a downloadable 39-second 1440×900 H264 MP4 screen recording, without audio, demonstrates the seven chapters, real prototype captures and example interactions. It is available from the presentation menu and cached for offline playback, with a local poster. It is not live bus/hardware footage.
+- **Backup:** a downloadable 39-second 1440×900 H264 MP4 screen recording, without audio, demonstrates the eight chapters, real prototype captures and example interactions. It is available from the presentation menu and cached for offline playback, with a local poster. It is not live bus/hardware footage.
 
 ### Access, state, production limits and maintenance
 
-The existing Site audience is retained. This presentation is a client-facing explanation, not an additional authenticated role. Its state is in memory and resets on reload/menu reset; it does not read/write `campusway-demo-v1`, parent sessions, admissions, real subject assignments, reservations, NFC or attendance. Prototype buttons use fixed, verified role routes and open a separate tab with the LMS's normal demo switcher/admission login. Parent example credentials remain SCN-1001 / 1234.
+The existing Site audience is retained. This presentation is a client-facing explanation, not an additional authenticated role. Its state is in memory and resets on reload/menu reset; it does not read/write `campusway-demo-v1`, parent sessions, admissions, real subject assignments, reservations, NFC or attendance. Prototype buttons use fixed, verified role routes and open a separate tab with the LMS's normal demo switcher/admission login. Parent examples are FAMILY-1001 / 1234 and FAMILY-1002 / 1234; old admission aliases still work.
 
-No backend, physical GPS/NFC, notification, protected authorization, real academic result or payment integration is added. Model assets, sample data provenance and dependency licences/notices are documented in `showcase/ASSETS.md`. `showcase/PRESENTATION_GUIDE.md` gives meeting controls and a chapter walkthrough. The isolated Vite build empties only `dist/showcase/`; it does not rebuild/replace the main LMS. Rebuild/re-record the backup when the story changes and keep this role reference current.
+No backend, physical GPS/NFC, external notification, protected authorization, real academic result or real payment integration is added. In-portal notifications, event consent and school fee demo checkout are implemented. Model assets, sample data provenance and dependency licences/notices are documented in `showcase/ASSETS.md`. `showcase/PRESENTATION_GUIDE.md` gives meeting controls and a chapter walkthrough. The isolated Vite build empties only `dist/showcase/`; it does not rebuild/replace the main LMS. Rebuild/re-record the backup when the story changes and keep this role reference current.
 
 ## Student subjects, homework and class notices
 
@@ -746,7 +804,7 @@ The Vice Principal may also create cover directly without a request. Cover teach
 1. Register/allocate a school transport student using existing admission and bus-allocation tools. School Administrator/Principal/Chairman issues a demo card from Bus boarding → Transport cards.
 2. Transport Coordinator or assigned Driver opens the expected bus roster for the date/direction, then uses the simulated bus reader to record taps. Offline captures queue locally and do not yet confirm boarding.
 3. Driver/Coordinator flags concerns; Coordinator synchronises readers, closes pickup and reviews untapped students. Confirmed not boarded is a reasoned, post-sync review action. Classroom attendance stays separate.
-4. Parents see only their admission-selected child's status/history. School leadership reads scoped coverage/manifests; physical devices and notifications remain future integration work.
+4. Parents see only their selected linked child’s status/history. School leadership reads scoped coverage/manifests; physical devices and external notifications remain future integration work; transport issue alerts are available in the portal.
 
 ### Transport and school supplies
 
@@ -793,7 +851,7 @@ The Vice Principal may also create cover directly without a request. Cover teach
 | Driver | Kasun Dias (`driver_01`) — Nugegoda Bus 01; Nalin De Silva (`driver_07`) — Malabe Bus 07. All eight operational demo buses have Driver accounts; assignment changes control current access. Five overview views plus map and NFC boarding. |
 | Book Store Officer | Hasini Perera (`librarian_c`) — Nugegoda; Kumari Rodrigo (`librarian_l`) — Malabe. Existing appointments retained under the renamed role. |
 | Uniform Store Officer | Ishara Senanayake (`uniform_c`) — Nugegoda; Dulani Jayawardena (`uniform_l`) — Malabe. Both have the five store views. |
-| Parent | Amaya `SCN-1001`, Kavin `SCN-1002`, Meera `SCN-1008`, Thevin `SCN-1009`; password `1234`. |
+| Parent | Nadeesha `FAMILY-1001` — Amaya + Kavin; Tharushi `FAMILY-1002` — Meera + Thevin; password `1234`. Existing admission aliases still work. |
 
 Role assignments may be changed in the demo, so these are seeded examples rather than immutable staff records.
 
@@ -806,6 +864,12 @@ node --test tests/*.test.mjs
 The suite covers access, migration, parent admission selection, network/directory/fleet data, academic/attendance reconciliation, report isolation, Principal leave decisions, Vice Principal coordination, Section Head scope/reviews/follow-ups and the cover-request handoff, Grade Coordinator scope/class reviews/follow-ups/reports, Section Head support responses and new-account migration. Browser verification should cover all five Section Head views, all three seeded Section Head accounts, 390px/320px layouts, course/material interactions, persistent follow-up/review/request outcomes, role switching and report CSV/HTML/print handling. Grade Coordinator browser checks should cover all five views, all three seeded grade accounts, enrolment teacher protection, material downloads, class/follow-up note persistence, Section Head queue isolation/responses, report exports and 390px/320px layouts. Class Teacher checks should cover fixed class scope, own-subject publication and parent completion, attendance overlays/restores across leadership views, private discussion notes, coordinator responses, report isolation and mobile forms. Check one-choice attendance buttons, keyboard navigation, live totals, draft cancellation, search/empty states, whole-list All present, saving while filtered, saved preselection and persistent Save controls at small screen sizes. Subject Teacher checks cover actual grant and course/student scope, own-course publication and parent completion, plan/review history, staff-only note visibility, coordinator queue isolation/responses, Class Teacher attendance separation, reassignment, report retention and scoped CSV/HTML/print. Check five teaching accounts and 1500px/390px/320px layouts, including forms. School Administrator checks cover both schools, direct registration/edit and duplicate admissions, same-school guardian links, class-change enrolment cleanup, subject teacher/enrolment writes and parent completion, private-note exclusion, current-appointment checks, filtered report totals/history, legacy routes and desktop/mobile forms. Transport Coordinator checks cover the operational-only street map, filtering/selection and paused simulation, driver/student moves and empty assignments, fixed school destination, cross-school rejection, Driver/Parent propagation, shared Vice Principal task history/reassignment, five report types with note exclusion/history isolation, legacy tracking, empty-school fleets and mobile forms/maps. NFC checks cover seven roles, current school/bus/child scope, card issue/loss/replacement and migration, roster snapshots, repeated/wrong-card taps, offline receipt reconciliation and historical card validity, coordinator review/closure rules, Parent privacy, CSV exclusion and mobile reader/card/review forms. Driver checks additionally cover incomplete/full safety checks, route/allocation invalidation, sequential stops/school arrival, shared fleet status, current-bus student/NFC summaries, issue handoff/status/privacy, trip CSV, existing-map compatibility, saved-state preservation, stale appointment/reassignment rejection and five views/forms at 1500px/390px/320px. Store checks cover grade/student/school/type isolation, uniform sizes/quantities, separate pupil bags, duplicate requests/guardians, stock holds/oversubscription, lifecycle/cancellation/reference verification, private-note exclusion, stock adjustments/listing changes, stale bag cleanup, report ownership/CSV safety, legacy-data migration and mobile catalogue/request/stock/collection forms. Keep passing test counts/evidence in the change log when updated.
 
 ## Proposed features and requirements
+
+### Family, transport alerts, events, communication and school fees
+
+**Feature IDs:** `FAMILY-002`, `TRANSPORT-ALERTS-002`, `GPS-PRIVACY-002`, `EVENT-CONSENT-001`, `SCHOOL-FEES-001`, `TEACHER-COMMS-001`. **Requested:** 26 November 2026. **Status:** Implemented in the prototype and interactive presentation (demo-only integrations).
+
+**User requirements:** notify Parents and Class Teachers about late buses, breakdowns and other issues; hide bus GPS outside school pickup/drop-off periods; one family login showing all linked children; event/trip consent and to-do notifications; full school fee views including demo online payment, reminders and unpaid students; teachers send whole-class or selected-student emails/letters and consent requests. Recommended ownership: School Administrator manages fees, Principal/Chairman read scoped fee oversight, teachers own their current classes, guardians respond per child. External delivery, real payments and device GPS remain unsupported; book/uniform reservations remain collect-only without payment.
 
 ### GitHub Pages with two routes
 
@@ -823,7 +887,7 @@ This section captures user-requested features before implementation. Keep their 
 
 ### Interactive product presentation
 
-**Feature ID:** `CLIENT-SHOWCASE-001`. **Requested:** 23 November 2026. **Status:** **Implemented**, with seven chapters and three primary cinematic 3D scenes plus supporting product props.
+**Feature ID:** `CLIENT-SHOWCASE-001`. **Requested:** 23 November 2026. **Status:** **Implemented**, with eight chapters and three primary cinematic 3D scenes plus supporting product props.
 
 The user approved the recommended web presentation as proposed: a separate fullscreen experience, Sussex navy/gold, Sri Lanka network map, 3D school bus and NFC card/reader, interactive transport/boarding/learning/leadership/collection examples, Presenter/Explore modes, four guided role tours and all 13 prototype links. Keyboard/touch navigation, notes, reduced motion/2D fallback, offline caching and a short backup video are included. See [Interactive client presentation](#interactive-client-presentation). This is presentation access only and adds no LMS role permissions or production integrations.
 
@@ -831,7 +895,7 @@ The user approved the recommended web presentation as proposed: a separate fulls
 
 **Feature ID:** `CLIENT-SHOWCASE-SCREENS-001`. **Requested:** 23 November 2026. **Status:** **Implemented**.
 
-**User requirement:** remove all small extra presentation texts and add actual prototype screenshots. **Implementation:** retain large headlines and operational controls, remove surrounding ancillary annotations, and default all seven chapters to captured prototype views. Added 32 original PNG captures, related-screen tabs, all 13 role previews, four three-screen role sequences and an enlarge/actual-size dialog. The recommended **Screens / Try demo** switch retains the interactive scenarios. Presenter notes retain useful narration and production limitations. Refreshed the short video backup and offline cache. Actual LMS text inside the captures remains unchanged. This change creates no role permissions, backend capability, live-data feed or edits to the LMS's browser state.
+**User requirement:** remove all small extra presentation texts and add actual prototype screenshots. **Implementation:** retain large headlines and operational controls, remove surrounding ancillary annotations, and default all eight chapters to captured prototype views. Added 32 original PNG captures, related-screen tabs, all 13 role previews, four three-screen role sequences and an enlarge/actual-size dialog. The recommended **Screens / Try demo** switch retains the interactive scenarios. Presenter notes retain useful narration and production limitations. Refreshed the short video backup and offline cache. Actual LMS text inside the captures remains unchanged. This change creates no role permissions, backend capability, live-data feed or edits to the LMS's browser state.
 
 ### Pupil’s books and school uniform reservations
 
@@ -873,6 +937,13 @@ For **every new user feature idea or future implementation**:
 8. Update README links and relevant demo account examples. Do not broaden site sharing or role permissions just to expose a view.
 
 ## Change log
+
+### 26 November 2026 — Family workflows, communication, transport privacy and school fees
+
+- Implemented six user requirements across Parent, Class Teacher, Subject Teacher, School Administrator, Transport Coordinator, Driver, Principal and Chairman. Added family home/child switching, shared in-portal inbox/to-dos, parent-facing bus alerts, GPS hour/completion gate, teacher email/letters/recipient preview, events/consent, fee invoices/demo checkout/receipts/reminders/unpaid students and scoped exports.
+- Extended the presentation to eight chapters and 51 actual prototype screens, including family/consent/fees, transport privacy and staff registers. Refreshed affected existing captures and the backup recording; retained original capture dates for unchanged store/boarding examples.
+- Validation: 200 Node tests (including 12 new cross-scope/state/privacy/payment workflow tests); browser verification of family login, successful demo checkout, per-child consent, selected-student letter preview/publication, transport alerts to Class Teacher, after-hours GPS hiding, invoice issuance/reminders and 390px/320px layouts. Presentation build and final live checks are recorded at completion.
+
 
 ### 25 November 2026 — GitHub Pages preparation
 
@@ -973,19 +1044,19 @@ For **every new user feature idea or future implementation**:
 
 ### 23 November 2026 — Interactive client product showcase
 
-- Implemented the approved seven-chapter web showcase at `/showcase/`, with Sussex navy/gold styling, a shared 3D canvas, procedural Sri Lanka/bus/NFC scenes and supporting product props. Added scoped narrative demos, four three-step role tours and all 13 prototype links.
+- Implemented the approved eight-chapter web showcase at `/showcase/`, with Sussex navy/gold styling, a shared 3D canvas, procedural Sri Lanka/bus/NFC scenes and supporting product props. Added scoped narrative demos, four three-step role tours and all 13 prototype links.
 - Added Present/Explore modes, notes, keyboard/touch/chapter controls, fullscreen/pause, reduced motion/2D fallback, isolated in-memory examples and content-versioned offline caching. Supplied a short H264 screen-recording backup and meeting guide. Preserved the main LMS and Site audience; no production integrations or LMS permissions were added.
 - Updated the feature tracker, maintained reference, README and asset/dependency provenance. Validation evidence follows.
 
 - **173 Node tests passed**, including eight presentation cases for chapter/branch/role completeness, fixed prototype links, NFC offline/duplicate/missing-scan behavior, academic/attendance separation, collection progression, shared assessment calculations and reset isolation.
 - Browser checks passed for the seven interactive chapters, navigation/notes, delayed routes, NFC states, actual sample-note download, publication/completion/attendance, comparisons, book/uniform flows, four contextual role tours/all 13 roles, pilot information, Explore scrolling, reduced motion and full 2D fallback. The LMS storage payload stayed unchanged.
-- All seven chapters passed width/reachability checks at 1500×1000, 1366×768, 1024×768, 768×1024, 390×844 and 320×800; additional WebGL mobile checks passed at 390/320px. Desktop/mobile visuals were inspected. An actual disconnected-browser reload passed with WebGL and NFC interaction. All 12 presentation assets were cached, including the 36.25-second 1440×810 H264 backup; online/offline video playback and fullscreen entry/exit passed.
+- All eight chapters passed width/reachability checks at 1500×1000, 1366×768, 1024×768, 768×1024, 390×844 and 320×800; additional WebGL mobile checks passed at 390/320px. Desktop/mobile visuals were inspected. An actual disconnected-browser reload passed with WebGL and NFC interaction. All 12 presentation assets were cached, including the 36.25-second 1440×810 H264 backup; online/offline video playback and fullscreen entry/exit passed.
 
 ### 23 November 2026 — Clean presentation and actual prototype captures
 
 - Removed small surrounding captions, chapter descriptions, fact rows, timing labels, scene annotations and repeated explanations. Kept headlines, working controls and presenter notes. Added default Screens view and Try demo, 32 original PNG captures with provenance, related-view tabs, all 13 role screenshots, four three-screen sequences, exact prototype links and an enlargement dialog with actual-size scrolling.
 - Captured the existing LMS in an isolated local demo browser; preserved the main application, role permissions, user browser state and current Site audience. Refreshed the silent backup video to 32.125 seconds at 1440×900. Updated this reference, requirement tracker, README, meeting guide and asset provenance.
-- **175 Node tests passed**, including screenshot-file signatures/dimensions/provenance, route validity, chapter coverage and all-role screenshot coverage. Browser checks passed for every screen tab, four role sequences/all 13 roles, enlargement/actual-size/fit/Escape, retained NFC/learning/attendance/reservation interactions and unchanged LMS storage. All seven chapters passed width checks at 1500×1000, 1366×768, 1024×768, 768×1024, 390×844 and 320×800, with mobile enlargement and 2D fallback. No browser errors were observed; desktop and phone visuals were inspected.
+- **175 Node tests passed**, including screenshot-file signatures/dimensions/provenance, route validity, chapter coverage and all-role screenshot coverage. Browser checks passed for every screen tab, four role sequences/all 13 roles, enlargement/actual-size/fit/Escape, retained NFC/learning/attendance/reservation interactions and unchanged LMS storage. All eight chapters passed width checks at 1500×1000, 1366×768, 1024×768, 768×1024, 390×844 and 320×800, with mobile enlargement and 2D fallback. No browser errors were observed; desktop and phone visuals were inspected.
 - Additional laptop checks verified that whole screenshots and their prototype links fit above the footer at 1366×768, 1024×768 and 1280×640. A disconnected-browser reload passed screenshot decoding/enlargement, WebGL/NFC interaction, fullscreen and online/offline H264 playback. All 45 local assets were cached, including the 32.125-second 1440×900 video.
 
 ### 23 November 2026 — Subjects, family notices and homework
@@ -993,6 +1064,6 @@ For **every new user feature idea or future implementation**:
 - Renamed visible Courses wording to Subjects across role views, forms, reports and presentation; retained internal record keys and legacy hash routes. Added canonical Subjects navigation.
 - Added Class Teacher subject selection per actual pupil, approval-gated Parent visibility and a parent/student/admission/class/school identity panel. Administrative enrolment alone grants no new parent-facing subject; class changes clear approvals.
 - Added common class notices with publish/edit/withdraw and parent read state, plus separate subject/class homework from Class Teachers and Subject Teachers. Parents download instructions and record homework completion separately from notes, attendance and marks.
-- Grouped teaching classes by subject; added distinct Science 8A/8B demo pupils/homework. Added one-time browser migration preserving existing enrolments and edits. Refreshed the presentation’s actual captures and matching interactive scenarios. Updated all affected role rules, requirements, README and meeting/asset guides. Validation: **187 Node tests passed**, including student-specific subject approval, class/school/role rejection, current-appointment checks, class-change approval reset, notice visibility/read/withdraw, separate homework completion and class-specific presentation examples. Browser checks passed for the Class Teacher → Parent selection/notice/homework flows, identity display, persistence, TXT homework download, Subject Teacher 8A/8B material/homework isolation, sibling rejection, legacy/canonical Subjects routes, and 1440px/390px/320px pages/forms without browser errors. Refreshed all 38 actual captures; presentation/offline validation is recorded below.
+- Grouped teaching classes by subject; added distinct Science 8A/8B demo pupils/homework. Added one-time browser migration preserving existing enrolments and edits. Refreshed the presentation’s actual captures and matching interactive scenarios. Updated all affected role rules, requirements, README and meeting/asset guides. Validation: **187 Node tests passed**, including student-specific subject approval, class/school/role rejection, current-appointment checks, class-change approval reset, notice visibility/read/withdraw, separate homework completion and class-specific presentation examples. Browser checks passed for the Class Teacher → Parent selection/notice/homework flows, identity display, persistence, TXT homework download, Subject Teacher 8A/8B material/homework isolation, sibling rejection, legacy/canonical Subjects routes, and 1440px/390px/320px pages/forms without browser errors. Refreshed all 51 actual captures; presentation/offline validation is recorded below.
 
-- Presentation validation: all nine classroom screenshot choices and the new class/subject/homework/notice examples passed browser checks; all seven chapters passed desktop/tablet/phone width checks, enlargement/actual-size and 2D fallback. Laptop frames and prototype links fit at 1366×768, 1024×768 and 1280×640. A disconnected browser loaded the new subject/class/homework/notice captures and enlarged images, ran NFC and played the 39-second H264 backup. All 51 local assets were cached; fullscreen and unchanged LMS storage checks passed.
+- Presentation validation: all nine classroom screenshot choices and the new class/subject/homework/notice examples passed browser checks; all eight chapters passed desktop/tablet/phone width checks, enlargement/actual-size and 2D fallback. Laptop frames and prototype links fit at 1366×768, 1024×768 and 1280×640. A disconnected browser loaded the new subject/class/homework/notice captures and enlarged images, ran NFC and played the 39-second H264 backup. All 51 local assets were cached; fullscreen and unchanged LMS storage checks passed.

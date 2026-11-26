@@ -43,6 +43,7 @@ export function branchTransportPage(options, branch) {
 }
 
 export function networkBusPage(options, bus) {
+  if (bus.trackingVisible === false) return `<div class="portal-card">${button("Back to school", "network-select", { value: bus.branch, variant: "secondary" })}<h2>BUS ${e(bus.label)}</h2><p>${e(bus.name)}</p>${badge("GPS hidden", "neutral")}<p>${e(bus.trackingPolicy.reason)}. Locations are visible only during school pickup and drop-off windows.</p></div>`;
   const telemetry = networkTelemetry(bus, { progress: options.progress, paused: options.paused, elapsed: options.networkElapsed });
   return '<div data-network-telemetry="' + e(bus.id) + '">' +
     button("Back to " + e(bus.branchName), "network-select", { value: bus.branch, variant: "secondary compact" }) +

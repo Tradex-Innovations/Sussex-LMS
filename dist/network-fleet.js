@@ -1,10 +1,11 @@
+import { protectFleet } from "./transport-privacy.js";
 import { networkRoutes } from "./network-routes.js";
 
 const routeCache = new WeakMap();
 const startedAt = performance.now();
 
 export function networkFleet(state, branches) {
-  return branches.flatMap((branch) => {
+  return protectFleet(state, branches.flatMap((branch) => {
     const index = branch.directoryIndex;
     const assigned = state.buses.filter((bus) => bus.branch === branch.id);
     const buses = assigned.length ? assigned : [0, 1].map((number) => ({
@@ -24,7 +25,7 @@ export function networkFleet(state, branches) {
       studentsOnBoard: bus.status === "school" ? 0 : 18 + (index * 7 + number * 3) % 22,
       capacity: 40, sample: true, operational: Boolean(assigned.length),
     }));
-  });
+  }));
 }
 
 export function fleetSummary(fleet) {
@@ -61,6 +62,7 @@ export function pointOnRoute(route, progress) {
 }
 
 export function networkTelemetry(bus, options = {}) {
+  if (bus.trackingVisible === false) return { progress: 0, position: null, speed: null, nextStop: "Location hidden outside school trips", eta: null, updated: "GPS hidden" };
   const simulatedElapsed = options.elapsed ?? (performance.now() - startedAt) / 1000;
   const progress = bus.status === "school" ? 1 : bus.status === "delayed" ? bus.start || 0.4
     : bus.operational && options.progress ? options.progress(bus)
