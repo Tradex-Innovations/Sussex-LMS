@@ -1,7 +1,7 @@
 {
-  "sourceCommit": "59ec2f5120bffdee8e26001b49dd79ac0724ac7d",
-  "source": "Actual Sussex LMS UI captures. GPS management, tracker, privacy and boarding views refreshed 26 November 2026. Unchanged screens retain original capture dates. Device telemetry is simulated.",
-  "prototypeSha256": "8107d2009a69a886b7a78c3892a01aa2ddcfdf572c7c69f7b5719f75076c2ca3",
+  "sourceCommit": "5da7e8528f45b68ad5b316de55f8ce4595f8b73b",
+  "source": "Actual Sussex LMS UI captures. Parent card checkout and fee views refreshed 26 November 2026 for Debit/Credit card with Visa/Mastercard badges. Other images retain their source capture dates. Payments and GPS are simulated.",
+  "prototypeSha256": "9320e2796df50f6482c9f50404cdba7b5980af1e3c75612c5b572acaa0d0e84a",
   "captures": [
     {
       "id": "section_head",
@@ -86,9 +86,9 @@
     {
       "id": "parent-fees",
       "route": "parent/fees",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:15:30.698Z",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-26T10:07:00.673920+00:00",
       "source": "Family workflows working tree, 26 November 2026; actual browser capture"
     },
     {
@@ -142,9 +142,9 @@
     {
       "id": "parent-payment",
       "route": "parent/fees",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:15:48.085Z",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-26T10:06:34.577305+00:00",
       "source": "Family workflows working tree, 26 November 2026; actual browser capture"
     },
     {

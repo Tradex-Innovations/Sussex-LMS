@@ -532,7 +532,7 @@ Also sees the parent/student identity panel, Class Teacher-selected subjects, co
 - **School uniforms:** browse the child’s school catalogue, choose item/size and 1–3 units per size, then submit a separate request to the Uniform Store. Duplicate open requests for the same pupil/item/size are blocked; later requests after collection are allowed.
 - Each reservation list is separated by guardian, selected pupil, school and store type. Remove unavailable/stale entries and recheck quantities before submission. Current stock is checked on submit and again on staff confirmation.
 - **My reservations:** read own selected-child references, captured items/sizes/quantities, progress and collection location/date/hours. Cancel Requested/Confirmed requests; contact the relevant store after Ready. Internal staff notes/identity history are hidden, while decline/cancellation reasons are shown.
-- Collection is an in-school handover against the reference/admission number. Book/uniform reservations request no payment details. The separate school-fee demo uses fixed dummy payment details only. No external SMS/email/push notification is sent.
+- Collection is an in-school handover against the reference/admission number. Book/uniform reservations request no payment details. The separate school-fee demo offers Debit/Credit card checkout with fixed Visa/Mastercard fixtures and demo verification only. No external SMS/email/push notification is sent.
 - Session survives refresh. Subject completion stays per student; book/uniform lists and reservations are per guardian/student/school/type. Earlier legacy family book records remain read-only and are not automatically assigned to the currently selected child.
 
 **Limits:** no other family's orders or unlinked student data, other guardians’ reservations, internal store notes, staff fulfilment/stock controls, staff role switcher inside the signed-in portal, teacher material publication, admission/course/bus edits, school comparisons, real payments or real GPS guarantees. Internal Section Head review notes are hidden from this portal.
@@ -570,7 +570,7 @@ Implemented **26 November 2026**, browser-local only. Feature IDs: `FAMILY-002`,
 ### School fees and demo payments
 
 - School Administrator executes invoice issuance, demo office payment recording and portal reminders in the appointed school. Principal reads its school; Chairman reads its current network/school selection. Other staff roles have no fee workspace or financial export permission.
-- Parents read invoices/payment history for all currently linked children, filter by student/status/query, inspect line items/due dates, pay an outstanding balance through Review → Method → Confirm → Result, and download a text demo receipt. Supported outcomes: success, decline and cancellation. Fixed test-card or demo-bank details are displayed; no real card numbers or banking credentials are requested/stored, no payment SDK/network is used and no money moves.
+- Parents read invoices/payment history for all currently linked children, filter by student/status/query, inspect line items/due dates, pay an outstanding balance through Review → Card details → Verify & pay → Processing → Confirmation, and download a text demo receipt. Supported outcomes: success, decline and cancellation. Debit and Credit card options show Visa/Mastercard badges and supplied demo fixtures; no real card numbers or banking credentials are requested/stored, no payment SDK/network is used and no money moves.
 - Amounts are integer LKR cents, with positive two-decimal inputs. Successful payments alone reduce balances. Office payments allow partial settlement, reject duplicate school receipt references and overpayment. Checkout rechecks the current family and balance and is idempotent after success; a changed balance rejects stale confirmation. Declines/cancellations leave the balance unchanged.
 - Staff views: Invoices, Payment history, Unpaid students (one row per student, aggregated balance, invoice detail/payment actions), Reminders; student/status/name/admission/class filters and scoped CSV. Current school membership is rechecked for every invoice. This is an illustrative ledger, not an accounting, banking or reconciliation integration.
 - Selected-invoice reminders are validated as a complete school-scoped unpaid batch before mutation, previewed and delivered only to current linked guardian portals. Missing guardians are shown for school follow-up; duplicate guardian/invoice/day reminders are skipped. Reminder history names the local acting administrator.
@@ -831,6 +831,16 @@ The suite covers access, migration, parent admission selection, network/director
 
 ## Proposed features and requirements
 
+### Card-only school fee checkout
+
+**Feature ID:** `SCHOOL-FEES-CARDS-002`. **Requested:** 26 November 2026. **Status:** Implemented prototype UI.
+
+**User requirement:** make online school fee payment resemble a real card checkout, offer Debit card and Credit card with Visa/Mastercard badges, and remove bank transfers and bank receipt uploads. The prototype implements Review → Card details → Verify & pay → Processing → Confirmation/receipt. This applies to school fees only; books/uniforms remain reserve-and-collect with no payment.
+
+Parents choose the card type and use supplied Visa/Mastercard fixtures, name, expiry and CVV, then demo verification code `123456`. Visa `4242 4242 4242 4242` and Mastercard `5555 5555 5555 4444` succeed; Visa `4000 0000 0000 0002` demonstrates decline. All use expiry `12/30` and CVV `123`. Only fixture numbers are accepted. No card number, CVV, typed holder value or OTP is persisted or sent externally. The saved checkout/payment retains only card type, brand, last four digits and simulated outcome. Existing legacy payments remain stored; an earlier bank entry displays as Previous payment, with no new bank option. Pending old checkouts return through the card form.
+
+Only the owning guardian with current child/school access can prepare/verify a payment. Balance and current appointment are rechecked before settlement; success is idempotent. Decline/cancel leave the fee balance unchanged. Administrator office-payment, reminders and unpaid-student views retain their existing school scope; Principal/Chairman retain read-only financial oversight. These steps simulate a gateway and card verification; no real processor, bank, OTP message or money movement is connected.
+
 ### GPS-device transport and removal of the Driver role
 
 **Feature ID:** `TRANSPORT-GPS-003`. **Requested:** 26 November 2026. **Status:** Implemented UI prototype; hardware integration pending.
@@ -917,6 +927,12 @@ For **every new user feature idea or future implementation**:
 8. Update README links and relevant demo account examples. Do not broaden site sharing or role permissions just to expose a view.
 
 ## Change log
+
+### 26 November 2026 — Card-only online fee checkout
+
+- Replaced the basic payment choices with a responsive debit/credit card checkout, Visa/Mastercard badges, realistic card fields, masked card verification, processing, success/decline/cancellation and receipts.
+- Removed new bank-transfer methods and bank receipt uploads; preserved historic payment amounts and school-office payment scope. Only demo fixtures are accepted; full card credentials and OTP are never stored.
+- Updated parent fee presentation/mind-map copy and affected captures. **202 Node tests passed**, including leaving the Parent session during processing, card fixtures, verification, decline/cancel, family/role isolation, idempotency, legacy preservation and credential exclusion. Browser checks passed for debit/credit selection, Visa/Mastercard form, wrong-code and unsupported-number feedback, success receipt, decline without balance change, 390px/320px layouts and the matching presentation flow. No browser errors were observed.
 
 Older entries below describe historical implementations. Driver functionality and earlier all-role GPS gates were superseded by the 26 November device-GPS update.
 

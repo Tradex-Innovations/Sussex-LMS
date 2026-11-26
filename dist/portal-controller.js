@@ -1,8 +1,8 @@
 import { linkedChildren } from "./access.js";
 import { notifications, markNotification, saveTransportAlert } from "./notifications-data.js";
 import { saveTrackingPolicy, completeTrackingTrip } from "./transport-privacy.js";
-import { feeInvoices, saveFeeInvoice, beginFeeCheckout, finishFeeCheckout, recordOfficePayment, sendFeeReminders, feesCSV } from "./fees-data.js";
-import { invoiceDetails, invoiceForm, officeForm, checkoutView, receiptText } from "./fees.js";
+import { feeInvoices, saveFeeInvoice, beginFeeCheckout, prepareFeeCard, finishFeeCheckout, recordOfficePayment, sendFeeReminders, feesCSV } from "./fees-data.js";
+import { invoiceDetails, invoiceForm, officeForm, checkoutView, checkoutProcessingView, receiptText } from "./fees.js";
 import { publishCommunication, cancelCommunication, respondConsent, remindEvent, eventCSV } from "./communications-data.js";
 import { composeForm, communicationPreview, consentForm, letterHTML } from "./communications.js";
 import { escapeHtml as e, button } from "./ui.js";
@@ -21,9 +21,9 @@ export function portalAction(name, value, api) {
     else if (name === "portal-invoice-new" && ctx.role === "admin") showDialog("portal-invoice-new", "Issue school fee invoice", "Browser-local demo", invoiceForm(state, ctx));
     else if (name === "portal-invoice") showDialog("portal-invoice", "School fee invoice", "Demo school fees", invoiceDetails(state, ctx, value));
     else if (name === "portal-office" && ctx.role === "admin") showDialog("portal-office", "Record office payment", "Demo payment only", invoiceDetails(state, ctx, value) + officeForm(value));
-    else if (name === "portal-pay") { let checkout; if (update((next) => { checkout = beginFeeCheckout(next, ctx, value); })) { render(); showDialog("portal-checkout", "Online school fee payment", "Demo checkout", checkoutView(api.getState(), ctx, checkout.id)); } }
-    else if (name === "portal-checkout-step") { const [id, step] = value.split("|"); if (!["review", "method", "confirm-card", "confirm-bank"].includes(step)) return; showDialog("portal-checkout", "Online school fee payment", "Demo checkout", checkoutView(state, ctx, id, step)); }
-    else if (name === "portal-checkout-cancel") save((next) => finishFeeCheckout(next, ctx, { id: value, method: "Demo card", outcome: "cancelled" }), "Checkout cancelled. No payment recorded.");
+    else if (name === "portal-pay") { let checkout; if (update((next) => { checkout = beginFeeCheckout(next, ctx, value); })) { render(); showDialog("portal-checkout", "Online school fee payment", "Visa & Mastercard · Debit or credit card", checkoutView(api.getState(), ctx, checkout.id)); } }
+    else if (name === "portal-checkout-step") { const [id, step] = value.split("|"); if (!["review", "card", "card-visa", "card-mastercard", "card-declined", "verify"].includes(step)) return; showDialog("portal-checkout", "Online school fee payment", "Visa & Mastercard · Debit or credit card", checkoutView(state, ctx, id, step)); }
+    else if (name === "portal-checkout-cancel") save((next) => finishFeeCheckout(next, ctx, { id: value, outcome: "cancelled" }), "Checkout cancelled. No payment recorded.");
     else if (name === "portal-receipt") download(receiptText(state, ctx, value), "sussex-demo-receipt.txt");
     else if (name === "portal-fees-export") download(feesCSV(state, ctx), "sussex-demo-fee-register.csv", "text/csv");
     else if (name === "portal-reminders-confirm") { let count = 0; if (save((next) => { count = sendFeeReminders(next, ctx, JSON.parse(value)).length; })) toast(count + " new portal reminders recorded. Duplicates or missing guardians were skipped."); }
@@ -36,7 +36,7 @@ export function portalAction(name, value, api) {
     else if (name === "portal-letter") download(letterHTML(state, ctx, value), "sussex-letter.html", "text/html");
   } catch (error) { toast(error.message); }
 }
-export function portalSubmit(mode, form, api) {
+export async function portalSubmit(mode, form, api) {
   const { state, ctx, update, render, showDialog, closeDialog, toast } = api, fd = new FormData(form), input = { ...Object.fromEntries(fd), students: fd.getAll("students") };
   const save = (fn, message) => { if (!update(fn)) return false; closeDialog(); render(); toast(message); return true; };
   try {
@@ -47,7 +47,16 @@ export function portalSubmit(mode, form, api) {
     else if (mode === "portal-transport-alert") save((next) => saveTransportAlert(next, ctx, input), "Alert added to family and class teacher inboxes.");
     else if (mode === "portal-invoice-new") save((next) => saveFeeInvoice(next, ctx, input), "Demo school fee invoice issued.");
     else if (mode === "portal-office") save((next) => recordOfficePayment(next, ctx, input), "Demo office payment recorded.");
-    else if (mode === "portal-checkout") { if (update((next) => finishFeeCheckout(next, ctx, input))) { render(); showDialog("portal-checkout", "Demo payment result", "No real money collected", checkoutView(api.getState(), ctx, input.id)); } }
+    else if (mode === "portal-card-details") { prepareFeeCard(structuredClone(state), ctx, input); if (update(next => prepareFeeCard(next, ctx, input))) { render(); showDialog("portal-checkout", "Online school fee payment", "Visa & Mastercard · Debit or credit card", checkoutView(api.getState(), ctx, input.id, "verify")); } }
+    else if (mode === "portal-checkout") {
+      finishFeeCheckout(structuredClone(state), ctx, input);
+      showDialog("portal-checkout", "Card payment", "", checkoutProcessingView());
+      await new Promise(resolve => setTimeout(resolve, 750));
+      const active = api.getContext();
+      if (active?.role !== "parent" || active.account.id !== ctx.account.id) return;
+      if (update(next => finishFeeCheckout(next, ctx, input))) { render(); showDialog("portal-checkout", "Payment confirmation", "", checkoutView(api.getState(), ctx, input.id)); }
+      else { closeDialog(); render(); }
+    }
     else if (mode === "portal-fee-reminders") {
       const ids = fd.getAll("invoiceIds"); sendFeeReminders(structuredClone(state), ctx, ids);
       const invoices = feeInvoices(state, ctx).filter((item) => ids.includes(item.id));

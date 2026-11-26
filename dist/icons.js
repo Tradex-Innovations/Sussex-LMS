@@ -1,4 +1,7 @@
 const paths = {
+  creditCard: '<rect x="2" y="4" width="20" height="16" rx="3"/><path d="M2 10h20M6 15h3m3 0h2"/>',
+  lock: '<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V6a4 4 0 0 1 8 0v4m-4 5v2"/>',
+  shield: '<path d="m12 2 8 4v6c0 5-8 10-8 10S4 17 4 12V6zM8 12l3 3 5-6"/>',
   brand: '<path d="M5 18h7a4 4 0 0 0 0-8H9a2.5 2.5 0 0 1 0-5h6"/><circle cx="4.5" cy="18" r="2"/><circle cx="18" cy="5" r="2.5"/><path d="m18 9 0 3m-1.6-1.5h3.2"/>',
   bus: '<path d="M4 16V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10M4 9h16M4 15h16M6 15v4m12-4v4M8 12h.01M16 12h.01"/>',
   map: '<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15m6-12v15"/>',

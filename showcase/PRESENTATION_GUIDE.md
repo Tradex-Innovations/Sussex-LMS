@@ -62,3 +62,5 @@ Open **System map** in the header, the final chapter’s **Explore the role mind
 Examples: `#mind-map/parent`, `#mind-map/class_teacher/attendance`, `#mind-map/admin/fees`, `#mind-map/transport/privacy`. All scope descriptions reflect the browser prototype. No real GPS, payment, email, authorization or data mutation is introduced by the map.
 
 GPS update (26 November 2026): Driver is retired. Bus-mounted GPS is the 24/7 source; management sees in-scope buses continuously, Parents only inside coordinator-set windows. The mind map shows GPS as hardware, not an account role. Device signals and locations remain simulated.
+
+Card payment update (26 November 2026): the fee checkout offers Debit/Credit card with Visa/Mastercard badges, fixture card details, demo verification code 123456, processing and a receipt. Bank transfers and receipt uploads are absent. Fees are simulated; book/uniform collection remains payment-free.

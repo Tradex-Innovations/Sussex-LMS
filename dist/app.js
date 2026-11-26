@@ -110,7 +110,7 @@ function selectFamilyChild(id) {
   parentSession = session; ui.courseId = ""; ui.stores = { books: storesDefaults(), uniforms: storesDefaults() };
   return true;
 }
-function portalAPI(ctx) { return { state, ctx, ui: ui.portal, getState: () => state, update, render, showDialog, closeDialog, toast, selectChild: selectFamilyChild }; }
+function portalAPI(ctx) { return { state, ctx, ui: ui.portal, getState: () => state, getContext: context, update, render, showDialog, closeDialog, toast, selectChild: selectFamilyChild }; }
 
 function elapsed() {
   return ui.elapsed + (ui.paused ? 0 : (performance.now() - ui.runningSince) / 1000);
@@ -287,8 +287,10 @@ function showDialog(mode, title, description, content) {
   dialogMode = mode;
   dialog.classList.toggle("chairman-dialog", mode.startsWith("chairman-"));
   dialog.classList.toggle("class-attendance-dialog", mode === "class-attendance");
+  dialog.classList.toggle("card-payment-dialog", mode === "portal-checkout");
   dialog.innerHTML = `<header class="dialog-heading"><div><h2 id="dialog-title">${e(title)}</h2>${description ? `<p>${e(description)}</p>` : ""}</div><button type="button" class="icon-button" aria-label="Close dialog" data-action="close-dialog">${icon("x", 21)}</button></header>${content}`;
   if (!dialog.open) dialog.showModal();
+  if (mode === "portal-checkout") { dialog.scrollTop = 0; dialog.querySelector("#dialog-title").setAttribute("tabindex", "-1"); dialog.querySelector("#dialog-title").focus({ preventScroll: true }); }
 }
 
 function updateAttendanceDraft(form) {

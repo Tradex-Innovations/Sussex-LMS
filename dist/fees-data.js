@@ -32,16 +32,51 @@ export function beginFeeCheckout(state, context, invoiceId) {
   const checkout = { id: "checkout-" + crypto.randomUUID(), parentId: ctx.account.id, invoiceId, amount: invoice.balance, status: "pending", at: now() };
   state.feeCheckouts ||= []; state.feeCheckouts.push(checkout); return checkout;
 }
-export function finishFeeCheckout(state, context, input) {
-  const ctx = ctxFor(state, context), checkout = (state.feeCheckouts || []).find((item) => item.id === input.id && item.parentId === ctx.account.id), invoice = feeInvoices(state, ctx).find((item) => item.id === checkout?.invoiceId);
+export const feeCardMethods = ["Debit card", "Credit card"];
+export const demoFeeCards = {
+  visa: { number: "4242 4242 4242 4242", brand: "Visa", last4: "4242", outcome: "success" },
+  mastercard: { number: "5555 5555 5555 4444", brand: "Mastercard", last4: "4444", outcome: "success" },
+  declined: { number: "4000 0000 0000 0002", brand: "Visa", last4: "0002", outcome: "declined" },
+};
+export function feePaymentMethod(payment) {
+  if (payment.method === "Demo bank") return "Previous payment";
+  if (payment.method === "Demo card") return "Card (earlier prototype)";
+  return payment.method + (payment.card ? " · " + payment.card.brand + " •••• " + payment.card.last4 : "");
+}
+function ownCheckout(state, context, id) {
+  const ctx = ctxFor(state, context), checkout = (state.feeCheckouts || []).find(item => item.id === id && item.parentId === ctx.account.id), invoice = feeInvoices(state, ctx).find(item => item.id === checkout?.invoiceId);
   if (ctx.role !== "parent" || !checkout || !invoice) fail("This checkout is outside your family.");
-  if (checkout.status === "success") return state.feePayments.find((item) => item.checkoutId === checkout.id);
+  return { ctx, checkout, invoice };
+}
+export function prepareFeeCard(state, context, input) {
+  const { checkout, invoice } = ownCheckout(state, context, input.id);
   if (checkout.status !== "pending") fail("Start a new checkout to try again.");
-  if (!["success", "declined", "cancelled"].includes(input.outcome) || !["Demo card", "Demo bank"].includes(input.method)) fail("Choose a demo payment method and outcome.");
-  if (input.outcome === "success" && (invoice.balance !== checkout.amount || invoice.balance <= 0)) fail("The balance changed. Close this checkout and review the invoice again.");
-  checkout.status = input.outcome; checkout.method = input.method; checkout.finishedAt = now();
-  if (input.outcome !== "success") return checkout;
-  const payment = { id: "receipt-" + crypto.randomUUID(), reference: "DEMO-" + crypto.randomUUID().slice(0, 8).toUpperCase(), checkoutId: checkout.id, invoiceId: invoice.id, studentId: invoice.studentId, branch: invoice.branch, parentId: ctx.account.id, amount: checkout.amount, method: input.method, status: "success", at: now(), by: ctx.account.name };
+  if (invoice.balance !== checkout.amount || invoice.balance <= 0) fail("The balance changed. Close this checkout and review the invoice again.");
+  const number = String(input.cardNumber || ""), card = Object.values(demoFeeCards).find(card => card.number.replaceAll(" ", "") === number.replaceAll(" ", ""));
+  if (!feeCardMethods.includes(input.method)) fail("Choose Debit card or Credit card.");
+  if (!card || !/^[\d ]+$/.test(number)) fail("Use one of the supplied demo Visa or Mastercard numbers. Do not enter a real card.");
+  if (!String(input.cardholder || "").trim() || String(input.cardholder).length > 80) fail("Enter the name on the demo card.");
+  if (input.expiry !== "12/30" || input.cvv !== "123") fail("Use the demo expiry 12/30 and security code 123.");
+  // Retain only a masked display summary. PAN, CVV, holder input and verification code never enter stored state.
+  checkout.method = input.method; checkout.card = { brand: card.brand, last4: card.last4 }; checkout.gatewayOutcome = card.outcome; checkout.stage = "verification";
+  return checkout;
+}
+export function finishFeeCheckout(state, context, input) {
+  const { ctx, checkout, invoice } = ownCheckout(state, context, input.id);
+  if (input.method && !feeCardMethods.includes(input.method)) fail("Choose Debit card or Credit card.");
+  if (checkout.status === "success") return state.feePayments.find(item => item.checkoutId === checkout.id);
+  if (checkout.status !== "pending") fail("Start a new checkout to try again.");
+  const cancelled = input.outcome === "cancelled";
+  if (!cancelled) {
+    if (invoice.balance !== checkout.amount || invoice.balance <= 0) fail("The balance changed. Close this checkout and review the invoice again.");
+    if (checkout.stage !== "verification" || !feeCardMethods.includes(checkout.method) || !checkout.card) fail("Complete the card details before paying.");
+    if (input.method && input.method !== checkout.method) fail("The selected card method changed. Review the card details again.");
+    if (input.otp !== "123456") fail("Enter the six-digit demo verification code 123456.");
+    if (!["success", "declined"].includes(checkout.gatewayOutcome) || input.outcome && input.outcome !== checkout.gatewayOutcome) fail("Use the supplied card to determine the simulated payment result.");
+  }
+  checkout.status = cancelled ? "cancelled" : checkout.gatewayOutcome; checkout.finishedAt = now();
+  if (checkout.status !== "success") return checkout;
+  const payment = { id: "receipt-" + crypto.randomUUID(), reference: "DEMO-" + crypto.randomUUID().slice(0, 8).toUpperCase(), checkoutId: checkout.id, invoiceId: invoice.id, studentId: invoice.studentId, branch: invoice.branch, parentId: ctx.account.id, amount: checkout.amount, method: checkout.method, card: { ...checkout.card }, status: "success", at: now(), by: ctx.account.name };
   state.feePayments ||= []; state.feePayments.push(payment); return payment;
 }
 export function recordOfficePayment(state, context, input) {

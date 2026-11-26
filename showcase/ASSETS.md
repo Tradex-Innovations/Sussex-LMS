@@ -25,3 +25,5 @@ The family chapter covers one guardian login/all linked children, transport inbo
 The drill-through role architecture and capability graphs use code-native SVG connectors and semantic HTML buttons from `src/RoleMindMap.jsx`, the scoped catalogue in `src/mind-map-data.js` and existing project icons/font/logo. No external graph service, new third-party dependency or raster/AI mind-map image is used. The generated showcase service worker caches the new bundle along with existing assets. The 50 prototype screenshots and eight-chapter backup video remain separate demonstration assets.
 
 GPS update (26 November 2026): Driver is retired. Bus-mounted GPS is the 24/7 source; management sees in-scope buses continuously, Parents only inside coordinator-set windows. The mind map shows GPS as hardware, not an account role. Device signals and locations remain simulated.
+
+Card payment update (26 November 2026): the fee checkout offers Debit/Credit card with Visa/Mastercard badges, fixture card details, demo verification code 123456, processing and a receipt. Bank transfers and receipt uploads are absent. Fees are simulated; book/uniform collection remains payment-free.

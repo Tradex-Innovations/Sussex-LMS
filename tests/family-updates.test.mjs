@@ -4,7 +4,7 @@ import { freshState, loadState } from '../dist/data.js';
 import { contextFor, linkedChildren, visibleCourses } from '../dist/access.js';
 import { authenticateParent, parentContext } from '../dist/parent-login.js';
 import { migrateFamilyPortal } from '../dist/family-seed.js';
-import { feeToday, feeInvoices, beginFeeCheckout, finishFeeCheckout, recordOfficePayment, sendFeeReminders, saveFeeInvoice, feesCSV } from '../dist/fees-data.js';
+import { feeToday, feeInvoices, beginFeeCheckout, prepareFeeCard, finishFeeCheckout, recordOfficePayment, sendFeeReminders, saveFeeInvoice, feesCSV } from '../dist/fees-data.js';
 import { communicationClasses, communicationStudents, communications, publishCommunication, respondConsent, consentFor, cancelCommunication, remindEvent, eventCSV } from '../dist/communications-data.js';
 import { letterHTML } from '../dist/communications.js';
 import { notifications, markNotification, saveTransportAlert } from '../dist/notifications-data.js';
@@ -41,17 +41,18 @@ test('School fees enforce parent family, administrative school and read-only lea
 test('Successful checkout is idempotent and only the owning family can settle it', () => {
  const { state, parent, other } = setup(), invoice = feeInvoices(state, parent)[0], checkout = beginFeeCheckout(state, parent, invoice.id);
  assert.equal(beginFeeCheckout(state, parent, invoice.id).id, checkout.id); const before = structuredClone(state);
- assert.throws(() => finishFeeCheckout(state, other, { id: checkout.id, method: 'Demo card', outcome: 'success' })); assert.deepEqual(state, before);
- const payment = finishFeeCheckout(state, parent, { id: checkout.id, method: 'Demo card', outcome: 'success' }); assert.match(payment.reference, /^DEMO-/); assert.equal(feeInvoices(state, parent)[0].balance, 0);
- assert.equal(finishFeeCheckout(state, parent, { id: checkout.id, method: 'Demo card', outcome: 'success' }).id, payment.id); assert.equal(state.feePayments.filter(p => p.checkoutId === checkout.id).length, 1);
- assert.throws(() => beginFeeCheckout(state, parent, invoice.id), /unpaid/); assert.ok(!JSON.stringify(state.feePayments).includes('4242'));
+ assert.throws(() => finishFeeCheckout(state, other, { id: checkout.id, method: 'Debit card', outcome: 'success' })); assert.deepEqual(state, before);
+ prepareFeeCard(state, parent, { id: checkout.id, method: 'Debit card', cardNumber: '4242 4242 4242 4242', cardholder: parent.account.name, expiry: '12/30', cvv: '123' });
+ const payment = finishFeeCheckout(state, parent, { id: checkout.id, method: 'Debit card', otp: '123456' }); assert.match(payment.reference, /^DEMO-/); assert.equal(feeInvoices(state, parent)[0].balance, 0);
+ assert.equal(finishFeeCheckout(state, parent, { id: checkout.id, method: 'Debit card', outcome: 'success' }).id, payment.id); assert.equal(state.feePayments.filter(p => p.checkoutId === checkout.id).length, 1);
+ assert.throws(() => beginFeeCheckout(state, parent, invoice.id), /unpaid/); assert.ok(!JSON.stringify(state.feePayments).includes('4242 4242 4242 4242'));
 });
 test('Declined/cancelled payments do not reduce fees; changed balances reject stale checkout and prevent overpayment', () => {
  const { state, parent, admin } = setup(), invoice = feeInvoices(state, parent)[0];
- for (const outcome of ['declined', 'cancelled']) { const checkout = beginFeeCheckout(state, parent, invoice.id); finishFeeCheckout(state, parent, { id: checkout.id, method: 'Demo bank', outcome }); assert.equal(feeInvoices(state, parent)[0].balance, invoice.balance); }
+ for (const outcome of ['declined', 'cancelled']) { const checkout = beginFeeCheckout(state, parent, invoice.id); if(outcome === 'declined') prepareFeeCard(state, parent, { id: checkout.id, method: 'Credit card', cardNumber: '4000 0000 0000 0002', cardholder: parent.account.name, expiry: '12/30', cvv: '123' }); finishFeeCheckout(state, parent, { id: checkout.id, method: 'Credit card', ...(outcome === 'cancelled' ? { outcome } : { otp: '123456' }) }); assert.equal(feeInvoices(state, parent)[0].balance, invoice.balance); }
  const checkout = beginFeeCheckout(state, parent, invoice.id); recordOfficePayment(state, admin, { invoiceId: invoice.id, amount: 10, reference: 'office-test' });
- assert.throws(() => finishFeeCheckout(state, parent, { id: checkout.id, method: 'Demo card', outcome: 'success' }), /balance changed/);
- finishFeeCheckout(state, parent, { id: checkout.id, method: 'Demo card', outcome: 'cancelled' }); assert.equal(checkout.status, 'cancelled');
+ assert.throws(() => finishFeeCheckout(state, parent, { id: checkout.id, method: 'Debit card', outcome: 'success' }), /balance changed/);
+ finishFeeCheckout(state, parent, { id: checkout.id, method: 'Debit card', outcome: 'cancelled' }); assert.equal(checkout.status, 'cancelled');
  assert.throws(() => recordOfficePayment(state, admin, { invoiceId: invoice.id, amount: 999999, reference: 'overpay' }));
  assert.throws(() => recordOfficePayment(state, admin, { invoiceId: invoice.id, amount: 10, reference: 'office-test' }), /already/);
 });
