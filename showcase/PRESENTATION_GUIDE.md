@@ -48,3 +48,15 @@ Role links open the existing LMS in a separate tab with its normal demo account/
 The family chapter covers one guardian login/all linked children, transport inbox alerts, trip consent, teacher letters/email and school fee demo payment. Use FAMILY-1001 / 1234. Parents cannot override GPS hours. Transport Coordinator → Tracking hours & alerts has the presenter clock (07:15 visible / 18:00 hidden), school time windows and trip completion. School Administrator owns invoices, unpaid students and fee reminders; Principal/Chairman read scoped fee oversight. Book/uniform reservations remain collection-only without payment. No real email, consent signature verification or payment integration is connected.
 
 51 actual prototype screenshots include 13 new family/communication/fee/privacy views. Affected existing captures were refreshed on 26 November via the in-app browser; unchanged store/boarding examples retain original capture dates. Browser screenshots were converted from JPEG to PNG without layout/content changes. Desktop refreshes use a requested 1440×900 viewport and parent bus/boarding use 390×844; the browser returns slightly smaller JPEG images. Exact file dimensions are recorded in the manifest. `captures.json` records per-file dimensions, capture dates and source provenance. The source hash covers the working tree used for captures.
+
+## Interactive system role mind map
+
+Open **System map** in the header, the final chapter’s **Explore the role mind map**, or Presentation menu → **Explore the system role mind map**. The full architecture is `/showcase/#mind-map`.
+
+1. Start with Chairman → Principal → Vice Principal, then follow academic and operational roles. Parents sit separately through linked children. Solid lines show the recommended staff reporting structure; dashed lines illustrate family services. Neither line grants inherited permissions.
+2. Click any role to open its capability map. Click a feature branch to explain **Can view / Can do**, constraints and the matching prototype workspace links. The role’s central card explains its exact scope and collaborating roles.
+3. Use Full architecture or breadcrumbs to return. Find a role jumps directly between all thirteen roles. Browser Back/Forward and copied role/feature URLs work; refreshing a direct link retains the selected content.
+4. Drag/pinch or scroll to explore; use +/− and Fit. Focus the map for arrow-key panning and Home/0 to fit. On a phone or with a keyboard, choose Outline for a hierarchy/feature list. Feature details scroll independently.
+5. **← Presentation** returns to the active chapter from the same visit. Starting directly at a mind-map URL returns to the network chapter. The eight narrative chapters and their backup video are separate from this additional interactive explorer.
+
+Examples: `#mind-map/parent`, `#mind-map/class_teacher/attendance`, `#mind-map/admin/fees`, `#mind-map/transport/privacy`. All scope descriptions reflect the browser prototype. No real GPS, payment, email, authorization or data mutation is introduced by the map.

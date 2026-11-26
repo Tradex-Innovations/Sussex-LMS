@@ -110,7 +110,7 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 
 **School fees:** additional `#chairman/fees` view reads the active network/school fee invoices, payment history, unpaid-student register, reminder log and CSV. Cannot issue invoices, record payments or send reminders; School Administrator executes those actions. No Class Teacher, Subject Teacher or other family financial scope is inherited.
 
-**Entry:** `#chairman/overview/transport`. **Navigation:** Overview, Bus tracking, Subjects, Students & guardians, Pupil’s books, School uniforms, Roles & access, Bus boarding.
+**Entry:** `#chairman/overview/transport`. **Navigation:** Overview, School fees (read-only), Bus tracking, Subjects, Students & guardians, Pupil’s books, School uniforms, Roles & access, Bus boarding.
 
 ### Overview views
 
@@ -138,7 +138,7 @@ An appointment is a role plus its school and, where needed, section, grade, clas
 
 **School fees:** additional `#principal/fees` view gives read-only invoice, payment-history, unpaid-student, reminder-log and CSV oversight within the appointed school. Cannot execute fee writes or payments through the Principal workspace.
 
-**Entry:** `#principal/overview/transport`. **Scope:** appointed school. **Navigation:** same six workspaces as Chairman, without a school selector.
+**Entry:** `#principal/overview/transport`. **Scope:** appointed school. **Navigation:** Overview, School fees (read-only), Bus tracking, Subjects, Students & guardians, Pupil’s books, School uniforms, Roles & access and Bus boarding, without a school selector.
 
 - **Daily pulse:** student attendance, unavailable teachers, classes requiring review and delayed bus signals, with links into related views.
 - **Transport Activity:** assigned-school map/routes/fleet, bus filters and details; existing vehicle management; start/end demo trips and reset to school routes.
@@ -332,7 +332,7 @@ Also manages per-student subject selection, common class notices and homework fo
 
 Also gives homework and manages separate subject classes; the Nuwan demo includes Science 8A and 8B. See [Student subjects, homework and class notices](#student-subjects-homework-and-class-notices) for the complete access and persistence rules.
 
-**Entry:** `#teacher/overview/summary`. **Scope:** current teaching-course assignments for an actual Subject Teacher appointment in its school; enrolled students must also match the subject’s school, grade and class. **Navigation:** Overview and Courses. Five overview views are implemented:
+**Entry:** `#teacher/overview/summary`. **Scope:** current teaching-course assignments for an actual Subject Teacher appointment in its school; enrolled students must also match the subject’s school, grade and class. **Navigation:** Overview, Letters & email, Events & consent, Subjects and Homework. Five overview views are implemented:
 
 ### Subject Overview
 
@@ -380,7 +380,7 @@ Also gives homework and manages separate subject classes; the Nuwan demo include
 
 **School fees:** `#admin/fees` is a separate complete workspace alongside the five administration overview views. Issue one-student invoices, review line items and due dates, record demo office payments including partial payments, inspect payment history/receipts, filter by student/status/name/admission/class, export school CSV, review one row per unpaid student, preview and send selected-invoice portal reminders, and review reminder history. Only actual pupils currently in the appointed school are eligible. No other branch or family’s financial records are exposed. Fee write ownership belongs to this role; Principal/Chairman read oversight is separate.
 
-**Entry:** `#admin/overview/summary`. **Scope:** the current, actual School Administrator appointment in one school. **Navigation:** Overview, Students & guardians, Subjects, Bus boarding. Five overview views are implemented:
+**Entry:** `#admin/overview/summary`. **Scope:** the current, actual School Administrator appointment in one school. **Navigation:** Overview, School fees, Students & guardians, Subjects and Bus boarding. Five overview views are implemented:
 
 ### Administration Overview
 
@@ -435,7 +435,7 @@ Also gives homework and manages separate subject classes; the Nuwan demo include
 
 **Tracking hours & alerts:** `#transport/tracking` configures the appointed school’s weekday pickup/drop-off windows, sends parent-facing late/breakdown/other/resolved updates, and completes a visible pickup/drop-off trip to hide its GPS immediately. The presenter may choose a shared demo clock or current Asia/Colombo time. This clock is shared across the demonstration; school window settings and bus completion writes stay in the appointed school. Parents have no privacy override. See [Family communication and school fee workflows](#family-communication-and-school-fee-workflows).
 
-**Entry:** `#transport/overview/fleet`. **Scope:** current Transport Coordinator appointment in one school; editable operational buses only. **Navigation:** Overview, Bus tracking and Bus boarding. Five overview views are implemented:
+**Entry:** `#transport/overview/fleet`. **Scope:** current Transport Coordinator appointment in one school; editable operational buses only. **Navigation:** Overview, Bus tracking, Tracking hours & alerts and Bus boarding. Five overview views are implemented:
 
 ### Fleet Activity
 
@@ -682,7 +682,7 @@ Implemented **26 November 2026**, browser-local only. Feature IDs: `FAMILY-002`,
 
 ## Interactive client presentation
 
-**Entry:** `/showcase/` on the existing private Site; local `http://127.0.0.1:4183/showcase/`. **Title:** Sussex College Network — A Connected School Day. **Source:** `showcase/`; **built output:** `dist/showcase/`. The main LMS remains at `/` with its existing role routes and browser data.
+**Entry:** [GitHub Pages `/showcase/`](https://tradex-innovations.github.io/Sussex-LMS/showcase/) (canonical), the separate original private Site, or local `http://127.0.0.1:4183/showcase/`. **Title:** Sussex College Network — A Connected School Day. **Source:** `showcase/`; **built output:** `dist/showcase/`. The main LMS remains at `/` with its existing role routes and browser data.
 
 On GitHub Pages the repository prefix applies to both routes: `/Sussex-LMS/` for the prototype and `/Sussex-LMS/showcase/` for the presentation. The presentation resolves prototype links from its current location instead of returning to a hardcoded host. Screenshot, role-tour and pilot links retain their fixed role hashes. No LMS permissions or data migrations change. Presentation offline caching remains confined to that host’s `showcase/` route; browser storage is separate between hosts.
 
@@ -706,7 +706,22 @@ Captures were made on 23 November 2026 from the current LMS source in an isolate
 - **Explore mode:** the same content with chapter selection, scene-area wheel navigation and horizontal touch swipes. Mobile chapter content scrolls vertically; all controls remain reachable. URL hash addresses each chapter; query values retain Explore and simple-graphics choices on reload.
 - **Motion/graphics:** GSAP transitions, one shared React Three Fiber/Three.js canvas, locally generated bus/card/reader/map meshes and supporting tablet/books/uniform props. OS reduced-motion preferences are respected; manual reduced-motion/2D choices remain available. A 2D SVG/CSS alternative supports every interaction when chosen or after GPU context loss.
 - **Offline:** a content-versioned service worker scoped strictly to `/showcase/` caches its local HTML/JS/CSS/font/logo/screenshots/poster/video after an initial successful online load. Cache updates remove old showcase caches only. The menu reports readiness; clearing browser storage removes the cache. Existing LMS routes and private Site authorization remain separate; opening the LMS still requires access/internet.
-- **Backup:** a downloadable 39-second 1440×900 H264 MP4 screen recording, without audio, demonstrates the eight chapters, real prototype captures and example interactions. It is available from the presentation menu and cached for offline playback, with a local poster. It is not live bus/hardware footage.
+- **Backup:** a downloadable 45-second 1440×900 H264 MP4 screenshot walkthrough, without audio, demonstrates the eight chapters, real prototype captures and example interactions. It is available from the presentation menu and cached for offline playback, with a local poster. It is not live bus/hardware footage.
+
+### Interactive system role mind map
+
+**Implemented 26 November 2026 — `PRESENTATION-MINDMAP-001`.** Open **System map** from the presentation header, **Explore the role mind map** in the final role chapter, or Presentation menu → **Explore the system role mind map**.
+
+- **Full architecture:** `/showcase/#mind-map` shows all 13 implemented roles and the recommended network/school/academic/operational reporting structure. Chairman spans 20 schools; Principal and Vice Principal are school-scoped; Section Head → Grade Coordinator → Class/Subject Teacher shows academic coordination; school administration, the two stores, transport coordination and Driver have separate responsibilities. The structure illustrates prototype responsibilities, not a verified official Sussex organisational chart.
+- **Family connection:** Parent is a separate linked-student role, not a subordinate staff appointment. Dashed overview lines illustrate learning/consent, journey updates and school collection. Role-scope panels also link all relevant collaborating roles, including class notices/alerts, guardian/fee administration and Book Store collection. A reporting or collaboration line does not inherit permissions or broaden access.
+- **Role drill-through:** select a role node or use **Find a role**. `/showcase/#mind-map/<role>` opens that role at the centre of a feature mind map. Every existing navigation workspace and every overview module is represented. Labels come from the current LMS role definitions; the explanatory feature catalogue is maintained against this reference and validated by tests.
+- **Feature drill-through:** select a capability branch. `/showcase/#mind-map/<role>/<feature>` opens a **Can view / Can do** panel with applicable limits and fixed links into that role’s actual prototype workspaces. Select the central role card, or `.../<role>/scope`, for school/section/grade/class/subject/bus/family scope, explicit permission limits and related roles. External workspace links retain the current host and repository prefix and open the ordinary prototype/demo login in a separate tab.
+- Coverage includes bus/GPS privacy and alerts, NFC boarding/cards, academic comparisons, attendance, staffing/appointments/leave/temporary cover, student/guardian records, subject selection and lectures/homework, teacher communication/event consent, school fee demo workflows, separate book/uniform collections, scoped reports and request/recommendation/approval hand-offs. Read-only leadership fees, Class Teacher publication limits, coordinator enrolment-only writes and school/subject/student scope stay explicit.
+- **Navigation:** breadcrumbs, Full architecture, per-role selector, browser Back/Forward, and direct-link refresh. **← Presentation** returns to the previously active chapter in the same visit; opening a mind-map URL directly defaults the return chapter to the network introduction. The eight story chapters and 51 existing prototype screenshots remain available.
+- **Interaction:** drag/pinch, wheel zoom, +/−, Fit and zoom percentage. With the canvas focused, arrow keys pan and Home/0 fits; +/− zoom. Normal chapter shortcuts and Explore swipes/wheel do not change chapters while explaining a mind map. Semantic HTML role/feature buttons are rendered over SVG connectors; map and outline controls have accessible names, visible focus and headings.
+- **Small screens:** an optional Outline view lists the staff hierarchy or role features with large buttons. Feature details form a separately scrolling lower panel; desktop uses a side panel. The role picker, breadcrumbs, map controls and workspace links remain reachable. The header uses a compact logo on narrow phones.
+- **Persistence and limits:** selected role/feature is represented in the URL; zoom/pan and outline mode are in presentation memory. Reload retains the direct role/feature but resets the camera/outline. It does not access or mutate LMS localStorage/sessionStorage, users, enrolments, GPS, payments, consent or messages. This is a presenter/explanation view, not a new authenticated role or a permission management interface. All current prototype integrations remain simulations.
+- **Offline and maintenance:** bundled SVG/HTML/CSS and role metadata use existing assets/icons/fonts and the showcase’s generated offline cache; no graph service, external graph dependency or generated raster mind-map asset is required. `showcase/src/mind-map-data.js` and this role reference must be updated together when role capabilities/navigation change. The backup video still covers the eight narrative chapters; this additional explorer is used interactively.
 
 ### Access, state, production limits and maintenance
 
@@ -719,7 +734,7 @@ No backend, physical GPS/NFC, external notification, protected authorization, re
 **Implemented:** 23 November 2026. Visible terminology throughout the prototype and presentation is **Subjects** and **Homework**. Existing internal `courses`, assignment records and legacy `/courses` hash links are retained for compatibility; the navigation uses `/subjects`.
 
 - **Class Teacher:** `#class_teacher/subjects` or Overview → Subjects & Materials lists actual students in the appointed school/grade/class. **Assign subjects** selects each student’s subjects; it updates only that pupil’s matching-class enrolments and parent-facing approval. It cannot appoint teachers or select subjects from another class, grade or school. Other classmates keep their selections. Core admission/guardian records remain read-only.
-- **Parent:** `#parent/subjects` shows the intersection of the Class Teacher’s current selection and valid matching-class enrolment for the admission-selected child. The persistent identity panel shows Parent, Student, Admission number, Class/Grade and School. Direct material download/completion and homework access use this same subject scope. Siblings require their own admission login.
+- **Parent:** `#parent/subjects` shows the intersection of the Class Teacher’s current selection and valid matching-class enrolment for the admission-selected child. The persistent identity panel shows Parent, Student, Admission number, Class/Grade and School. Direct material download/completion and homework access use this same subject scope. Linked siblings are selected through the family child switcher without another login.
 - **Administration / academic leadership:** existing teaching-appointment and scoped enrolment functions remain. They cannot create a new Class Teacher approval through those forms. Removing an enrolment removes its approval; changing a pupil’s grade/class clears approved subjects until the new Class Teacher selects them. Teaching-appointment changes do not transfer Class Teacher permissions.
 - **Notices:** `#class_teacher/notices` publishes a title/message to all current student parents in the exact appointed class, regardless of their selected subjects. The Class Teacher can edit or withdraw class-owned notices; a newly appointed teacher in that same class can maintain them. `#parent/notices` exposes only the selected child’s current-class published notices. **Mark as read** persists per guardian/student/notice revision; edited notices become unread. Withdrawn notices remain in the staff list and disappear from parents. Private discussion/review notes are never copied to notices.
 - **Homework:** `#class_teacher/homework` may publish for any subject in the appointed class, including a subject taught by another teacher. `#teacher/homework` may publish only for a currently assigned teaching subject/class. Title, instructions and a valid due date are required. Each record stays tied to that exact subject/class; staff can edit or withdraw it, without changing its subject. Class Teachers oversee their own class’s homework; Subject Teachers manage their currently assigned subject classes. Reassignment removes the former Subject Teacher’s access.
@@ -865,6 +880,12 @@ The suite covers access, migration, parent admission selection, network/director
 
 ## Proposed features and requirements
 
+### Drill-through system role mind map
+
+**Feature ID:** `PRESENTATION-MINDMAP-001`. **Requested:** 26 November 2026. **Status:** Implemented in the interactive presentation.
+
+**User requirement:** include an interactive presentation mind map whose full view explains how all system roles are distributed. Selecting a role drills into a role-specific mind map explaining what that role can view and do. Recommended implementation: a full-canvas architecture view, role/feature drill-through, scope and permission limits, reporting versus family-service links, zoom/pan, keyboard/mobile navigation and direct prototype workspace links. This explains current prototype permissions; it does not grant access, add roles or turn the presentation into an authenticated LMS workspace.
+
 ### Family, transport alerts, events, communication and school fees
 
 **Feature IDs:** `FAMILY-002`, `TRANSPORT-ALERTS-002`, `GPS-PRIVACY-002`, `EVENT-CONSENT-001`, `SCHOOL-FEES-001`, `TEACHER-COMMS-001`. **Requested:** 26 November 2026. **Status:** Implemented in the prototype and interactive presentation (demo-only integrations).
@@ -937,6 +958,13 @@ For **every new user feature idea or future implementation**:
 8. Update README links and relevant demo account examples. Do not broaden site sharing or role permissions just to expose a view.
 
 ## Change log
+
+### 26 November 2026 — Drill-through presentation role mind map
+
+- Added `PRESENTATION-MINDMAP-001`: full 13-role architecture, per-role capability mind maps, feature/scope panels, view/action/limit explanations, related roles and existing-workspace links. Added header, role-chapter and presentation-menu entry points with shareable role/feature URLs.
+- Preserved current appointment/school/section/grade/class/subject/bus/family boundaries and the distinction between reporting relationships, collaboration and permission grants. No LMS role, permission, record workflow or production integration changed.
+- Added drag/pinch/wheel/keyboard pan and zoom, Fit, breadcrumbs, browser history, presentation return, accessible role selection and a mobile Outline view. Updated the existing offline build and walkthrough documentation; kept the eight narrative chapters, 51 captures and chapter backup video intact.
+- Validation: **205 Node tests passed**, including role/navigation/overview coverage, graph hierarchy integrity, direct-link parsing, canvas fit/zoom invariants and financial/academic/family permission distinctions. Browser checks passed for all 13 role/first-feature drill-downs, desktop and 390px/320px layouts, feature panels, scope navigation, zoom/keyboard pan, outline, browser history, menu/chapter entries and direct-link refresh, with no observed console errors. Production build passed; hosted deployment is verified separately before completion.
 
 ### 26 November 2026 — Family workflows, communication, transport privacy and school fees
 
