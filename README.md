@@ -31,9 +31,9 @@ GitHub Pages serves the demonstration’s frontend. Browser-local records and de
 
 ## Interactive client presentation
 
-Open [the GitHub Pages presentation](https://tradex-innovations.github.io/Sussex-LMS/showcase/), [the original private presentation](https://campusway-school-demo.manusara.chatgpt.site/showcase/) or the [local showcase](http://127.0.0.1:4183/showcase/). The same `/showcase/` route is included in the prepared GitHub Pages deployment. This separate eight-chapter presentation combines cinematic 3D scenes with **50 actual prototype screenshots**, four guided role tours and links to all 12 LMS roles. Chapters open in **Screens** view; click a screenshot to enlarge it, then choose **Actual size** to inspect the original. **Try demo** opens the interactive sample workflow. It does not change LMS records.
+Open [the GitHub Pages presentation](https://tradex-innovations.github.io/Sussex-LMS/showcase/) or [local showcase](http://127.0.0.1:4183/showcase/). The separate eight-chapter **Connected Transport** presentation fully introduces bus-mounted GPS, network/school maps, Parent journeys, viewing hours, issue alerts, NFC boarding, coordination/reports and a one-bus pilot. It includes cinematic 3D scenes and **18 actual transport screenshots**. Chapters open in **Screens**; select a screenshot to enlarge it. **Explore flow** runs isolated presentation examples without changing LMS records.
 
-The presentation also includes a [drill-through system mind map](https://tradex-innovations.github.io/Sussex-LMS/showcase/#mind-map). Choose **System map** in the header (or the final role chapter) to see the 13-role architecture, then select a role → capability branch for **Can view / Can do**, scope limits and links to the actual prototype workspace. Try [Parent](https://tradex-innovations.github.io/Sussex-LMS/showcase/#mind-map/parent), [Class Teacher](https://tradex-innovations.github.io/Sussex-LMS/showcase/#mind-map/class_teacher) or [Transport privacy](https://tradex-innovations.github.io/Sussex-LMS/showcase/#mind-map/transport/privacy). Pan/zoom and Fit explore the canvas; Outline offers a mobile/keyboard alternative. Reporting lines explain responsibilities and do not grant permissions. This separate presenter view does not change LMS records. See [the maintained access contract](ROLE_FEATURES_ACCESS.md#interactive-system-role-mind-map).
+The [full system mind map](https://tradex-innovations.github.io/Sussex-LMS/showcase/#mind-map) is **unchanged**, retaining all 12 roles and their transport, academic, fee, communication and collection capabilities. Choose **System map** in the header/menu or final pilot chapter, then select a role → feature for views, actions, limits and workspace links. Pan/zoom, Fit, mobile Outline, deep links and return-to-presentation remain available. All LMS features remain in the prototype; only the presentation narrative is transport-only. See [the maintained access contract](ROLE_FEATURES_ACCESS.md#interactive-system-role-mind-map).
 
 Use **Present** for the guided story or **Explore** for client browsing. The presentation keeps large headlines and functional controls; supporting explanations and prototype limits are in presenter notes. Left/right keys move chapters, **N** opens notes and **M** opens the chapter menu. The menu includes reduced motion, simpler graphics, reset, fullscreen and a short backup video. Load once online until **Presentation available offline** appears before using it without a connection; screenshots and video are included. Prototype links need connectivity; the original private Site also requires its existing access.
 
@@ -45,7 +45,7 @@ npm ci
 npm run build
 ```
 
-The build writes only `dist/showcase/`. Read [the meeting guide](showcase/PRESENTATION_GUIDE.md), [asset provenance](showcase/ASSETS.md) and [presentation access/limits](ROLE_FEATURES_ACCESS.md#interactive-client-presentation). GPS, NFC, results and collection examples remain simulated; school fees include a simulated online checkout; no real money is collected. Book/uniform reservations have no payment.
+The build writes only `dist/showcase/`. Read [the meeting guide](showcase/PRESENTATION_GUIDE.md), [asset provenance](showcase/ASSETS.md) and [presentation access/limits](ROLE_FEATURES_ACCESS.md#interactive-client-presentation). Transport presentation examples use simulated feeds; GPS/NFC hardware and external delivery still need integration. The 45-second backup video now covers transport only.
 
 ## Subjects, homework and class notices
 
@@ -56,7 +56,7 @@ The build writes only `dist/showcase/`. Read [the meeting guide](showcase/PRESEN
 - **Subject Teacher → Subjects:** classes are grouped by subject with separate **Open class** and **Give homework** controls. Preview Nuwan Gamage to compare Science 8A and 8B; their pupils, materials and homework stay separate.
 - Existing demo enrolments are retained as imported selections by a one-time migration. Newly registered/admin-enrolled pupils need the Class Teacher’s subject selection before parents gain subject access. Class changes clear those selections. Old `/courses` links remain compatible with `/subjects`.
 
-The presentation’s **The classroom → Prototype view** selector shows these actual screens. **Try demo** demonstrates class separation, subject visibility, homework, notices and attendance. See [the complete access reference](ROLE_FEATURES_ACCESS.md#student-subjects-homework-and-class-notices).
+These academic workspaces remain in the LMS and its full system mind map; they are outside the transport-only presentation narrative. See [the complete access reference](ROLE_FEATURES_ACCESS.md#student-subjects-homework-and-class-notices).
 
 ## Parent demo login
 

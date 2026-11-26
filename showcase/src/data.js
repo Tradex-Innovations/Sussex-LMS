@@ -1,17 +1,16 @@
 import { branchDirectory } from '../../dist/network-data.js';
 import { islandPolygons } from '../../dist/sri-lanka-land.js';
-import { rankedResults } from '../../dist/network-analytics.js';
 export { islandPolygons };
 export const branches = branchDirectory.map(({ id, name, school, lat, lon }, directoryIndex) => ({ id, name, school, lat, lon, directoryIndex }));
 export const chapters = [
-  { id: 'network', label: 'The network', kicker: 'ONE CONNECTED SCHOOL DAY', title: ['One network.', 'Every school day,', 'connected.'], accent: 2, description: 'From the first pickup to the final lesson. A shared view of transport, learning and school life for Sussex College Network.', note: 'Open with the network: 20 schools, one shared product, access shaped around each person’s responsibility. Select a branch, then follow a school day.', time: '1 min' },
-  { id: 'journey', label: 'The journey', kicker: '07:00 AM · THE SCHOOL JOURNEY', title: ['A clearer journey.', 'For every family.'], accent: 1, description: 'Follow the assigned bus, see its next stop and give the school transport team the same picture from an on-bus GPS tracker.', note: 'Transport is the centre of this proposal. Move the bus along the route and show the parent view. Try a delay or breakdown alert: the allocated families and current Class Teachers receive an in-portal update. The GPS tracker reports 24/7. School management sees in-scope buses all day; Parents see only their child’s bus in coordinator-configured windows. Use Transport Coordinator → Tracking hours & alerts to change the presenter clock; parents cannot override privacy.', time: '2 min' },
-  { id: 'boarding', label: 'The tap', kicker: '07:20 AM · STUDENT BOARDING', title: ['One small tap.', 'A recorded arrival', 'on the bus.'], accent: 1, description: 'Connect each student’s card to the trip roster. Give parents a clear boarding status and staff a way to review exceptions.', note: 'Tap the sample card. Repeat it to show duplicate handling. Switch the reader offline, tap and reconnect. A missed scan means Needs review, never automatic absence. Physical NFC hardware remains a future integration.', time: '2 min' },
-  { id: 'learning', label: 'The classroom', kicker: '08:00 AM · LEARNING CONTINUES', title: ['School and home.', 'On the same page.'], accent: 1, description: 'Class Teachers select student subjects and share class notices. Teachers give class-specific homework and lecture notes.', note: 'Begin with the family login and selected child identity. Show only Class Teacher-selected subjects, separate homework and common class notices. Subject Teachers manage each teaching class separately. In Try demo, change Science 8A/8B, publish notes/homework, select Amaya’s subjects, publish a class notice and mark attendance. Completion does not create assessment marks.', time: '1 min' },
-  { id: 'leadership', label: 'The bigger picture', kicker: '10:00 AM · SCHOOL LEADERSHIP', title: ['Every branch.', 'A clearer picture.'], accent: 1, description: 'Move from the whole network to one school. Explore sample academic results alongside the people and operations behind them.', note: 'Switch between Mathematics, Science and English. The comparison reuses the LMS’s illustrative Grade 8 Term 3 assessment model. It is not Sussex’s real performance. Choose a school and show how leadership can investigate.', time: '1 min' },
-  { id: 'collection', label: 'School essentials', kicker: '02:00 PM · PARENT CONVENIENCE', title: ['Reserve online.', 'Collect at school.'], accent: 1, description: 'Pupil’s books go to the Book Store. Sized uniforms go to the Uniform Store. Parents follow each request through to collection.', note: 'Choose pupil’s books or uniforms, then walk the request through confirmation, ready and collected. Requested stock is not held until the store confirms it. There is no buying or online payment.', time: '1 min' },
-  { id: 'family', label: 'The family', kicker: 'ONE LOGIN · EVERY CHILD', title: ['Less to chase.', 'More connected.'], accent: 1, description: 'One family account, event consent, school fee payments and reminders.', note: 'Sign in with FAMILY-1001 / 1234 and switch between Amaya and Kavin. Open Inbox for transport alerts, homework and fee to-dos. Respond to a class trip per child. Teachers send a letter or demo email to the whole class or selected pupils. Walk through school fee review, Debit/Credit card details with Visa/Mastercard badges, demo verification and a simulated success or decline; download the demo receipt. The School Administrator manages invoices, unpaid students and reminders; Principal and Chairman have scoped read oversight. No real money or external email is sent. Book/uniform reservations stay collection-only.', time: '2 min' },
-  { id: 'roles', label: 'Your next chapter', kicker: 'ONE PRODUCT · TWELVE ROLES', title: ['The right view.', 'For every role.'], accent: 1, description: 'One connected school day, with access that follows each person’s responsibility. Start with a focused pilot, then build towards the network.', note: 'Explore the four guided role tours, or open any of the twelve role previews in the existing prototype. Close with the proposed pilot: one school, one bus and a small card group before expanding.', time: '2 min' },
+  { id: 'network', label: 'Connected transport', scene: 'map', title: ['Every bus.', 'Every branch.', 'One clear view.'], accent: 2, note: 'Introduce transport across the 20-school network. The Chairman sees all branches or selected schools on the Sri Lanka map; school management sees only its assigned school. Select a branch, then open the actual Chairman or Principal transport screen. Branch coordinates are approximate and the routes and vehicles are illustrative, not a claim about the current Sussex fleet.' },
+  { id: 'tracker', label: 'The GPS connection', scene: 'tracker', title: ['On the bus.', 'Always connected.'], accent: 1, note: 'A bus-mounted GPS tracker sends location over its mobile-data connection to the system, independently of a driver phone or login. The intended device feed runs 24/7. Match each tracker to its bus and school. Explain last-known location and signal loss without presenting stale data as live. Try the signal interruption and recovery. The prototype simulates this feed; hardware, SIM coverage, telemetry ingestion and monitoring must be connected and tested in the pilot.' },
+  { id: 'journey', label: 'The parent journey', scene: 'bus', title: ['Their bus.', 'In your hands.'], accent: 1, note: 'One family account lists all linked children. Select the intended child to see only their allocated bus, route and stops during the school viewing window. Show the actual mobile Parent transport screen and boarding status, then advance the illustrative Nugegoda Bus 01 route. This is a route-progress illustration, not a verified ETA calculation. Choosing another school on the introduction does not invent a route for that school.' },
+  { id: 'privacy', label: 'The right visibility', scene: 'bus', title: ['24-hour oversight.', 'School-time sharing.'], accent: 1, note: 'GPS reporting continues 24/7. Chairman sees buses across selected branches; Principal, Vice Principal, School Administrator and Transport Coordinator see only their appointed school, including after hours. Parents see only their selected child’s bus during the Transport Coordinator’s school weekday pickup/drop-off windows. Defaults: 06:00–08:30 and 13:00–16:00 Asia/Colombo. Try 07:15, 14:30, 18:00, the weekend and a completed Parent trip. Hidden Parent views contain no route, marker or coordinates. Alerts remain accessible. Parents cannot change these rules; Class Teachers receive scoped alerts rather than full fleet-map access.' },
+  { id: 'alerts', label: 'Keep everyone informed', scene: 'bus', title: ['A delay.', 'An update.', 'Everyone informed.'], accent: 2, note: 'Transport Coordinator selects the affected bus and sends Late, Breakdown, Other issue or Resolved updates. Allocated families and current Class Teachers of those students receive in-portal notifications. An affected student/class scope is used, not a network-wide message. Show both actual inboxes and try the alert flow. Alerts remain readable outside Parent GPS hours. This presentation does not send messages; SMS, email, push delivery and automatic incident detection are separate production integrations.' },
+  { id: 'boarding', label: 'Every boarding recorded', scene: 'nfc', title: ['Tap the card.', 'Know who boarded.'], accent: 1, note: 'School staff issue a transport NFC card linked to a student; a bus-mounted reader records boarding against the bus/date/direction roster. Show the staff roster, Parent status and card management. Tap, repeat, go offline, reconnect and sync. Unknown, inactive or wrong-bus cards need review. Closing pickup with no confirmed tap means Needs review, never automatic classroom absence. Coordinators record reasoned corrections and export manifests. NFC closure does not stop the 24/7 GPS feed or itself close Parent GPS visibility. The hardware reader is not yet connected.' },
+  { id: 'operations', label: 'Transport control', scene: 'map', title: ['Routes aligned.', 'Issues followed.', 'Decisions clear.'], accent: 2, note: 'The Transport Coordinator works inside one school: fleet activity, routes/stops, tracker and student allocations, issues/follow-ups and transport reports. Demonstrate GPS signal status, route membership and student/bus allocation, the issue board and scoped CSV/HTML/print reports. Vice Principal supports school follow-ups. Private coordination notes are separate from Parent alerts. There is no Driver account, dispatch workflow or manual driver trip start. Show actual workspaces rather than claiming automatic route optimisation or predictive analytics.' },
+  { id: 'pilot', label: 'Start with one bus', scene: 'bus', title: ['One school.', 'One bus.', 'Ready to begin.'], accent: 2, note: 'Agree one school, one bus, a small student-card group and named school owners. Install a compatible GPS tracker, mobile-data SIM and NFC reader; validate real routes, signal loss/recovery, offline tap sync, duplicates/exceptions, Parent time windows, notification recipients and management scope. Train staff and families, review accuracy and usability, then expand. Open Pilot plan for the stages. The full System map remains available with every role and capability unchanged. The transport presentation does not remove academic, fee or collection functionality from the LMS.' },
 ];
 export function prototypeBaseFor(href) {
   const page = new URL(href);
@@ -34,76 +33,40 @@ export const roleTours = [
   { id: 'uniform_store', label: 'Uniform Store Officer', category: 'Operations', scope: 'The school’s uniform reservations', icon: 'shirt', route: 'uniform_store/overview/summary', detail: 'Manage sizes and stock, prepare confirmed requests and record uniform collection.' },
   { id: 'parent', label: 'Parent', category: 'Family', scope: 'All children linked to this guardian', icon: 'phone', route: 'parent/login', tour: ['Open the family dashboard', 'Review events and give consent', 'Pay school fees in the demo'], detail: 'All linked children, transport alerts, consent, demo fee payments, subjects, homework and school collection.' },
 ];
-export const focusedTours = ['chairman', 'principal', 'parent', 'transport'];
 export const stops = ['Nugegoda Junction', 'Nawala Junction', 'Rajagiriya', 'School'];
-export const initialDemo = { familyCard: 'Debit card', familyChild: 'amaya', familyConsent: '', feeStep: 0, trackingHidden: false, branchId: 'colombo', journey: 0.28, delayed: false, boarding: 'pending', offline: false, queued: false, tapMessage: '', published: false, completed: false, subjectEnabled: true, noticePublished: false, teachingClass: '8A', classWork: {}, homeworkPublished: false, homeworkDone: false, attendance: '', learningRole: 'teacher', subject: 'mathematics', compareAll: false, supply: 'books', size: '10', reservation: 'none', roleId: 'chairman', tourStep: 0 };
+export const initialDemo = { branchId: 'colombo', journey: 0.28, signal: true, audience: 'parent', time: '07:15', weekday: true, tripClosed: false, issue: 'late', alert: '', boarding: 'pending', offline: false, queued: false, tapMessage: '', operation: 'fleet' };
+export function parentLocationVisible(state) {
+  if (!state.weekday || state.tripClosed) return false;
+  const minute = Number(state.time.slice(0,2)) * 60 + Number(state.time.slice(3));
+  return (minute >= 360 && minute <= 510) || (minute >= 780 && minute <= 960);
+}
+export function locationVisible(state) { return state.audience === 'management' || parentLocationVisible(state); }
+export const alertLabels = { late: 'Bus running late', breakdown: 'Bus breakdown', other: 'Transport update', resolved: 'Issue resolved' };
 export function demoReducer(state, action) {
   switch (action.type) {
-    case 'family-child': return ['amaya','kavin'].includes(action.value) ? { ...state, familyChild: action.value } : state;
-    case 'family-consent': return { ...state, familyConsent: action.value };
-    case 'family-card': return ['Debit card','Credit card'].includes(action.value) ? { ...state, familyCard: action.value } : state;
-    case 'family-pay': return { ...state, feeStep: (state.feeStep + 1) % 4 };
-    case 'tracking-hidden': return { ...state, trackingHidden: !state.trackingHidden };
     case 'branch': return branches.some(branch => branch.id === action.id) ? { ...state, branchId: action.id } : state;
     case 'advance': return { ...state, journey: Math.min(1, state.journey + 0.24) };
-    case 'restart-journey': return { ...state, journey: 0.04, delayed: false };
-    case 'delay': return { ...state, delayed: !state.delayed };
+    case 'restart-journey': return { ...state, journey: 0.04 };
+    case 'signal': return { ...state, signal: !state.signal };
+    case 'audience': return ['parent','management'].includes(action.value) ? { ...state, audience: action.value } : state;
+    case 'time': return /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(action.value) ? { ...state, time: action.value } : state;
+    case 'weekday': return { ...state, weekday: !state.weekday };
+    case 'trip-closed': return { ...state, tripClosed: !state.tripClosed };
+    case 'issue': return Object.hasOwn(alertLabels,action.value) ? { ...state, issue: action.value } : state;
+    case 'notify': return { ...state, alert: state.issue };
+    case 'operation': return ['fleet','routes','allocations','issues','reports'].includes(action.value) ? { ...state, operation: action.value } : state;
     case 'reader': return { ...state, offline: !state.offline, tapMessage: state.offline ? 'Reader reconnected. Sync queued taps to confirm boarding.' : 'Reader offline. New taps will be queued.' };
     case 'tap':
       if (state.offline) return { ...state, queued: true, tapMessage: 'Tap captured offline. Boarding is not confirmed until sync.' };
       if (state.boarding === 'boarded') return { ...state, tapMessage: 'Already boarded. Repeated tap ignored.' };
-      return { ...state, boarding: 'boarded', tapMessage: 'Amaya’s boarding recorded. The parent view now shows Boarded.' };
+      return { ...state, boarding: 'boarded', tapMessage: 'Amaya’s boarding recorded. Parent status: Boarded.' };
     case 'sync': return state.offline ? { ...state, tapMessage: 'Reconnect the reader before syncing.' } : state.queued ? { ...state, queued: false, boarding: 'boarded', tapMessage: 'Queued tap synced once. Boarding confirmed.' } : { ...state, tapMessage: 'Reader is up to date. No queued taps.' };
-    case 'missed': return { ...state, boarding: 'review', tapMessage: 'Pickup closed without a confirmed tap. Needs review by the Transport Coordinator.' };
+    case 'missed': return { ...state, boarding: state.boarding === 'boarded' ? 'boarded' : 'review', tapMessage: state.boarding === 'boarded' ? 'Confirmed boarding retained.' : 'Pickup closed without a confirmed tap. Needs review by the Transport Coordinator.' };
     case 'reset-boarding': return { ...state, boarding: 'pending', queued: false, offline: false, tapMessage: '' };
-    case 'teaching-class': return ['8A', '8B'].includes(action.value) ? { ...state, teachingClass: action.value } : state;
-    case 'student-subject': return { ...state, subjectEnabled: !state.subjectEnabled };
-    case 'class-notice': return { ...state, noticePublished: true };
-    case 'publish': return { ...state, published: state.teachingClass === '8A' || state.published, classWork: { ...state.classWork, [state.teachingClass]: { ...state.classWork[state.teachingClass], notes: true } } };
-    case 'complete': return state.published && state.subjectEnabled ? { ...state, completed: !state.completed } : state;
-    case 'give-homework': return { ...state, homeworkPublished: state.teachingClass === '8A' || state.homeworkPublished, classWork: { ...state.classWork, [state.teachingClass]: { ...state.classWork[state.teachingClass], homework: true } } };
-    case 'homework-done': return state.homeworkPublished && state.subjectEnabled ? { ...state, homeworkDone: !state.homeworkDone } : state;
-    case 'attendance': return ['present', 'absent', 'late'].includes(action.value) ? { ...state, attendance: action.value } : state;
-    case 'learning-role': return ['teacher', 'class_teacher', 'parent', 'subjects', 'notices'].includes(action.value) ? { ...state, learningRole: action.value } : state;
-    case 'subject': return ['mathematics', 'science', 'english'].includes(action.value) ? { ...state, subject: action.value } : state;
-    case 'compare': return { ...state, compareAll: !state.compareAll };
-    case 'supply': return ['books', 'uniforms'].includes(action.value) ? { ...state, supply: action.value, reservation: 'none' } : state;
-    case 'size': return ['6', '8', '10', '12', '14', '16'].includes(action.value) && state.reservation === 'none' ? { ...state, size: action.value } : state;
-    case 'reserve': { const sequence = ['none', 'requested', 'confirmed', 'ready', 'collected']; const index = sequence.indexOf(state.reservation); return { ...state, reservation: sequence[Math.min(index + 1, sequence.length - 1)] }; }
-    case 'reset-reservation': return { ...state, reservation: 'none' };
-    case 'role': return roleTours.some(role => role.id === action.id) ? { ...state, roleId: action.id, tourStep: 0 } : state;
-    case 'tour-step': return { ...state, tourStep: Math.max(0, Math.min(2, Number(action.value) || 0)) };
     case 'reset': return { ...initialDemo };
     default: return state;
   }
 }
-export function comparison(state) {
-  const selected = state.compareAll ? branches : branches.filter(branch => ['colombo', 'lakeside', state.branchId, 'kandy'].includes(branch.id));
-  return rankedResults(selected, { subject: state.subject, grade: 8, term: 3 });
-}
 export function chapterFromHash(hash) { const index = chapters.findIndex(chapter => chapter.id === String(hash).replace(/^#/, '')); return index < 0 ? 0 : index; }
 export function prototypeURL(roleId) { const role = roleTours.find(role => role.id === roleId); return role ? prototypeBase + '#' + role.route : prototypeBase; }
-export const chapterScene = (index) => index === 1 ? 'bus' : index === 2 ? 'nfc' : [3,6].includes(index) ? 'learning' : index === 5 ? 'supplies' : 'map';
-
-export const tourDetails = {
- chairman: [
-  { route: 'chairman/overview/transport', text: 'Begin with the Sri Lanka network map, select a school and inspect its simulated bus activity.' },
-  { route: 'chairman/overview/academic', text: 'Choose Mathematics and compare the sample subject results across branches. Open a school to investigate.' },
-  { route: 'chairman/overview/reports', text: 'Generate a scoped executive snapshot for discussion with school leadership.' },
- ],
- principal: [
-  { route: 'principal/overview/transport', text: 'The Principal sees the assigned school’s routes and operational fleet.' },
-  { route: 'principal/overview/attendance', text: 'Review school attendance, then explore staffing availability and follow-up priorities.' },
-  { route: 'principal/overview/reports', text: 'Capture school reports and coordinate actions within the assigned school.' },
- ],
- parent: [
-  { route: 'parent/family', text: 'Use FAMILY-1001 / 1234. One guardian account shows Amaya and Kavin with a child switcher.' },
-  { route: 'parent/events', text: 'Respond to a trip consent request for the intended child and review the shared inbox.' },
-  { route: 'parent/fees', text: 'Review invoices and complete a simulated online fee payment. School supplies stay reserve-and-collect.' },
- ],
- transport: [
-  { route: 'transport/overview/fleet', text: 'Follow bus-mounted GPS telemetry across the appointed school. Management visibility is 24/7.' },
-  { route: 'transport/boarding', text: 'Review autonomous onboard-reader rosters and try the NFC simulation.' },
-  { route: 'transport/tracking', text: 'Set Parent visibility windows and notify families/class teachers about transport issues.' },
- ],
-};
+export const chapterScene = index => chapters[index]?.scene || 'map';

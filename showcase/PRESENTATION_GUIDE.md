@@ -1,70 +1,42 @@
-# A Connected School Day
+# Connected Transport
 
-Sussex College Network client presentation. Open `/showcase/` on the existing prototype site, or `http://127.0.0.1:4183/showcase/` when running the static server.
-
-The published [GitHub Pages presentation](https://tradex-innovations.github.io/Sussex-LMS/showcase/) uses the repository prefix: `/Sussex-LMS/showcase/` for this presentation and `/Sussex-LMS/` for the prototype. **Open prototype** stays on the current host. The user approved the repository becoming public to enable Pages; the Pages deployment and live route checks passed on 25 November 2026. The original private Site and localhost remain available. A new host has its own browser-local demo state and offline cache.
+Sussex College Network client presentation: [published showcase](https://tradex-innovations.github.io/Sussex-LMS/showcase/) or `http://127.0.0.1:4183/showcase/`. The narrative is exclusively transport. The full system mind map and the LMS keep every role and feature.
 
 ## Before the meeting
 
-Open the presentation online once and wait for **Presentation available offline** in the menu. The local assets and backup video are cached in that browser. Opening the actual LMS prototype requires internet and the existing Site access. Prefer a laptop/projector for the cinematic layout; all chapters also support touch and smaller screens.
+Load online until the menu shows **Presentation available offline**. The 18 actual screenshots and 45-second silent 1440×900 backup video are cached alongside the application. Portal workspace links need connectivity. The original private Site retains its existing access; GitHub Pages is public under the previously approved repository hosting.
 
-Choose **Present** for a guided walkthrough. **Explore** additionally supports scrolling over the scene and horizontal swiping to change chapters. Each chapter's mobile content scrolls vertically. The progress bar and chapter menu always allow direct navigation.
+Chapters open in **Screens**. Select related tabs, click an image to enlarge, use **Actual size / Fit to view**, and follow **Open transport view** to the actual portal. **Explore flow** shows an isolated interactive example. Large headlines and operational controls stay on screen; explanations and integration limits are in **Notes**.
 
-Chapters open in **Screens** view with actual prototype captures. Use the screen tabs (or **Prototype view** in The classroom) to show related views; select the image to enlarge it. **Actual size** allows scrolling across the original pixels; **Fit to view** restores the full frame. **Open prototype** opens that captured view's real LMS route. Choose **Try demo** for the presentation's interactive examples. Headlines and functional controls remain visible; supporting narration and limits are in **Notes** instead of small on-screen annotations.
+## Eight transport chapters
 
-Use the fullscreen button or the menu's fullscreen action when supported by the browser. Load the menu's **Watch the backup walkthrough** before the meeting if a video-only fallback is needed. The downloadable H264 video is 45 seconds at 1440×900, with no audio; it is a short visual summary rather than the full narrated presentation.
-
-## Eight chapters
-
-| Chapter | Suggested discussion | Interaction |
+| Chapter | Explain | Show |
 | --- | --- | --- |
-| The network | Explain 20 branches and 12 roles. | Show the actual Chairman map. In Try demo, pick a school on the 3D map or selector. |
-| The journey | Show school-bus visibility for parents/staff. | Show Parent and GPS tracker screens. In Try demo, advance Bus 01 and try a delayed signal. |
-| The tap | Explain card-linked boarding and exceptions. | Show the boarding roster, Parent status and student cards. In Try demo, tap/repeat, reconnect/sync and review a missing scan. |
-| The classroom | Connect class teaching with each family. | Show Parent identity/subjects, per-student selections, separate teaching classes, homework, class notices, lecture notes and attendance using Prototype view. In Try demo, publish for Science 8A/8B, select the pupil’s subject, share a common notice and mark homework/notes/attendance separately. |
-| The bigger picture | Discuss network/school oversight. | Show Academic, Attendance, Staffing and Reports screens. In Try demo, compare illustrative subjects. |
-| School essentials | Explain collection-only reservations. | Show Parent books/uniforms, both store queues and collection. In Try demo, progress a reservation. |
-| Your next chapter | Explain role scope and proposed pilot. | Show four three-screen role tours or All roles, then discuss Pilot plan. |
+| Connected transport | One network with school-scoped access. | Chairman’s Sri Lanka map, Principal school transport, 20-school selector. |
+| The GPS connection | Bus tracker → mobile data → system → screens. No Driver account or phone dependence; intended 24/7 reporting. | GPS fleet/trackers; interrupt and restore the illustrative signal. |
+| The parent journey | One family login, select a child, see that child’s assigned bus in permitted hours. | Actual mobile Parent map/boarding status; Bus 01 stop progress. |
+| The right visibility | Management sees in-scope buses 24/7; Parents follow coordinator weekday windows. | 07:15, 14:30, 18:00, weekend and closed Parent trip; actual settings/hidden/management views. |
+| Keep everyone informed | Coordinator sends late, breakdown, other or resolved alerts to affected families and their Class Teachers. | Actual inboxes; share an illustrative breakdown update. Alerts remain available after GPS hours. |
+| Every boarding recorded | Student-linked NFC card and autonomous bus reader. | Roster, Parent status, card administration; tap/repeat/offline/reconnect/sync/missing-tap review. |
+| Transport control | Coordinate routes, allocations, issues and reports within one school. | Actual routes, student allocations, follow-ups and generated report. Private notes are separate from Parent alerts. |
+| Start with one bus | Agree owners, connect hardware, validate, train, review and expand. | Pilot plan; transport workspace; unchanged full System map. |
 
-Allow roughly 8–10 minutes for the guided story plus discussion. Chapter notes suggest individual discussion time and explain prototype limits. The example journey follows Nugegoda Bus 01; selecting another branch on the network map does not imply a verified operating route for that school.
+Allow 10–15 minutes plus discussion. Use the selected child and school consistently. Network branch selection does not manufacture operational routes for that branch. Nugegoda Bus 01 and the route progression are illustrative, not verified timings or actual Sussex operations.
 
-## Controls
+Parent defaults: weekday 06:00–08:30 pickup and 13:00–16:00 drop-off, Asia/Colombo. The real prototype settings are owned by the Transport Coordinator; the presentation comparison is a fixed example. Chairman, Principal, Vice Principal, School Administrator and Transport Coordinator see only their permitted network/school scope continuously. Class Teacher alerts do not imply full map access.
 
-- **Next chapter / Previous** and the progress segments navigate the story.
-- **Left / Right / Page Up / Page Down** navigate; editable controls and role tabs keep their native keys.
-- **Space** pauses/resumes animation when focus is outside an interactive button/link.
-- **N** opens presenter notes; **M** opens chapters; **Escape** closes an open dialog.
-- Menu: notes, chapter jump, fullscreen, reduce motion, simpler 2D graphics, reset examples and backup video.
-- OS reduced-motion preferences are respected. Simpler graphics keeps every product interaction usable without WebGL. GPU-context loss also falls back to that view.
+A missed tap means **Needs review**, never automatic classroom absence. NFC pickup closure does not close Parent GPS or stop tracker reporting. Hardware/telemetry, connectivity recovery and external delivery still need production integration; in-portal prototype messages are already implemented. Presentation controls do not send messages or write LMS data.
 
-## What the client is seeing
+## Controls and resilience
 
-The 50 screenshots are unaltered captures of actual prototype views in an isolated demo browser. They are static images, not live data. Try demo interactions are presentation examples held in memory; they do not read or write the LMS's browser database. GPS, NFC, academic results, uniform designs, collection and student records are sample demonstrations. A missed tap means review, not automatic student absence. Lesson completion does not create academic marks. Book/uniform flows have no checkout or online payment.
+Present supports Next/Previous and direct progress/menu chapters. Explore adds scene-area wheel navigation and horizontal swipes; phone content scrolls vertically. Left/Right/Page Up/Page Down navigate, Space pauses outside interactive controls, N opens Notes, M chapters and Escape closes dialogs. Fullscreen, reduced motion, 2D graphics, reset and backup playback/download are in the menu. OS reduced motion is respected; GPU failure falls back to 2D.
 
-Role links open the existing LMS in a separate tab with its normal demo account/login behavior. Parent demo admission: **SCN-1001**, password **1234**. Suggested pilot stages are a proposal, not a delivery commitment or an installed hardware claim.
+All eight chapters and interactive flows were checked at 390px/320px, with desktop checks at 1280×720. Screenshots are real captures of the simulated portal, with provenance in `public/assets/screens/captures.json`. No hardware is connected by this presentation. It never reads/writes portal storage.
 
-## 26 November 2026 family update
+## Full system mind map — preserved
 
-The family chapter covers one guardian login/all linked children, transport inbox alerts, trip consent, teacher letters/email and school fee demo payment. Use FAMILY-1001 / 1234. Parents cannot override GPS hours. Transport Coordinator → Tracking hours & alerts has the presenter clock (07:15 Parent-visible / 18:00 Parent-hidden; management stays visible), school time windows and trip completion. School Administrator owns invoices, unpaid students and fee reminders; Principal/Chairman read scoped fee oversight. Book/uniform reservations remain collection-only without payment. No real email, consent signature verification or payment integration is connected.
+Open **System map** in the header/menu or **Explore the role mind map** in the final pilot chapter. `#mind-map` still shows all 12 roles and their reporting/family-service connections. Every role and capability, including academics, consent, payments and school collections, remains unchanged.
 
-50 actual prototype screenshots cover the 12 current roles. The GPS update refreshes affected management, fleet, tracker, privacy, boarding and Parent views using the in-app browser. Desktop GPS captures use the default browser viewport; Parent transport captures use a 390×844 mobile viewport. JPEG captures are converted to PNG without content changes. Exact image dimensions, source dates and source hashes are recorded in `captures.json`. Other unchanged screens retain their original capture dates.
+Select a role, then a feature for Can view / Can do, scope and workspace links. Use breadcrumbs, Full architecture, Find a role, copied deep links and browser Back/Forward. Drag/pinch/wheel, +/−, Fit and keyboard map controls remain. Phones can use Outline. **← Presentation** returns to the active transport chapter; direct mind-map entries return to the network introduction.
 
-## Interactive system role mind map
-
-Open **System map** in the header, the final chapter’s **Explore the role mind map**, or Presentation menu → **Explore the system role mind map**. The full architecture is `/showcase/#mind-map`.
-
-1. Start with Chairman → Principal → Vice Principal, then follow academic and operational roles. Parents sit separately through linked children. Solid lines show the recommended staff reporting structure; dashed lines illustrate family services. Neither line grants inherited permissions.
-2. Click any role to open its capability map. Click a feature branch to explain **Can view / Can do**, constraints and the matching prototype workspace links. The role’s central card explains its exact scope and collaborating roles.
-3. Use Full architecture or breadcrumbs to return. Find a role jumps directly between all twelve roles. Browser Back/Forward and copied role/feature URLs work; refreshing a direct link retains the selected content.
-4. Drag/pinch or scroll to explore; use +/− and Fit. Focus the map for arrow-key panning and Home/0 to fit. On a phone or with a keyboard, choose Outline for a hierarchy/feature list. Feature details scroll independently.
-5. **← Presentation** returns to the active chapter from the same visit. Starting directly at a mind-map URL returns to the network chapter. The eight narrative chapters and their backup video are separate from this additional interactive explorer.
-
-Examples: `#mind-map/parent`, `#mind-map/class_teacher/attendance`, `#mind-map/admin/fees`, `#mind-map/transport/privacy`. All scope descriptions reflect the browser prototype. No real GPS, payment, email, authorization or data mutation is introduced by the map.
-
-GPS update (26 November 2026): Driver is retired. Bus-mounted GPS is the 24/7 source; management sees in-scope buses continuously, Parents only inside coordinator-set windows. The mind map shows GPS as hardware, not an account role. Device signals and locations remain simulated.
-
-Card payment update (26 November 2026): the fee checkout offers Debit/Credit card with Visa/Mastercard badges, fixture card details, demo verification code 123456, processing and a receipt. Bank transfers and receipt uploads are absent. Fees are simulated; book/uniform collection remains payment-free.
-
-System mind map language (26 November 2026): explain this view as the planned product. Role scopes, capabilities and access notes use product language, without demo/prototype labels, sample credentials or simulation instructions. The linked prototype and technical readiness reference remain separate; this wording does not claim that production integrations are already connected.
-
-Mind-map releases refresh open role/feature maps when a new version becomes active. Visible presentation tabs check for updates every minute and on focus; chapter examples and LMS pages are preserved. An older tab may need one reload to adopt this update behavior.
+The map explains the planned product without demo/prototype wording; it does not claim connected production integrations. Existing release refreshes retain role/feature URLs, and the offline map remains available. The backup video covers only the transport narrative.

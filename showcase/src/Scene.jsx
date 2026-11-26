@@ -97,13 +97,14 @@ function NfcStage({ demo, paused, reduced }) {
     </group>
   </group>;
 }
-function LearningStage({ demo, family }) {
-  const tex = useLabel(family ? ['SUSSEX / FAMILY', 'Every child.', 'CONSENT / FEES / UPDATES', 'ONE FAMILY ACCOUNT'] : ['SUSSEX / LEARNING', 'A shared lesson.', demo.published ? 'Science lecture notes' : 'Teacher prepares materials', demo.completed ? 'PARENT: COMPLETED' : 'PARENT: READY TO LEARN'], '#e9efe8', '#163f40');
-  return <group position={[.15, .2, -1]} rotation={[0, -.25, -.08]}><Round size={[4.5, 3.05, .18]} position={[0, 2.05, 0]} radius={.12} castShadow><meshStandardMaterial color="#192c3a" metalness={.5} roughness={.35}/></Round><mesh position={[0, 2.05, .105]}><planeGeometry args={[4.23, 2.68]}/><meshBasicMaterial map={tex}/></mesh>{[0, 1, 2].map(index => <Round key={index} size={[2.4, .23, 1.7]} position={[-2.1, .22 + index * .25, .5]} rotation={[0, index * .11, 0]} radius={.035} castShadow><meshStandardMaterial color={['#d7ad5a', '#326262', '#e1d8bd'][index]} roughness={.6}/></Round>)}</group>;
-}
-function SuppliesStage({ demo }) {
-  const label = useLabel(['SUSSEX COLLEGE NETWORK', 'PUPIL’S BOOK', 'MATHEMATICS / GRADE 8', 'SCHOOL COLLECTION'], '#f3e6c8', '#183b51');
-  return <group position={[0, 0, -.6]} rotation={[0, -.35, 0]}><mesh position={[0, .03, 0]} receiveShadow><cylinderGeometry args={[3.3, 3.3, .12, 64]}/><meshStandardMaterial color="#132d3b" metalness={.5} roughness={.4}/></mesh>{demo.supply === 'books' ? <group position={[-.5, .5, 0]} rotation={[-.15, .12, -.15]}>{[0, 1, 2].map(index => <Round key={index} size={[2.8, .22, 3.8]} position={[index * .09, index * .26, 0]} radius={.04} castShadow><meshStandardMaterial color={['#31576a', '#dfbf7b', '#f3e6c8'][index]} roughness={.6}/></Round>)}<mesh position={[.18, .65, 0]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[2.65, 3.65]}/><meshBasicMaterial map={label}/></mesh></group> : <group position={[-.2, 1.45, 0]} rotation={[.05, 0, .04]}><Round size={[2.0, 2.5, .25]} radius={.09} castShadow><meshStandardMaterial color="#e7d9ba" roughness={.85}/></Round>{[-1, 1].map(side => <Round key={side} size={[.9, 1.3, .25]} position={[side * 1.2, .65, 0]} rotation={[0, 0, side * .6]} radius={.08} castShadow><meshStandardMaterial color="#e7d9ba" roughness={.85}/></Round>)}<mesh position={[0, .1, .14]}><boxGeometry args={[.035, 2.25, .02]}/><meshStandardMaterial color="#aa9776"/></mesh><Round size={[.45, .5, .025]} position={[-.52, .35, .145]} radius={.025}><meshStandardMaterial color="#dbcba7"/></Round><mesh position={[0, 1.26, 0]} rotation={[Math.PI / 2, 0, 0]}><torusGeometry args={[.34, .09, 10, 32, Math.PI]}/><meshStandardMaterial color="#bdad8a"/></mesh></group>}</group>;
+function TrackerStage({ demo }) {
+  const label = useLabel(['BUS-MOUNTED GPS', demo.signal ? 'CONNECTED' : 'SIGNAL LOST', '24 / 7 TELEMETRY', 'GPS → MOBILE DATA → SYSTEM'], '#102735', demo.signal ? '#9ce2bf' : '#e5bb65');
+  return <group position={[0, .4, -.5]} rotation={[.1, -.35, 0]}>
+    <Round size={[3.5, .9, 2.4]} radius={.18} position={[0, .7, 0]} castShadow><meshStandardMaterial color="#183b50" metalness={.6} roughness={.3}/></Round>
+    <mesh position={[0, 1.16, 0]} rotation={[-Math.PI/2,0,0]}><planeGeometry args={[3.25,2.1]}/><meshBasicMaterial map={label}/></mesh>
+    <mesh position={[1.4, 1.75, -.8]}><cylinderGeometry args={[.045,.065,1.3,12]}/><meshStandardMaterial color="#e5bb65" metalness={.7} roughness={.25}/></mesh>
+    {[1.1,1.65,2.2].map(radius=><mesh key={radius} rotation={[-Math.PI/2,0,0]} position={[0,.1,0]}><torusGeometry args={[radius,.018,8,64,Math.PI*1.5]}/><meshBasicMaterial color={demo.signal ? '#9ce2bf' : '#e5bb65'} transparent opacity={.5}/></mesh>)}
+  </group>;
 }
 function AnimatedWorld({ chapter, demo, dispatch, paused, reduced, onReady }) {
   const { camera, gl } = useThree(), root = useRef(), groups = useRef({}), target = useRef(new THREE.Vector3(0, .8, 0));
@@ -116,7 +117,7 @@ function AnimatedWorld({ chapter, demo, dispatch, paused, reduced, onReady }) {
       if (name === scene) { group.visible = true; gsap.to(group.scale, { x: 1, y: 1, z: 1, duration: instant ? 0 : 1.1, ease: 'power3.out' }); gsap.to(group.position, { y: 0, duration: instant ? 0 : 1.1, ease: 'power3.out' }); }
       else gsap.to(group.scale, { x: .001, y: .001, z: .001, duration: instant ? 0 : .5, onComplete: () => { group.visible = false; } });
     }
-    const positions = { map: [0, 8.8, 11.5], bus: [7.5, 5.2, 9.5], nfc: [4.2, 7.1, 8.3], learning: [3, 4.2, 9], supplies: [4.5, 6, 8.5] };
+    const positions = { map: [0, 8.8, 11.5], bus: [7.5, 5.2, 9.5], nfc: [4.2, 7.1, 8.3], tracker: [4.2, 7.1, 8.3] };
     gsap.killTweensOf(camera.position); gsap.to(camera.position, { x: positions[scene][0], y: positions[scene][1], z: positions[scene][2], duration: instant ? 0 : 1.4, ease: 'power2.inOut' });
     const next = scene === 'map' ? new THREE.Vector3(0, .3, 0) : new THREE.Vector3(0, 1, 0); gsap.to(target.current, { x: next.x, y: next.y, z: next.z, duration: instant ? 0 : 1.4 });
     return () => { for (const group of Object.values(groups.current)) if (group) { gsap.killTweensOf(group.scale); gsap.killTweensOf(group.position); } };
@@ -128,8 +129,7 @@ function AnimatedWorld({ chapter, demo, dispatch, paused, reduced, onReady }) {
     <group ref={el => { groups.current.map = el; }} scale={scene === 'map' ? 1 : .001} visible={scene === 'map'}><Country selected={demo.branchId} onSelect={id => dispatch({ type: 'branch', id })} paused={paused} reduced={reduced}/></group>
     <group ref={el => { groups.current.bus = el; }} scale={.001} visible={false}><BusStage paused={paused} reduced={reduced} progress={demo.journey}/></group>
     <group ref={el => { groups.current.nfc = el; }} scale={.001} visible={false}><NfcStage demo={demo} paused={paused} reduced={reduced}/></group>
-    <group ref={el => { groups.current.learning = el; }} scale={.001} visible={false}><LearningStage demo={demo} family={chapter === 6}/></group>
-    <group ref={el => { groups.current.supplies = el; }} scale={.001} visible={false}><SuppliesStage demo={demo}/></group>
+    <group ref={el => { groups.current.tracker = el; }} scale={.001} visible={false}><TrackerStage demo={demo}/></group>
   </group>;
 }
 export default function Scene(props) {

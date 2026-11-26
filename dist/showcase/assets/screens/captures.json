@@ -1,118 +1,14 @@
 {
-  "sourceCommit": "5da7e8528f45b68ad5b316de55f8ce4595f8b73b",
-  "source": "Actual Sussex LMS UI captures. Parent card checkout and fee views refreshed 26 November 2026 for Debit/Credit card with Visa/Mastercard badges. Other images retain their source capture dates. Payments and GPS are simulated.",
+  "sourceCommit": "f2ca1d9073673c753f1b276b1559cfd413469118",
+  "source": "Actual transport workspaces captured from Sussex LMS. Locations and hardware feeds are simulated. Unchanged captures retain their original dates; the presentation includes transport only.",
   "prototypeSha256": "9320e2796df50f6482c9f50404cdba7b5980af1e3c75612c5b572acaa0d0e84a",
   "captures": [
-    {
-      "id": "section_head",
-      "route": "section_head/overview/summary",
-      "width": 1440,
-      "height": 960,
-      "capturedAt": "2026-11-23T09:34:03.133Z"
-    },
-    {
-      "id": "coordinator",
-      "route": "coordinator/overview/summary",
-      "width": 1440,
-      "height": 960,
-      "capturedAt": "2026-11-23T09:34:03.645Z"
-    },
-    {
-      "id": "librarian",
-      "route": "librarian/overview/summary",
-      "width": 1440,
-      "height": 960,
-      "capturedAt": "2026-11-23T09:34:08.665Z"
-    },
-    {
-      "id": "uniform_store",
-      "route": "uniform_store/overview/summary",
-      "width": 1440,
-      "height": 960,
-      "capturedAt": "2026-11-23T09:34:09.172Z"
-    },
-    {
-      "id": "teacher-classes",
-      "route": "teacher/subjects",
-      "width": 1440,
-      "height": 960,
-      "capturedAt": "2026-11-23T09:34:10.721Z"
-    },
-    {
-      "id": "book-requests",
-      "route": "librarian/overview/reservations",
-      "width": 1440,
-      "height": 960,
-      "capturedAt": "2026-11-23T09:34:14.484Z"
-    },
-    {
-      "id": "uniform-requests",
-      "route": "uniform_store/overview/reservations",
-      "width": 1440,
-      "height": 960,
-      "capturedAt": "2026-11-23T09:34:15.004Z"
-    },
-    {
-      "id": "parent-ready",
-      "route": "parent/library",
-      "width": 1440,
-      "height": 960,
-      "capturedAt": "2026-11-23T09:34:18.176Z"
-    },
-    {
-      "id": "parent-family",
-      "route": "parent/family",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:15:30.499Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
     {
       "id": "parent-inbox",
       "route": "parent/inbox",
       "width": 1425,
       "height": 891,
       "capturedAt": "2026-11-26T05:15:30.598Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "parent-events",
-      "route": "parent/events",
-      "width": 1440,
-      "height": 900,
-      "capturedAt": "2026-11-26T05:15:30.642Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "parent-fees",
-      "route": "parent/fees",
-      "width": 1280,
-      "height": 720,
-      "capturedAt": "2026-11-26T10:07:00.673920+00:00",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "parent-letters",
-      "route": "parent/communications",
-      "width": 1440,
-      "height": 900,
-      "capturedAt": "2026-11-26T05:15:30.745Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "class-events",
-      "route": "class_teacher/events",
-      "width": 1440,
-      "height": 900,
-      "capturedAt": "2026-11-26T05:15:30.798Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "class-letters",
-      "route": "class_teacher/communications",
-      "width": 1440,
-      "height": 900,
-      "capturedAt": "2026-11-26T05:15:30.845Z",
       "source": "Family workflows working tree, 26 November 2026; actual browser capture"
     },
     {
@@ -124,179 +20,11 @@
       "source": "Family workflows working tree, 26 November 2026; actual browser capture"
     },
     {
-      "id": "admin-unpaid",
-      "route": "admin/fees",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:15:46.047Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "admin-fees",
-      "route": "admin/fees",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:15:46.563Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "parent-payment",
-      "route": "parent/fees",
-      "width": 1280,
-      "height": 720,
-      "capturedAt": "2026-11-26T10:06:34.577305+00:00",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "chairman-academic",
-      "route": "chairman/overview/academic",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:29:38.522Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "chairman-attendance",
-      "route": "chairman/overview/attendance",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:29:38.690Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "chairman-reports",
-      "route": "chairman/overview/reports",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:29:38.891Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "principal-attendance",
-      "route": "principal/overview/attendance",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:29:39.091Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "principal-reports",
-      "route": "principal/overview/reports",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:29:39.158Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "class_teacher",
-      "route": "class_teacher/overview/summary",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:29:39.223Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "class-notices",
-      "route": "class_teacher/notices",
-      "width": 1440,
-      "height": 900,
-      "capturedAt": "2026-11-26T05:29:39.274Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "class-subjects",
-      "route": "class_teacher/subjects",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:29:39.326Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "class-attendance",
-      "route": "class_teacher/overview/attendance",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:29:39.407Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "teacher",
-      "route": "teacher/overview/summary",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:29:39.457Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "teacher-homework",
-      "route": "teacher/homework",
-      "width": 1440,
-      "height": 900,
-      "capturedAt": "2026-11-26T05:29:39.507Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "teacher-notes",
-      "route": "teacher/subjects",
-      "width": 1440,
-      "height": 900,
-      "capturedAt": "2026-11-26T05:29:39.556Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "admin",
-      "route": "admin/overview/summary",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:29:39.623Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
       "id": "transport-cards",
       "route": "admin/boarding",
       "width": 1425,
       "height": 891,
       "capturedAt": "2026-11-26T05:29:39.675Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "parent-courses",
-      "route": "parent/subjects",
-      "width": 1440,
-      "height": 900,
-      "capturedAt": "2026-11-26T05:29:39.788Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "parent-books",
-      "route": "parent/library",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:29:39.843Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "parent-uniforms",
-      "route": "parent/uniforms",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:29:40.002Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "parent-homework",
-      "route": "parent/homework",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:29:40.053Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
-    },
-    {
-      "id": "parent-notices",
-      "route": "parent/notices",
-      "width": 1440,
-      "height": 900,
-      "capturedAt": "2026-11-26T05:29:40.103Z",
       "source": "Family workflows working tree, 26 November 2026; actual browser capture"
     },
     {
@@ -319,13 +47,6 @@
       "capturedAt": "2026-11-26T09:35:25.618Z",
       "width": 1280,
       "height": 720
-    },
-    {
-      "id": "chairman-staffing",
-      "route": "chairman/overview/staffing",
-      "capturedAt": "2026-11-26T09:35:25.687Z",
-      "width": 1265,
-      "height": 712
     },
     {
       "id": "transport",
@@ -382,6 +103,34 @@
       "width": 1265,
       "height": 712,
       "capturedAt": "2026-11-26T09:35:03.148981+00:00"
+    },
+    {
+      "id": "transport-routes",
+      "route": "transport/overview/routes",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-26T16:20:32.241090+00:00"
+    },
+    {
+      "id": "transport-allocations",
+      "route": "transport/overview/assignments",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-26T16:20:32.277545+00:00"
+    },
+    {
+      "id": "transport-issues",
+      "route": "transport/overview/issues",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-26T16:20:32.315645+00:00"
+    },
+    {
+      "id": "transport-reports",
+      "route": "transport/overview/reports",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-26T16:20:32.349568+00:00"
     }
   ]
 }
