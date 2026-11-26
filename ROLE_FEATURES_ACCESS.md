@@ -835,6 +835,13 @@ The suite covers access, migration, parent admission selection, network/director
 
 ## Proposed features and requirements
 
+### Parent screenshot proportions in the presentation
+
+**Feature ID:** `PRESENTATION-PHONE-005`. **Requested:** 26 November 2026. **Status:** Implemented presentation correction.
+
+**User requirement:** fix the malformed Parent map/phone screenshot in The parent journey. The old source image was 375×211 with miniaturised mobile content and a wide blank area. Replaced it with an actual 390×844 portrait browser capture, scrolled to show the selected child, bus details and complete map. Screenshot metadata and intrinsic image dimensions now match every source PNG; mobile captures must have portrait proportions in validation. The replacement uses a new asset filename so existing offline caches cannot reuse the malformed image after a page refresh. Compact laptop sizing also scales the phone frame to keep its bottom and portal link above the footer. Parent map/boarding tabs, enlargement, workspace links, full system map and LMS access are preserved. Updated the affected backup-video frame and offline build. No role permissions or portal data workflow changes.
+
+
 ### Transport-only client introduction
 
 **Feature ID:** `PRESENTATION-TRANSPORT-004`. **Requested:** 26 November 2026. **Status:** Implemented presentation-only.
@@ -950,6 +957,13 @@ For **every new user feature idea or future implementation**:
 8. Update README links and relevant demo account examples. Do not broaden site sharing or role permissions just to expose a view.
 
 ## Change log
+
+### 26 November 2026 — Correct Parent phone screenshot proportions
+
+- Replaced the malformed landscape Parent bus image with a verified actual 390×844 portrait capture showing the complete map and child/bus context.
+- Supplied real intrinsic dimensions for all gallery images and added portrait validation for mobile screenshot assets. Refreshed the transport video’s Parent frame and offline cache; retained the existing full system map and all role/access behaviour.
+- Validation: **206 Node tests passed** with mobile portrait/metadata checks; production build and module-version check passed. Browser checks confirmed map/boarding portrait ratios and complete phone/link visibility above the footer at 1280×640, 1280×720 and 1440×900, no horizontal overflow at 390px/320px, and correct full-resolution enlargement. No browser errors observed; full system-map source files remain unchanged.
+
 
 ### 26 November 2026 — Transport-only client presentation
 

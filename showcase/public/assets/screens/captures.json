@@ -1,5 +1,5 @@
 {
-  "sourceCommit": "f2ca1d9073673c753f1b276b1559cfd413469118",
+  "sourceCommit": "d2b11303a06e64ca2e0fb954e0a52a03056846ab",
   "source": "Actual transport workspaces captured from Sussex LMS. Locations and hardware feeds are simulated. Unchanged captures retain their original dates; the presentation includes transport only.",
   "prototypeSha256": "9320e2796df50f6482c9f50404cdba7b5980af1e3c75612c5b572acaa0d0e84a",
   "captures": [
@@ -79,9 +79,14 @@
     {
       "id": "parent-bus",
       "route": "parent/transport",
-      "capturedAt": "2026-11-26T09:36:12.022Z",
-      "width": 375,
-      "height": 211
+      "capturedAt": "2026-11-26T18:06:34.058091+00:00",
+      "width": 390,
+      "height": 844,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "note": "Actual mobile Parent transport view, scrolled to include heading, selected child, bus details and complete map. Replaces the malformed landscape capture."
     },
     {
       "id": "parent-boarding",

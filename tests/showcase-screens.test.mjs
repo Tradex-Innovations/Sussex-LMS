@@ -10,7 +10,8 @@ test('Every screenshot is an actual captured PNG with matching dimensions and ro
  assert.equal(Object.keys(screenshots).length,18);assert.equal(provenance.captures.length,18);assert.match(provenance.sourceCommit,/^[a-f0-9]{40}$/);
  for(const [id,shot]of Object.entries(screenshots)){
   const file=fs.readFileSync(new URL('../showcase/public/assets/screens/'+shot.file,import.meta.url));assert.deepEqual([...file.subarray(0,8)],[137,80,78,71,13,10,26,10]);
-  const record=provenance.captures.find(item=>item.id===id);assert.ok(record,id);assert.equal(record.route,shot.route);assert.equal(file.readUInt32BE(16),record.width);assert.equal(file.readUInt32BE(20),record.height);
+  const record=provenance.captures.find(item=>item.id===id);assert.ok(record,id);assert.equal(record.route,shot.route);assert.equal(file.readUInt32BE(16),record.width);assert.equal(file.readUInt32BE(20),record.height);assert.equal(shot.width,record.width);assert.equal(shot.height,record.height);
+  if(shot.mobile)assert.ok(record.height/record.width>1.7,`${id} must be a portrait phone capture, not a scaled landscape screenshot`);
   const [role,page]=shot.route.split('/');assert.ok(roles[role].pages.includes(page === "subjects" ? "courses" : page));assert.equal(screenshotSource(id),'./assets/screens/'+shot.file);
  }
 });
