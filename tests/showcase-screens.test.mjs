@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { blackPixelFraction } from './helpers/png-quality.mjs';
 import { screenshots, chapterScreens, screenshotSource } from '../showcase/src/screens.js';
 import { chapters, prototypeBase } from '../showcase/src/data.js';
 import { roles } from '../dist/data.js';
@@ -13,6 +14,12 @@ test('Every screenshot is an actual captured PNG with matching dimensions and ro
   const record=provenance.captures.find(item=>item.id===id);assert.ok(record,id);assert.equal(record.route,shot.route);assert.equal(file.readUInt32BE(16),record.width);assert.equal(file.readUInt32BE(20),record.height);assert.equal(shot.width,record.width);assert.equal(shot.height,record.height);
   if(shot.mobile)assert.ok(record.height/record.width>1.7,`${id} must be a portrait phone capture, not a scaled landscape screenshot`);
   const [role,page]=shot.route.split('/');assert.ok(roles[role].pages.includes(page === "subjects" ? "courses" : page));assert.equal(screenshotSource(id),'./assets/screens/'+shot.file);
+ }
+});
+test('Portal screenshot captures contain no large black failure regions',()=>{
+ for(const [id,shot]of Object.entries(screenshots)){
+  const file=fs.readFileSync(new URL('../showcase/public/assets/screens/'+shot.file,import.meta.url));
+  assert.ok(blackPixelFraction(file)<.25,`${id} contains a large black capture region; recapture the actual portal`);
  }
 });
 test('Each transport chapter has real screenshots and no unrelated story workspaces',()=>{

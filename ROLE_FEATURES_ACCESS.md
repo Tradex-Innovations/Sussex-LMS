@@ -835,6 +835,13 @@ The suite covers access, migration, parent admission selection, network/director
 
 ## Proposed features and requirements
 
+### Complete Parent transport-alert screenshot
+
+**Feature ID:** `PRESENTATION-CAPTURE-006`. **Requested:** 27 November 2026. **Status:** Implemented presentation correction.
+
+**User requirement:** fix the blacked-out Parent alerts screenshot in Keep everyone informed. The source PNG contained a black region covering about 79% of its pixels; the portal itself renders correctly. Replaced it with an actual full desktop Parent inbox capture with the Transport filter selected, showing the linked student and bus-delay notification. The new filename avoids reuse of the damaged cached asset. Updated dimensions/provenance, actual-size enlargement and the backup-video alert frame/offline build. All 18 portal images are now checked for large near-black capture failures, alongside existing dimension and mobile portrait validation. No role permissions, Parent/teacher alert scope, stored portal records or system-map content changes.
+
+
 ### Parent screenshot proportions in the presentation
 
 **Feature ID:** `PRESENTATION-PHONE-005`. **Requested:** 26 November 2026. **Status:** Implemented presentation correction.
@@ -957,6 +964,13 @@ For **every new user feature idea or future implementation**:
 8. Update README links and relevant demo account examples. Do not broaden site sharing or role permissions just to expose a view.
 
 ## Change log
+
+### 27 November 2026 — Replace blacked-out Parent alerts capture
+
+- Replaced the damaged Parent inbox PNG with a complete 1280×720 actual transport-filtered capture and a new filename; refreshed metadata and the backup/offline presentation assets.
+- Added dependency-free PNG pixel validation across all 18 portal captures. The check rejects the old damaged image; the other 17 captures pass. Retained the full system map and all LMS roles/access.
+- Validation: **207 Node tests passed**, including a new pixel-quality check demonstrated failing on the damaged PNG and passing all 18 corrected captures. Production build, module-version and diff checks passed. Visually reviewed the full capture contact sheet; browser checks passed for all three alert tabs at 1280×640, 1440×900, 390px and 320px, full-size enlargement, portal links and image loading without browser errors. The full system-map source files remain unchanged.
+
 
 ### 26 November 2026 — Correct Parent phone screenshot proportions
 

@@ -7,7 +7,7 @@ export const screenshots = {
  'transport-cards': { title: 'Student cards', file: 'transport-cards.png', width: 1425, height: 891, route: 'admin/boarding' },
  'parent-bus': { title: 'Parent bus tracking', file: 'parent-bus-portrait.png', width: 390, height: 844, route: 'parent/transport', mobile: true },
  'parent-boarding': { title: 'Parent boarding status', file: 'parent-boarding.png', width: 375, height: 812, route: 'parent/boarding', mobile: true },
- 'parent-inbox': { title: 'Family notifications', file: 'parent-inbox.png', width: 1425, height: 891, route: 'parent/inbox' },
+ 'parent-inbox': { title: 'Family notifications', file: 'parent-inbox-complete.png', width: 1280, height: 720, route: 'parent/inbox' },
  'class-inbox': { title: 'Teacher bus alerts', file: 'class-inbox.png', width: 1440, height: 900, route: 'class_teacher/inbox' },
  'transport-privacy': { title: 'Tracking hours & alerts', file: 'transport-privacy.png', width: 1265, height: 712, route: 'transport/tracking' },
  'parent-gps-hidden': { title: 'GPS privacy', file: 'parent-gps-hidden.png', width: 1265, height: 712, route: 'parent/transport' },

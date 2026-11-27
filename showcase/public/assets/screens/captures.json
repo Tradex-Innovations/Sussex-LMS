@@ -1,15 +1,16 @@
 {
-  "sourceCommit": "d2b11303a06e64ca2e0fb954e0a52a03056846ab",
+  "sourceCommit": "4c6595fcf08daf1f5d1953296e412a88e3042d42",
   "source": "Actual transport workspaces captured from Sussex LMS. Locations and hardware feeds are simulated. Unchanged captures retain their original dates; the presentation includes transport only.",
   "prototypeSha256": "9320e2796df50f6482c9f50404cdba7b5980af1e3c75612c5b572acaa0d0e84a",
   "captures": [
     {
       "id": "parent-inbox",
       "route": "parent/inbox",
-      "width": 1425,
-      "height": 891,
-      "capturedAt": "2026-11-26T05:15:30.598Z",
-      "source": "Family workflows working tree, 26 November 2026; actual browser capture"
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-27T04:10:21.779132+00:00",
+      "source": "Family workflows working tree, 26 November 2026; actual browser capture",
+      "note": "Actual Parent inbox with Transport filter selected; replaces capture containing a large black region."
     },
     {
       "id": "class-inbox",
