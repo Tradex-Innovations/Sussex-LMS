@@ -1,0 +1,151 @@
+{
+  "sourceCommit": "dc29d33c210905344f7491a453db68cafbf55229",
+  "source": "Actual unbranded School Management Platform preview captures. Records, telemetry and hardware are illustrative; no client identity or original logo is included.",
+  "prototypeSha256": "ccd726f4339e7209b4ecfd729bb50cc2b9eed7214de92b4fc3a6e1ffea23f2a5",
+  "captures": [
+    {
+      "id": "network",
+      "file": "network.png",
+      "route": "chairman/overview/transport",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-27T19:11:19.294237+00:00"
+    },
+    {
+      "id": "principal",
+      "file": "principal.png",
+      "route": "principal/overview/transport",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-27T19:11:19.544495+00:00"
+    },
+    {
+      "id": "vice_principal",
+      "file": "vice_principal.png",
+      "route": "vice_principal/overview/transport",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-27T19:11:19.779331+00:00"
+    },
+    {
+      "id": "transport",
+      "file": "transport.png",
+      "route": "transport/overview/fleet",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-27T19:11:19.942202+00:00"
+    },
+    {
+      "id": "boarding",
+      "file": "boarding.png",
+      "route": "transport/boarding",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-27T19:12:22.290459+00:00"
+    },
+    {
+      "id": "transport-cards",
+      "file": "transport-cards.png",
+      "route": "admin/boarding",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-27T19:11:20.774726+00:00"
+    },
+    {
+      "id": "parent-bus",
+      "file": "parent-bus.png",
+      "route": "parent/transport",
+      "width": 390,
+      "height": 844,
+      "capturedAt": "2026-11-27T19:12:38.645429+00:00"
+    },
+    {
+      "id": "parent-boarding",
+      "file": "parent-boarding.png",
+      "route": "parent/boarding",
+      "width": 390,
+      "height": 844,
+      "capturedAt": "2026-11-27T19:12:38.875972+00:00"
+    },
+    {
+      "id": "parent-inbox",
+      "file": "parent-inbox.png",
+      "route": "parent/inbox",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-27T19:12:23.274164+00:00"
+    },
+    {
+      "id": "class-inbox",
+      "file": "class-inbox.png",
+      "route": "class_teacher/inbox",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-27T19:11:20.909088+00:00"
+    },
+    {
+      "id": "transport-privacy",
+      "file": "transport-privacy.png",
+      "route": "transport/tracking",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-27T19:12:22.454095+00:00"
+    },
+    {
+      "id": "parent-gps-hidden",
+      "file": "parent-gps-hidden.png",
+      "route": "parent/transport",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-27T19:15:35.346359+00:00"
+    },
+    {
+      "id": "gps-trackers",
+      "file": "gps-trackers.png",
+      "route": "transport/overview/assignments",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-27T19:11:37.459030+00:00"
+    },
+    {
+      "id": "admin-transport",
+      "file": "admin-transport.png",
+      "route": "admin/transport",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-27T19:11:20.611151+00:00"
+    },
+    {
+      "id": "transport-routes",
+      "file": "transport-routes.png",
+      "route": "transport/overview/routes",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-27T19:11:20.293920+00:00"
+    },
+    {
+      "id": "transport-allocations",
+      "file": "transport-allocations.png",
+      "route": "transport/overview/assignments",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-27T19:11:20.092480+00:00"
+    },
+    {
+      "id": "transport-issues",
+      "file": "transport-issues.png",
+      "route": "transport/overview/issues",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-27T19:11:20.461001+00:00"
+    },
+    {
+      "id": "transport-reports",
+      "file": "transport-reports.png",
+      "route": "transport/overview/reports",
+      "width": 1280,
+      "height": 720,
+      "capturedAt": "2026-11-27T19:11:47.359612+00:00"
+    }
+  ]
+}

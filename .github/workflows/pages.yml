@@ -32,12 +32,12 @@ jobs:
         run: |
           node scripts/refresh-module-versions.mjs --check
           node --test tests/*.test.mjs
-      - name: Build presentation into the prototype site
+      - name: Build client and common product presentations
         working-directory: showcase
         run: npm run build
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-      - name: Upload both routes
+      - name: Upload all public routes
         uses: actions/upload-pages-artifact@v4
         with:
           path: dist

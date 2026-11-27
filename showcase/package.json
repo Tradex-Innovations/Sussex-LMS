@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 4190",
-    "build": "vite build && node generate-sw.mjs",
-    "preview": "vite preview --host 127.0.0.1 --port 4190"
+    "build": "vite build && node generate-sw.mjs && node build-product.mjs",
+    "preview": "vite preview --host 127.0.0.1 --port 4190",
+    "build:product": "node build-product.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "9.8.2",

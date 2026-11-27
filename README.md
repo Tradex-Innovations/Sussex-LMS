@@ -47,6 +47,12 @@ npm run build
 
 The build writes only `dist/showcase/`. Read [the meeting guide](showcase/PRESENTATION_GUIDE.md), [asset provenance](showcase/ASSETS.md) and [presentation access/limits](ROLE_FEATURES_ACCESS.md#interactive-client-presentation). Transport presentation examples use simulated feeds; GPS/NFC hardware and external delivery still need integration. The 45-second backup video now covers transport only.
 
+## Common product presentation
+
+The reusable [School Management Platform presentation](https://tradex-innovations.github.io/Sussex-LMS/product/) has no client name/logo in its UI, actual screenshots, 3D scenes or backup video. Its [system map](https://tradex-innovations.github.io/Sussex-LMS/product/#mind-map) keeps the same 12 roles, complete feature catalogue and interactions. The existing client presentation stays at `/showcase/`.
+
+Workspace links open the neutral [portal preview](https://tradex-innovations.github.io/Sussex-LMS/product/portal/) with separate browser records/session. Local presentation: `http://127.0.0.1:4183/product/`. The normal presentation build now generates both routes; `npm run build:product --prefix showcase` builds only the common version. See [the common presentation guide](showcase/PRODUCT_GUIDE.md) and [maintained access reference](ROLE_FEATURES_ACCESS.md#common-product-presentation).
+
 ## Subjects, homework and class notices
 
 - **Class Teacher → Subjects:** select **Assign subjects** beside a student. Only the selected subjects appear to that student’s parent; teaching appointments stay with school administration.

@@ -685,6 +685,18 @@ The Site identity/audience is retained. The presentation is a client-facing expl
 
 The intended GPS/NFC/mobile-data connection, hardware monitoring and external notification delivery still require production integration and pilot validation. No backend, physical device, push/SMS/email delivery or protected authorization is added by this change. In-portal workflows already implemented in the LMS remain available. See `showcase/ASSETS.md` for source/licence/provenance and `showcase/PRESENTATION_GUIDE.md` for the transport meeting walkthrough. The Vite build empties only `dist/showcase/`. Re-capture changed screens, rebuild/re-record the backup and maintain this reference with future changes.
 
+## Common product presentation
+
+**Implemented 28 November 2026 — `PRESENTATION-COMMON-007`.** The reusable, unbranded presentation is published separately at [GitHub Pages `/product/`](https://tradex-innovations.github.io/Sussex-LMS/product/), with its full [system map](https://tradex-innovations.github.io/Sussex-LMS/product/#mind-map). Local route: `http://127.0.0.1:4183/product/`. The existing `/showcase/` client presentation and root LMS remain unchanged.
+
+- **Presentation:** uses the neutral title School Management Platform, the same eight transport chapters, controls, animations, 3D bus/GPS/NFC objects, fallback, presenter notes, enlargement and mobile layouts. Client names/logos are removed from header, mind-map header, notes, alt/title text, 3D textures, fallback illustrations, screenshots, video and poster.
+- **Exact system-map architecture:** generated from the existing `RoleMindMap.jsx` and `mind-map-data.js` at build time. All 12 roles, nodes, reporting/service/collaboration connections, scope rules, features, views/actions/limits, layouts, deep links, pan/zoom/Fit, Outline and presentation return are preserved. Only client branding is neutralised. The original source files are not edited; no duplicate role catalogue is maintained.
+- **Neutral workspaces:** all feature/workspace links and screenshot links retain the current host/project prefix and go to `/product/portal/#<role>/<page>`. This companion preview uses the same existing frontend roles/workflows with neutral text and sample campus records, rather than opening the client-branded portal. Explicit sample admission/card/device identifiers use NET instead of the client prefix. Real client directory URLs, street addresses and map embeds are omitted; geographic sample campus positions remain illustrative. No extra role or permission is introduced.
+- **Screens/media:** 18 new actual captures of the neutral preview, including desktop management, tracker, roster, privacy, inbox and reporting views and portrait Parent map/boarding screens. No branded screenshots are reused or painted over. Source dates/routes/dimensions/hashes are in `showcase/product-public/assets/screens/captures.json`. A separate 45-second silent 1440×900 backup and poster cover the generic chapters; no client-branded video is linked. PNG dimensions, portrait aspect and black-region quality checks apply to this set too.
+- **State isolation:** the common portal stores its illustrative records in `school-product-demo-v1` and Parent session in `school-product-parent-demo-session`. It does not read/write the original `campusway-demo-v1` or client Parent session. Presentation examples remain in memory. Neutral Parent family login is FAMILY-1001 / 1234, with linked admissions NET-1001/NET-1002; role switches and UI restrictions remain demonstrations, not server authorization.
+- **Offline/release isolation:** the generated worker is scoped to `/product/`, uses `school-product-*` caches and SCHOOL_PRODUCT_UPDATED messages, and caches the common presentation/media and neutral portal assets after initial loading. It never deletes `sussex-showcase-*` caches or intercepts root/`showcase/` requests. Map release refreshes keep the role/feature URL. Cached application assets do not imply live GPS, hardware or external-service connectivity.
+- **Build/maintenance:** `npm run build --prefix showcase` builds both presentations. `npm run build:product --prefix showcase` rebuilds the common version alone. `showcase/build-product.mjs` prepares only `dist/product/`, using an ignored staging directory; it copies the public frontend with neutral identity and separate storage, retains branch index/scope fields, removes client logo assets and versions transformed modules. Keep both capture sets/media current when their UI changes. Existing hardware, payment, notification, privacy and role-scope limitations remain exactly as documented above.
+
 ## Student subjects, homework and class notices
 
 **Implemented:** 23 November 2026. Visible terminology throughout the prototype and presentation is **Subjects** and **Homework**. Existing internal `courses`, assignment records and legacy `/courses` hash links are retained for compatibility; the navigation uses `/subjects`.
@@ -835,6 +847,13 @@ The suite covers access, migration, parent admission selection, network/director
 
 ## Proposed features and requirements
 
+### Reusable presentation without client branding
+
+**Feature ID:** `PRESENTATION-COMMON-007`. **Requested:** 28 November 2026. **Status:** Implemented as a separate common-product route.
+
+**User requirement:** create another presentation with the exact same system map, without the Sussex logo/name or references to that college, suitable for any prospective client, under a separate path on the same hosted site. Implemented `/product/` with the same 12-role architecture and transport narrative, neutral wording/3D assets, 18 newly captured neutral screens and a separate video. The recommended companion `/product/portal/` keeps workspace links unbranded and separates its browser data/session/cache from the original client portal. Existing client presentation, full system map source, role permissions and hosting audience are preserved. No real GPS/NFC, gateway, messaging or backend connection is added.
+
+
 ### Complete Parent transport-alert screenshot
 
 **Feature ID:** `PRESENTATION-CAPTURE-006`. **Requested:** 27 November 2026. **Status:** Implemented presentation correction.
@@ -964,6 +983,14 @@ For **every new user feature idea or future implementation**:
 8. Update README links and relevant demo account examples. Do not broaden site sharing or role permissions just to expose a view.
 
 ## Change log
+
+### 28 November 2026 — Common product presentation on a separate route
+
+- Added `/product/` and `/product/#mind-map`, generated from the same architecture, features, interactions and layout as the client presentation with neutral School Management Platform identity. Preserved the original `/showcase/` and LMS.
+- Added neutral workspace previews at `/product/portal/`, separate records/Parent session/module versions and product-only offline/release namespace. Preserved branch scope/index fields and existing role workflows; removed client directory identity, links and logo assets.
+- Recaptured all 18 screens, recorded a separate generic 45-second backup/poster, and extended the existing build/hosting pipeline to publish all routes together. Added tests for exact map/catalogue parity, prefix-safe workspace links, valid neutral staff/sample data, fresh captures and branding/cache/storage isolation.
+- Validation: **214 Node tests passed**, including exact architecture/feature/layout equality, neutral sample/staff integrity, fresh PNG quality, host-prefix links, browser-storage reads and worker isolation from client caches/pages. Both production builds and the runtime-version/diff checks passed. Reviewed the 18 neutral captures together; all 12 role maps and workspace links, eight chapters at 390px/320px, mobile Outline, 45-second video playback, offline readiness, privacy, NFC sync and 2D fallback were verified. Original client presentation/runtime source and built files remain unchanged.
+
 
 ### 27 November 2026 — Replace blacked-out Parent alerts capture
 

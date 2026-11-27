@@ -19,3 +19,11 @@ Presentation examples live in memory and do not read/write LMS data or send noti
 Parent map correction (26 November 2026): replaced the malformed 375×211 image with a real 390×844 portrait browser capture, scrolled to show the child/bus details and complete map. The registry supplies actual intrinsic dimensions; validation rejects landscape assets labelled as mobile. Parent boarding remains the original verified portrait capture. The backup video’s Parent journey frame was refreshed.
 
 Parent alerts correction (27 November 2026): replaced a blacked-out Parent inbox source image with an actual 1280×720 desktop capture, Transport filter selected. `parent-inbox-complete.png` avoids cached damaged-image reuse. The PNG quality check decodes the 18 light portal captures and rejects images with more than 25% near-black pixels; the old image failed at about 79%. The backup’s alert frame and offline cache were refreshed. Role scope and the full system map are unchanged.
+
+## Separate common product presentation — 28 November 2026
+
+`build-product.mjs` generates `/product/` from the same presentation source with neutral text/icons. The original architecture catalogue, graph geometry, role features and client-specific build are retained. Bus/card/reader textures are regenerated from neutral strings. No client logo, favicon, screenshots or video are copied into this presentation.
+
+`product-public/assets/screens/` contains 18 actual neutral portal captures, taken through the browser and converted from JPEG to PNG without changing their content. The manifest records actual route, dimensions, capture times, source commit and neutral portal source hash. All existing screenshot quality checks apply. `product-public/assets/showcase-walkthrough.mp4` is a separate 45-second 1440×900 silent H264 recording of the generic chapters; its poster is the opening frame.
+
+The companion `/product/portal/` reuses existing public frontend code, ordinary map/cover/font/vendor assets and licences. It uses a generated code-native school icon, neutral sample school names, no client street-address/source/embed records and separate browser state/session keys. These are illustrative campuses and devices, not claims of actual school customers. The common cache/version namespace is separate from the client presentation. All live-integration limitations remain.
